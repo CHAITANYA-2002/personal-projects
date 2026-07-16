@@ -1,0 +1,184 @@
++-------+--------------------------+----------------+-------------+
+| round | race                     | winner         | constructor |
++-------+--------------------------+----------------+-------------+
+|     1 | Bahrain Grand Prix       | Max Verstappen | Red Bull    |
+|     2 | Saudi Arabian Grand Prix | Sergio Pérez   | Red Bull    |
+|     3 | Australian Grand Prix    | Max Verstappen | Red Bull    |
+|     4 | Azerbaijan Grand Prix    | Sergio Pérez   | Red Bull    |
+|     5 | Miami Grand Prix         | Max Verstappen | Red Bull    |
+|     6 | Monaco Grand Prix        | Max Verstappen | Red Bull    |
+|     7 | Spanish Grand Prix       | Max Verstappen | Red Bull    |
+|     8 | Canadian Grand Prix      | Max Verstappen | Red Bull    |
+|     9 | Austrian Grand Prix      | Max Verstappen | Red Bull    |
+|    10 | British Grand Prix       | Max Verstappen | Red Bull    |
+|    11 | Hungarian Grand Prix     | Max Verstappen | Red Bull    |
+|    12 | Belgian Grand Prix       | Max Verstappen | Red Bull    |
+|    13 | Dutch Grand Prix         | Max Verstappen | Red Bull    |
+|    14 | Italian Grand Prix       | Max Verstappen | Red Bull    |
+|    15 | Singapore Grand Prix     | Carlos Sainz   | Ferrari     |
+|    16 | Japanese Grand Prix      | Max Verstappen | Red Bull    |
+|    17 | Qatar Grand Prix         | Max Verstappen | Red Bull    |
+|    18 | United States Grand Prix | Max Verstappen | Red Bull    |
+|    19 | Mexico City Grand Prix   | Max Verstappen | Red Bull    |
+|    20 | São Paulo Grand Prix     | Max Verstappen | Red Bull    |
+|    21 | Las Vegas Grand Prix     | Max Verstappen | Red Bull    |
+|    22 | Abu Dhabi Grand Prix     | Max Verstappen | Red Bull    |
++-------+--------------------------+----------------+-------------+
++----------------------+------+
+| driver               | wins |
++----------------------+------+
+| Eddie Irvine         |    4 |
+| Bruce McLaren        |    4 |
+| Johnny Herbert       |    3 |
+| Peter Collins        |    3 |
+| Pedro Rodríguez      |    2 |
+| Oscar Piastri        |    2 |
+| Olivier Panis        |    1 |
+| Alessandro Nannini   |    1 |
+| Gunnar Nilsson       |    1 |
+| Jochen Mass          |    1 |
+| Jean-Pierre Beltoise |    1 |
+| Peter Gethin         |    1 |
+| François Cevert      |    1 |
+| Ludovico Scarfiotti  |    1 |
+| Richie Ginther       |    1 |
+| Giancarlo Baghetti   |    1 |
+| Innes Ireland        |    1 |
+| Jim Rathmann         |    1 |
+| Rodger Ward          |    1 |
+| Jimmy Bryan          |    1 |
+| Sam Hanks            |    1 |
+| Luigi Musso          |    1 |
+| Bob Sweikert         |    1 |
+| Piero Taruffi        |    1 |
+| Troy Ruttman         |    1 |
+| Lee Wallard          |    1 |
+| Johnnie Parsons      |    1 |
+| Pierre Gasly         |    1 |
+| Esteban Ocon         |    1 |
++----------------------+------+
++--------------------+--------+------+---------+
+| driver             | starts | wins | win_pct |
++--------------------+--------+------+---------+
+| Juan Fangio        |     58 |   24 |   41.38 |
+| Alberto Ascari     |     36 |   13 |   36.11 |
+| Jim Clark          |     73 |   25 |   34.25 |
+| Max Verstappen     |    209 |   63 |   30.14 |
+| Michael Schumacher |    308 |   91 |   29.55 |
+| Lewis Hamilton     |    356 |  105 |   29.49 |
+| Jackie Stewart     |    100 |   27 |   27.00 |
+| Ayrton Senna       |    162 |   41 |   25.31 |
+| Alain Prost        |    202 |   51 |   25.25 |
+| Stirling Moss      |     73 |   16 |   21.92 |
+| Damon Hill         |    122 |   22 |   18.03 |
+| Sebastian Vettel   |    300 |   53 |   17.67 |
+| Nigel Mansell      |    192 |   31 |   16.15 |
+| Tony Brooks        |     41 |    6 |   14.63 |
+| Niki Lauda         |    174 |   25 |   14.37 |
++--------------------+--------+------+---------+
++------------------+---------+
+| debut_category   | drivers |
++------------------+---------+
+| Standard (20-30) |     534 |
+| Veteran (>30)    |     313 |
+| Prodigy (<20)    |      14 |
++------------------+---------+
++-------+--------------------------+-----------------+----------------+
+| round | name                     | started_pole    | winner         |
++-------+--------------------------+-----------------+----------------+
+|     4 | Azerbaijan Grand Prix    | Charles Leclerc | Sergio Pérez   |
+|     5 | Miami Grand Prix         | Sergio Pérez    | Max Verstappen |
+|    11 | Hungarian Grand Prix     | Lewis Hamilton  | Max Verstappen |
+|    12 | Belgian Grand Prix       | Charles Leclerc | Max Verstappen |
+|    14 | Italian Grand Prix       | Carlos Sainz    | Max Verstappen |
+|    18 | United States Grand Prix | Charles Leclerc | Max Verstappen |
+|    19 | Mexico City Grand Prix   | Charles Leclerc | Max Verstappen |
+|    21 | Las Vegas Grand Prix     | Charles Leclerc | Max Verstappen |
++-------+--------------------------+-----------------+----------------+
++---------------+------------------+
+| name          | one_two_finishes |
++---------------+------------------+
+| Ferrari       |               88 |
+| Mercedes      |               60 |
+| McLaren       |               48 |
+| Williams      |               33 |
+| Red Bull      |               31 |
+| Tyrrell       |                8 |
+| Team Lotus    |                6 |
+| BRM           |                5 |
+| Cooper-Climax |                5 |
+| Brabham-Repco |                4 |
++---------------+------------------+
++-----------------+------------+
+| driver          | total_2023 |
++-----------------+------------+
+| Max Verstappen  |        575 |
+| Sergio Pérez    |        285 |
+| Lewis Hamilton  |        234 |
+| Fernando Alonso |        206 |
+| Charles Leclerc |        206 |
+| Lando Norris    |        205 |
+| Carlos Sainz    |        200 |
+| George Russell  |        175 |
+| Oscar Piastri   |         97 |
+| Lance Stroll    |         74 |
++-----------------+------------+
++------+---------------------+-------------+
+| year | name                | winner_time |
++------+---------------------+-------------+
+| 2011 | Canadian Grand Prix | 04:04:39    |
+| 1951 | Indianapolis 500    | 03:57:38    |
+| 1955 | Indianapolis 500    | 03:53:59    |
+| 1956 | Indianapolis 500    | 03:53:28    |
+| 1953 | Indianapolis 500    | 03:53:01    |
+| 1952 | Indianapolis 500    | 03:52:41    |
+| 1954 | Indianapolis 500    | 03:49:17    |
+| 1954 | German Grand Prix   | 03:45:45    |
+| 1958 | Indianapolis 500    | 03:44:13    |
+| 1957 | Indianapolis 500    | 03:41:14    |
++------+---------------------+-------------+
++------------------+-------------+
+| driver           | points_2022 |
++------------------+-------------+
+| Max Verstappen   |         433 |
+| Charles Leclerc  |         291 |
+| Sergio Pérez     |         291 |
+| George Russell   |         262 |
+| Lewis Hamilton   |         233 |
+| Carlos Sainz     |         228 |
+| Lando Norris     |         116 |
+| Esteban Ocon     |          89 |
+| Fernando Alonso  |          81 |
+| Valtteri Bottas  |          47 |
+| Sebastian Vettel |          37 |
+| Daniel Ricciardo |          34 |
+| Pierre Gasly     |          23 |
+| Kevin Magnussen  |          21 |
+| Lance Stroll     |          18 |
+| Yuki Tsunoda     |          12 |
+| Mick Schumacher  |          12 |
+| Guanyu Zhou      |           6 |
+| Alexander Albon  |           4 |
+| Nicholas Latifi  |           2 |
+| Nyck de Vries    |           2 |
+| Nico Hülkenberg  |           0 |
++------------------+-------------+
++---------------------+---------------------+-------------+
+| driver              | constructors_driven | career_wins |
++---------------------+---------------------+-------------+
+| Maurice Trintignant |                  13 |           2 |
+| Stirling Moss       |                  12 |          16 |
+| Jo Bonnier          |                  12 |           1 |
+| Jacky Ickx          |                  10 |           8 |
+| Dan Gurney          |                  10 |           4 |
+| John Surtees        |                   9 |           6 |
+| Niki Lauda          |                   8 |          25 |
+| Nelson Piquet       |                   8 |          23 |
+| Graham Hill         |                   8 |          14 |
+| Jack Brabham        |                   8 |          14 |
+| Patrick Tambay      |                   8 |           2 |
+| Jo Siffert          |                   8 |           2 |
+| Jenson Button       |                   7 |          15 |
+| Alan Jones          |                   7 |          12 |
+| Mario Andretti      |                   7 |          12 |
++---------------------+---------------------+-------------+

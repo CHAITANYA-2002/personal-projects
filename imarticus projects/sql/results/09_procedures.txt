@@ -1,0 +1,19 @@
++------------------+--------+------+----------+
+| driver           | points | wins | position |
++------------------+--------+------+----------+
+| Max Verstappen   |  395.5 |   10 |        1 |
+| Lewis Hamilton   |  387.5 |    8 |        2 |
+| Valtteri Bottas  |    226 |    1 |        3 |
+| Sergio Pérez     |    190 |    1 |        4 |
+| Carlos Sainz     |  164.5 |    0 |        5 |
+| Lando Norris     |    160 |    0 |        6 |
+| Charles Leclerc  |    159 |    0 |        7 |
+| Daniel Ricciardo |    115 |    1 |        8 |
+| Pierre Gasly     |    110 |    0 |        9 |
+| Fernando Alonso  |     81 |    0 |       10 |
++------------------+--------+------+----------+
++------------+----------------+----------------------+
+| races_held | champion       | constructor_champion |
++------------+----------------+----------------------+
+|         22 | Max Verstappen | Mercedes             |
++------------+----------------+----------------------+

@@ -1,0 +1,221 @@
++--------------------+------+----------+----------------+
+| driver             | wins | rank_pos | dense_rank_pos |
++--------------------+------+----------+----------------+
+| Lewis Hamilton     |  105 |        1 |              1 |
+| Michael Schumacher |   91 |        2 |              2 |
+| Max Verstappen     |   63 |        3 |              3 |
+| Sebastian Vettel   |   53 |        4 |              4 |
+| Alain Prost        |   51 |        5 |              5 |
+| Ayrton Senna       |   41 |        6 |              6 |
+| Fernando Alonso    |   32 |        7 |              7 |
+| Nigel Mansell      |   31 |        8 |              8 |
+| Jackie Stewart     |   27 |        9 |              9 |
+| Niki Lauda         |   25 |       10 |             10 |
+| Jim Clark          |   25 |       10 |             10 |
+| Juan Fangio        |   24 |       12 |             11 |
+| Nico Rosberg       |   23 |       13 |             12 |
+| Nelson Piquet      |   23 |       13 |             12 |
+| Damon Hill         |   22 |       15 |             13 |
+| Kimi Räikkönen     |   21 |       16 |             14 |
+| Mika Häkkinen      |   20 |       17 |             15 |
+| Stirling Moss      |   16 |       18 |             16 |
+| Jenson Button      |   15 |       19 |             17 |
+| Emerson Fittipaldi |   14 |       20 |             18 |
++--------------------+------+----------+----------------+
++-------+--------------------------+--------+---------------+
+| round | name                     | points | running_total |
++-------+--------------------------+--------+---------------+
+|     1 | Bahrain Grand Prix       |     25 |            25 |
+|     2 | Saudi Arabian Grand Prix |     19 |            44 |
+|     3 | Australian Grand Prix    |     25 |            69 |
+|     4 | Azerbaijan Grand Prix    |     18 |            87 |
+|     5 | Miami Grand Prix         |     26 |           113 |
+|     6 | Monaco Grand Prix        |     25 |           138 |
+|     7 | Spanish Grand Prix       |     26 |           164 |
+|     8 | Canadian Grand Prix      |     25 |           189 |
+|     9 | Austrian Grand Prix      |     26 |           215 |
+|    10 | British Grand Prix       |     26 |           241 |
+|    11 | Hungarian Grand Prix     |     26 |           267 |
+|    12 | Belgian Grand Prix       |     25 |           292 |
+|    13 | Dutch Grand Prix         |     25 |           317 |
+|    14 | Italian Grand Prix       |     25 |           342 |
+|    15 | Singapore Grand Prix     |     10 |           352 |
+|    16 | Japanese Grand Prix      |     26 |           378 |
+|    17 | Qatar Grand Prix         |     26 |           404 |
+|    18 | United States Grand Prix |     25 |           429 |
+|    19 | Mexico City Grand Prix   |     25 |           454 |
+|    20 | São Paulo Grand Prix     |     25 |           479 |
+|    21 | Las Vegas Grand Prix     |     25 |           504 |
+|    22 | Abu Dhabi Grand Prix     |     26 |           530 |
++-------+--------------------------+--------+---------------+
++---------------+-------------------+------+
+| nationality   | driver            | wins |
++---------------+-------------------+------+
+| German        | Sebastian Vettel  |   53 |
+| British       | Nigel Mansell     |   31 |
+| Brazilian     | Nelson Piquet     |   23 |
+| Finnish       | Mika Häkkinen     |   20 |
+| Argentine     | Carlos Reutemann  |   12 |
+| Australian    | Alan Jones        |   12 |
+| Austrian      | Gerhard Berger    |   10 |
+| French        | René Arnoux       |    7 |
+| Canadian      | Gilles Villeneuve |    6 |
+| Italian       | Riccardo Patrese  |    6 |
+| American      | Dan Gurney        |    4 |
+| New Zealander | Bruce McLaren     |    4 |
+| Spanish       | Carlos Sainz      |    4 |
+| Belgian       | Thierry Boutsen   |    3 |
+| Mexican       | Pedro Rodríguez   |    2 |
+| Swiss         | Jo Siffert        |    2 |
+| Swedish       | Jo Bonnier        |    1 |
++---------------+-------------------+------+
++-----+----------+----------+
+| lap | time     | delta_ms |
++-----+----------+----------+
+|   1 | 1:32.190 |     NULL |
+|   2 | 1:30.710 |    -1480 |
+|   3 | 1:30.408 |     -302 |
+|   4 | 1:30.716 |      308 |
+|   5 | 1:30.552 |     -164 |
+|   6 | 1:30.440 |     -112 |
+|   7 | 1:30.529 |       89 |
+|   8 | 1:30.516 |      -13 |
+|   9 | 1:30.632 |      116 |
+|  10 | 1:30.506 |     -126 |
+|  11 | 1:30.561 |       55 |
+|  12 | 1:30.590 |       29 |
+|  13 | 1:30.561 |      -29 |
+|  14 | 1:30.647 |       86 |
+|  15 | 1:30.267 |     -380 |
+|  16 | 1:32.558 |     2291 |
+|  17 | 1:50.188 |    17630 |
+|  18 | 1:29.896 |   -20292 |
+|  19 | 1:29.386 |     -510 |
+|  20 | 1:29.628 |      242 |
+|  21 | 1:29.127 |     -501 |
+|  22 | 1:29.689 |      562 |
+|  23 | 1:29.634 |      -55 |
+|  24 | 1:29.293 |     -341 |
+|  25 | 1:29.401 |      108 |
++-----+----------+----------+
++------------------+----------------------+
+| driver           | avg_positions_gained |
++------------------+----------------------+
+| Sergio Pérez     |                 2.50 |
+| Max Verstappen   |                 1.91 |
+| Liam Lawson      |                 1.60 |
+| Guanyu Zhou      |                 1.33 |
+| Lance Stroll     |                 1.05 |
+| Daniel Ricciardo |                 1.00 |
+| Logan Sargeant   |                 0.90 |
+| Yuki Tsunoda     |                 0.64 |
+| Pierre Gasly     |                 0.45 |
+| Nyck de Vries    |                 0.44 |
++------------------+----------------------+
++-------+---------------------------+--------+---------------+
+| round | name                      | points | rolling_avg_3 |
++-------+---------------------------+--------+---------------+
+|     1 | Bahrain Grand Prix        |     18 |            18 |
+|     2 | Emilia Romagna Grand Prix |     25 |          21.5 |
+|     3 | Portuguese Grand Prix     |     18 |         20.33 |
+|     4 | Spanish Grand Prix        |     19 |         20.67 |
+|     5 | Monaco Grand Prix         |     25 |         20.67 |
+|     6 | Azerbaijan Grand Prix     |      0 |         14.67 |
+|     7 | French Grand Prix         |     26 |            17 |
+|     8 | Styrian Grand Prix        |     25 |            17 |
+|     9 | Austrian Grand Prix       |     26 |         25.67 |
+|    10 | British Grand Prix        |      0 |            17 |
+|    11 | Hungarian Grand Prix      |      2 |          9.33 |
+|    12 | Belgian Grand Prix        |   12.5 |          4.83 |
+|    13 | Dutch Grand Prix          |     25 |         13.17 |
+|    14 | Italian Grand Prix        |      0 |          12.5 |
+|    15 | Russian Grand Prix        |     18 |         14.33 |
+|    16 | Turkish Grand Prix        |     18 |            12 |
+|    17 | United States Grand Prix  |     25 |         20.33 |
+|    18 | Mexico City Grand Prix    |     25 |         22.67 |
+|    19 | São Paulo Grand Prix      |     18 |         22.67 |
+|    20 | Qatar Grand Prix          |     19 |         20.67 |
+|    21 | Saudi Arabian Grand Prix  |     18 |         18.33 |
+|    22 | Abu Dhabi Grand Prix      |     26 |            21 |
++-------+---------------------------+--------+---------------+
++--------------------+---------------+
+| driver             | podium_streak |
++--------------------+---------------+
+| Michael Schumacher |            19 |
+| Lewis Hamilton     |            16 |
+| Max Verstappen     |            15 |
+| Fernando Alonso    |            15 |
+| Lewis Hamilton     |            12 |
+| Sebastian Vettel   |            11 |
+| Sebastian Vettel   |            11 |
+| Lewis Hamilton     |            10 |
+| Nico Rosberg       |             9 |
+| Lewis Hamilton     |             9 |
++--------------------+---------------+
++------------------+---------------+-------------------+
+| driver           | best_lap      | gap_to_fastest_ms |
++------------------+---------------+-------------------+
+| Max Verstappen   | 00:01:26.9930 |                 0 |
+| Sergio Pérez     | 00:01:27.4930 |               500 |
+| Alexander Albon  | 00:01:27.8450 |               852 |
+| Lance Stroll     | 00:01:28.0500 |              1057 |
+| Oscar Piastri    | 00:01:28.1380 |              1145 |
+| Lando Norris     | 00:01:28.1640 |              1171 |
+| George Russell   | 00:01:28.1870 |              1194 |
+| Charles Leclerc  | 00:01:28.1990 |              1206 |
+| Fernando Alonso  | 00:01:28.2560 |              1263 |
+| Lewis Hamilton   | 00:01:28.3720 |              1379 |
+| Daniel Ricciardo | 00:01:28.5710 |              1578 |
+| Logan Sargeant   | 00:01:28.5800 |              1587 |
+| Guanyu Zhou      | 00:01:28.7460 |              1753 |
+| Pierre Gasly     | 00:01:29.0160 |              2023 |
+| Nico Hülkenberg  | 00:01:29.2170 |              2224 |
++------------------+---------------+-------------------+
++--------------------+----------------+-----------------+
+| driver             | pts_per_season | career_quartile |
++--------------------+----------------+-----------------+
+| Max Verstappen     |          291.2 |               1 |
+| Lewis Hamilton     |          267.8 |               1 |
+| Charles Leclerc    |          194.7 |               1 |
+| Sebastian Vettel   |          193.6 |               1 |
+| Oscar Piastri      |          173.5 |               1 |
+| Lando Norris       |          158.3 |               1 |
+| Valtteri Bottas    |            149 |               1 |
+| Nico Rosberg       |            145 |               1 |
+| Carlos Sainz       |          120.4 |               1 |
+| Sergio Pérez       |          113.2 |               1 |
+| Fernando Alonso    |          110.9 |               1 |
+| George Russell     |          110.7 |               1 |
+| Kimi Räikkönen     |           98.6 |               1 |
+| Daniel Ricciardo   |           94.3 |               1 |
+| Mark Webber        |           87.3 |               1 |
+| Michael Schumacher |           82.4 |               1 |
+| Felipe Massa       |           77.8 |               1 |
+| Jenson Button      |           68.6 |               1 |
+| Alain Prost        |           61.4 |               1 |
+| Ayrton Senna       |           55.8 |               1 |
++--------------------+----------------+-----------------+
++--------------------------+-----------------+
+| driver                   | first_win_start |
++--------------------------+-----------------+
+| Nino Farina              |               1 |
+| Giancarlo Baghetti       |               1 |
+| Johnnie Parsons          |               1 |
+| Lee Wallard              |               2 |
+| Juan Fangio              |               2 |
+| Bill Vukovich            |               3 |
+| Troy Ruttman             |               3 |
+| Jacques Villeneuve       |               4 |
+| Bob Sweikert             |               4 |
+| Tony Brooks              |               4 |
+| Clay Regazzoni           |               5 |
+| Emerson Fittipaldi       |               5 |
+| José Froilán González    |               5 |
+| Pat Flaherty             |               5 |
+| Lewis Hamilton           |               6 |
+| Ludovico Scarfiotti      |               7 |
+| Luigi Fagioli            |               7 |
+| Jimmy Bryan              |               7 |
+| Piero Taruffi            |               7 |
+| Jacky Ickx               |               8 |
++--------------------------+-----------------+

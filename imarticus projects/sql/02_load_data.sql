@@ -1,0 +1,56 @@
+-- ============================================================
+-- 02 — LOAD DATA  (MySQL 8.0, LOAD DATA LOCAL INFILE)
+-- Requires: server local_infile=ON and client --local-infile=1.
+-- Run this file from the sql/ directory so the relative data paths resolve:
+--   mysql --local-infile=1 -u root -p < 02_load_data.sql
+-- CSVs: text fields quoted, NULLs encoded as \N, LF line endings.
+-- ============================================================
+
+USE f1_analytics;
+SET FOREIGN_KEY_CHECKS = 0;
+SET UNIQUE_CHECKS = 0;
+
+LOAD DATA LOCAL INFILE 'data/circuits.csv'
+  INTO TABLE circuits FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
+
+LOAD DATA LOCAL INFILE 'data/constructors.csv'
+  INTO TABLE constructors FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
+
+LOAD DATA LOCAL INFILE 'data/drivers.csv'
+  INTO TABLE drivers FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
+
+LOAD DATA LOCAL INFILE 'data/seasons.csv'
+  INTO TABLE seasons FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
+
+LOAD DATA LOCAL INFILE 'data/status.csv'
+  INTO TABLE status FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
+
+LOAD DATA LOCAL INFILE 'data/races.csv'
+  INTO TABLE races FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
+
+LOAD DATA LOCAL INFILE 'data/qualifying.csv'
+  INTO TABLE qualifying FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
+
+LOAD DATA LOCAL INFILE 'data/pit_stops.csv'
+  INTO TABLE pit_stops FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
+
+LOAD DATA LOCAL INFILE 'data/lap_times.csv'
+  INTO TABLE lap_times FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
+
+LOAD DATA LOCAL INFILE 'data/results.csv'
+  INTO TABLE results FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
+
+LOAD DATA LOCAL INFILE 'data/sprint_results.csv'
+  INTO TABLE sprint_results FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
+
+LOAD DATA LOCAL INFILE 'data/driver_standings.csv'
+  INTO TABLE driver_standings FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
+
+LOAD DATA LOCAL INFILE 'data/constructor_standings.csv'
+  INTO TABLE constructor_standings FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
+
+LOAD DATA LOCAL INFILE 'data/constructor_results.csv'
+  INTO TABLE constructor_results FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
+
+SET FOREIGN_KEY_CHECKS = 1;
+SET UNIQUE_CHECKS = 1;

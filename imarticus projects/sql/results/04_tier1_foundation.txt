@@ -1,0 +1,190 @@
++--------------------------------------+----------+---------+
+| name                                 | location | country |
++--------------------------------------+----------+---------+
+| Autodromo Enzo e Dino Ferrari        | Imola    | Italy   |
+| Autodromo Internazionale del Mugello | Mugello  | Italy   |
+| Autodromo Nazionale di Monza         | Monza    | Italy   |
+| Pescara Circuit                      | Pescara  | Italy   |
++--------------------------------------+----------+---------+
++--------+-------+
+| decade | races |
++--------+-------+
+|   1950 |    84 |
+|   1960 |   100 |
+|   1970 |   144 |
+|   1980 |   156 |
+|   1990 |   162 |
+|   2000 |   174 |
+|   2010 |   198 |
+|   2020 |   107 |
++--------+-------+
++---------------+--------------+
+| nationality   | driver_count |
++---------------+--------------+
+| British       |          166 |
+| American      |          158 |
+| Italian       |           99 |
+| French        |           73 |
+| German        |           50 |
+| Brazilian     |           32 |
+| Argentine     |           24 |
+| Swiss         |           23 |
+| Belgian       |           23 |
+| South African |           23 |
++---------------+--------------+
++--------------+--------------+
+| name         | race_entries |
++--------------+--------------+
+| Ferrari      |         1100 |
+| McLaren      |          929 |
+| Williams     |          843 |
+| Tyrrell      |          433 |
+| Sauber       |          419 |
+| Renault      |          403 |
+| Team Lotus   |          395 |
+| Red Bull     |          394 |
+| Minardi      |          345 |
+| Ligier       |          330 |
+| Mercedes     |          317 |
+| Brabham      |          308 |
+| Arrows       |          296 |
+| Toro Rosso   |          268 |
+| Benetton     |          260 |
+| Jordan       |          250 |
+| Alfa Romeo   |          216 |
+| Force India  |          212 |
+| BRM          |          208 |
+| March        |          196 |
+| Haas F1 Team |          190 |
+| Osella       |          171 |
+| Toyota       |          140 |
+| Ensign       |          133 |
+| Fittipaldi   |          119 |
+| Surtees      |          119 |
+| BAR          |          118 |
+| ATS          |          116 |
+| Larrousse    |          114 |
++--------------+--------------+
++----------------------+
+| avg_races_per_season |
++----------------------+
+|                15.00 |
++----------------------+
++------+-------+
+| year | races |
++------+-------+
+| 2024 |    24 |
+| 2021 |    22 |
+| 2022 |    22 |
+| 2023 |    22 |
+| 2016 |    21 |
+| 2018 |    21 |
+| 2019 |    21 |
+| 2012 |    20 |
+| 2017 |    20 |
+| 2005 |    19 |
+| 2010 |    19 |
+| 2011 |    19 |
+| 2013 |    19 |
+| 2014 |    19 |
+| 2015 |    19 |
+| 2004 |    18 |
+| 2006 |    18 |
+| 2008 |    18 |
+| 1977 |    17 |
+| 1995 |    17 |
+| 1997 |    17 |
+| 2000 |    17 |
+| 2001 |    17 |
+| 2002 |    17 |
+| 2007 |    17 |
+| 2009 |    17 |
+| 2020 |    17 |
+| 1976 |    16 |
+| 1978 |    16 |
+| 1982 |    16 |
+| 1984 |    16 |
+| 1985 |    16 |
+| 1986 |    16 |
+| 1987 |    16 |
+| 1988 |    16 |
+| 1989 |    16 |
+| 1990 |    16 |
+| 1991 |    16 |
+| 1992 |    16 |
+| 1993 |    16 |
+| 1994 |    16 |
+| 1996 |    16 |
+| 1998 |    16 |
+| 1999 |    16 |
+| 2003 |    16 |
++------+-------+
++-----------+------------+------------+---------------+
+| forename  | surname    | dob        | nationality   |
++-----------+------------+------------+---------------+
+| Jolyon    | Palmer     | 1991-01-20 | British       |
+| Roberto   | Merhi      | 1991-03-22 | Spanish       |
+| Max       | Chilton    | 1991-04-21 | British       |
+| Will      | Stevens    | 1991-06-28 | British       |
+| Esteban   | Gutiérrez  | 1991-08-05 | Mexican       |
+| Alexander | Rossi      | 1991-09-25 | American      |
+| Stoffel   | Vandoorne  | 1992-03-26 | Belgian       |
+| Felipe    | Nasr       | 1992-08-21 | Brazilian     |
+| Kevin     | Magnussen  | 1992-10-05 | Danish        |
+| Rio       | Haryanto   | 1993-01-22 | Indonesian    |
+| Antonio   | Giovinazzi | 1993-12-14 | Italian       |
+| Daniil    | Kvyat      | 1994-04-26 | Russian       |
+| Carlos    | Sainz      | 1994-09-01 | Spanish       |
+| Pascal    | Wehrlein   | 1994-10-18 | German        |
+| Nyck      | de Vries   | 1995-02-06 | Dutch         |
+| Nicholas  | Latifi     | 1995-06-29 | Canadian      |
+| Sergey    | Sirotkin   | 1995-08-27 | Russian       |
+| Jack      | Aitken     | 1995-09-23 | British       |
+| Pierre    | Gasly      | 1996-02-07 | French        |
+| Alexander | Albon      | 1996-03-23 | Thai          |
+| Pietro    | Fittipaldi | 1996-06-25 | Brazilian     |
+| Esteban   | Ocon       | 1996-09-17 | French        |
+| Max       | Verstappen | 1997-09-30 | Dutch         |
+| Charles   | Leclerc    | 1997-10-16 | Monegasque    |
+| George    | Russell    | 1998-02-15 | British       |
+| Lance     | Stroll     | 1998-10-29 | Canadian      |
+| Nikita    | Mazepin    | 1999-03-02 | Russian       |
+| Mick      | Schumacher | 1999-03-22 | German        |
+| Guanyu    | Zhou       | 1999-05-30 | Chinese       |
+| Lando     | Norris     | 1999-11-13 | British       |
+| Yuki      | Tsunoda    | 2000-05-11 | Japanese      |
+| Logan     | Sargeant   | 2000-12-31 | American      |
+| Oscar     | Piastri    | 2001-04-06 | Australian    |
+| Liam      | Lawson     | 2002-02-11 | New Zealander |
+| Jack      | Doohan     | 2003-01-20 | Australian    |
+| Franco    | Colapinto  | 2003-05-27 | Argentinian   |
+| Oliver    | Bearman    | 2005-05-08 | British       |
++-----------+------------+------------+---------------+
++--------------------+
+| distinct_countries |
++--------------------+
+|                 35 |
++--------------------+
++---------+----------+
+| country | circuits |
++---------+----------+
+| USA     |       11 |
+| France  |        7 |
+| Spain   |        6 |
+| Italy   |        4 |
+| UK      |        4 |
++---------+----------+
++-----------------+-------------+
+| status          | occurrences |
++-----------------+-------------+
+| Finished        |        7674 |
+| +1 Lap          |        4037 |
+| Engine          |        2026 |
+| +2 Laps         |        1613 |
+| Accident        |        1062 |
+| Did not qualify |        1025 |
+| Collision       |         854 |
+| Gearbox         |         810 |
+| Spun off        |         795 |
+| +3 Laps         |         731 |
++-----------------+-------------+
