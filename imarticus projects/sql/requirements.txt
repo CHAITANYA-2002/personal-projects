@@ -3,3 +3,4 @@ matplotlib>=3.7
 SQLAlchemy>=2.0
 PyMySQL>=1.1
 jupyter>=1.0
+sqlparse>=0.4

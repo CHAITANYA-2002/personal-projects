@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Missing Value Decision Flowchart</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #f5f3ee;
+  --paper:     #fefcf8;
+  --ink:       #17172b;
+  --ink2:      #3a3a58;
+  --ink3:      #8080a0;
+  --border:    #dedad2;
+
+  --start-bg:  #17172b;
+  --start-fg:  #ffffff;
+
+  --detect-bg: #eef2ff;
+  --detect-bd: #bdc8f5;
+  --detect-fg: #2a3da0;
+
+  --diag-bg:   #fdf8ff;
+  --diag-bd:   #d8bff5;
+  --diag-fg:   #6020a0;
+
+  --mcar-bg:   #edfaf3;
+  --mcar-bd:   #89d9ac;
+  --mcar-fg:   #0d6b3a;
+
+  --mar-bg:    #fffaeb;
+  --mar-bd:    #f0cc7a;
+  --mar-fg:    #7a4d00;
+
+  --mnar-bg:   #fff0ed;
+  --mnar-bd:   #f5a898;
+  --mnar-fg:   #9e2210;
+
+  --thresh-bg: #f0f0ff;
+  --thresh-bd: #c0c0f0;
+  --thresh-fg: #303090;
+
+  --strat-bg:  #f8f0ff;
+  --strat-bd:  #c8a0f0;
+  --strat-fg:  #560090;
+
+  --drop-bg:   #e8f4ff;
+  --drop-bd:   #90c8f5;
+  --drop-fg:   #0050a0;
+
+  --stat-bg:   #edfaf3;
+  --stat-bd:   #89d9ac;
+  --stat-fg:   #0a5c30;
+
+  --adv-bg:    #fff5e8;
+  --adv-bd:    #f5c870;
+  --adv-fg:    #7a4400;
+
+  --mnar-s-bg: #fff0ed;
+  --mnar-s-bd: #f5a898;
+  --mnar-s-fg: #9e2210;
+
+  --val-bg:    #eafaf7;
+  --val-bd:    #80d4c8;
+  --val-fg:    #0a6055;
+
+  --pit-bg:    #fff8e8;
+  --pit-bd:    #f0c860;
+  --pit-fg:    #7a4800;
+
+  --end-bg:    #17172b;
+  --end-fg:    #ffffff;
+
+  --arr:       #9090b8;
+  --arr-yes:   #16a34a;
+  --arr-no:    #dc2626;
+}
+
+body {
+  background: var(--bg);
+  font-family: 'Outfit', sans-serif;
+  color: var(--ink);
+  padding: 48px 24px 80px;
+  min-height: 100vh;
+}
+
+/* ══════════════════════════════
+   HEADER
+══════════════════════════════ */
+.page-header {
+  text-align: center;
+  margin-bottom: 52px;
+}
+.eyebrow {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  background: #e6e3dc;
+  padding: 4px 16px;
+  border-radius: 20px;
+  margin-bottom: 16px;
+}
+.page-header h1 {
+  font-size: clamp(28px, 4.5vw, 46px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  line-height: 1.08;
+  margin-bottom: 12px;
+}
+.page-header p {
+  font-size: 15px;
+  color: var(--ink3);
+  max-width: 560px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* ══════════════════════════════
+   MAIN LAYOUT
+══════════════════════════════ */
+.flow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+/* ══════════════════════════════
+   SECTION DIVIDERS
+══════════════════════════════ */
+.sec-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 900px;
+  margin: 18px 0 10px;
+}
+.sec-label-line { flex: 1; height: 1.5px; background: var(--border); }
+.sec-label-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  white-space: nowrap;
+  padding: 3px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+}
+
+/* ══════════════════════════════
+   ARROWS
+══════════════════════════════ */
+.arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2px 0;
+}
+.a-line { width: 2px; height: 28px; background: var(--arr); }
+.a-line-short { width: 2px; height: 16px; background: var(--arr); }
+.a-head { width:0; height:0; border-left:7px solid transparent; border-right:7px solid transparent; border-top:9px solid var(--arr); }
+
+.arrow-yes .a-line, .arrow-yes .a-head { background: var(--arr-yes); }
+.arrow-yes .a-head { border-top-color: var(--arr-yes); }
+.arrow-no .a-line, .arrow-no .a-head { background: var(--arr-no); }
+.arrow-no .a-head { border-top-color: var(--arr-no); }
+
+.arr-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 2px 9px;
+  border-radius: 20px;
+  margin: 3px 0;
+}
+.arr-badge.yes { background: #dcfce7; color: var(--arr-yes); border: 1px solid #86efac; }
+.arr-badge.no  { background: #fee2e2; color: var(--arr-no);  border: 1px solid #fca5a5; }
+.arr-badge.col { background: #e0e7ff; color: #3730a3; border: 1px solid #a5b4fc; }
+
+/* ══════════════════════════════
+   GENERIC NODE
+══════════════════════════════ */
+.node {
+  border-radius: 14px;
+  padding: 18px 24px;
+  width: 100%;
+  max-width: 900px;
+  border: 2px solid var(--border);
+  background: var(--paper);
+  animation: fadeUp 0.45s ease both;
+}
+.node-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 6px;
+}
+.node h2 { font-size: 17px; font-weight: 800; margin-bottom: 6px; color: var(--ink); }
+.node p  { font-size: 13px; line-height: 1.65; color: var(--ink2); }
+
+/* ══════════════════════════════
+   TERMINAL NODES
+══════════════════════════════ */
+.terminal {
+  border-radius: 60px;
+  padding: 14px 36px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+  border: none;
+  animation: fadeUp 0.45s ease both;
+}
+.terminal.start { background: var(--start-bg); color: var(--start-fg); box-shadow: 0 4px 28px rgba(23,23,43,.22); }
+.terminal.end   { background: var(--end-bg);   color: var(--end-fg);   box-shadow: 0 4px 28px rgba(23,23,43,.22); }
+.terminal.no-miss { background: var(--mcar-bg); color: var(--mcar-fg); border: 2px solid var(--mcar-bd); border-radius: 12px; padding: 12px 22px; font-size: 13px; }
+
+/* ══════════════════════════════
+   DIAMOND
+══════════════════════════════ */
+.diamond-outer {
+  width: 260px;
+  height: 148px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeUp 0.45s ease both;
+  flex-shrink: 0;
+}
+.diamond-shape {
+  position: absolute;
+  width: 185px; height: 105px;
+  background: var(--paper);
+  border: 2.5px solid #c4bfb5;
+  border-radius: 12px;
+  transform: rotate(45deg) scale(0.85);
+  box-shadow: 0 2px 14px rgba(0,0,0,.07);
+}
+.diamond-inner {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 0 22px;
+}
+.diamond-inner span {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  display: block;
+  margin-bottom: 3px;
+}
+.diamond-inner strong { font-size: 13.5px; font-weight: 800; line-height: 1.3; }
+
+/* ══════════════════════════════
+   DETECT NODE
+══════════════════════════════ */
+.detect-node {
+  background: var(--detect-bg);
+  border-color: var(--detect-bd);
+}
+.detect-node .node-tag { color: var(--detect-fg); }
+.detect-node h2 { color: var(--detect-fg); }
+.detect-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.detect-chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: #dce3ff;
+  color: var(--detect-fg);
+  border: 1px solid var(--detect-bd);
+}
+.detect-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 12px;
+}
+.detect-step {
+  background: white;
+  border: 1.5px solid var(--detect-bd);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.detect-step .ds-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--detect-fg);
+  margin-bottom: 4px;
+}
+.detect-step p { font-size: 12px; color: var(--ink2); line-height: 1.5; }
+
+/* ══════════════════════════════
+   DIAGNOSE NODE
+══════════════════════════════ */
+.diag-node {
+  background: var(--diag-bg);
+  border-color: var(--diag-bd);
+}
+.diag-node .node-tag { color: var(--diag-fg); }
+.diag-node h2 { color: var(--diag-fg); }
+.diag-tests {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 12px;
+}
+.diag-test {
+  background: white;
+  border: 1.5px solid var(--diag-bd);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.diag-test .t-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--diag-fg);
+  margin-bottom: 5px;
+  letter-spacing: 0.08em;
+}
+.diag-test h4 { font-size: 13px; font-weight: 700; margin-bottom: 5px; color: var(--ink); }
+.diag-test p  { font-size: 12px; color: var(--ink2); line-height: 1.55; }
+.diag-test .t-result {
+  margin-top: 7px;
+  font-size: 11px;
+  font-style: italic;
+  color: var(--diag-fg);
+  line-height: 1.4;
+}
+
+/* ══════════════════════════════
+   MECHANISM CARDS (3-col)
+══════════════════════════════ */
+.mech-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  width: 100%;
+  max-width: 900px;
+  animation: fadeUp 0.45s ease both;
+}
+.mech-card {
+  border-radius: 14px;
+  padding: 18px 18px;
+  border: 2px solid;
+}
+.mech-card.mcar { background: var(--mcar-bg); border-color: var(--mcar-bd); }
+.mech-card.mar  { background: var(--mar-bg);  border-color: var(--mar-bd); }
+.mech-card.mnar { background: var(--mnar-bg); border-color: var(--mnar-bd); }
+.mech-tag-pill {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 2px 10px;
+  border-radius: 20px;
+  border: 1.5px solid currentColor;
+  margin-bottom: 8px;
+}
+.mcar .mech-tag-pill { color: var(--mcar-fg); }
+.mar  .mech-tag-pill { color: var(--mar-fg); }
+.mnar .mech-tag-pill { color: var(--mnar-fg); }
+.mech-card h3 { font-size: 14px; font-weight: 800; margin-bottom: 6px; }
+.mcar h3 { color: var(--mcar-fg); }
+.mar  h3 { color: var(--mar-fg); }
+.mnar h3 { color: var(--mnar-fg); }
+.mech-card p  { font-size: 12px; line-height: 1.6; color: var(--ink2); }
+.mech-signal {
+  margin-top: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.mcar .mech-signal { background: #d4f5e4; color: var(--mcar-fg); }
+.mar  .mech-signal { background: #fef2cc; color: var(--mar-fg); }
+.mnar .mech-signal { background: #fdddd8; color: var(--mnar-fg); }
+.mech-examples {
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--ink3);
+  line-height: 1.6;
+  font-style: italic;
+}
+
+/* ══════════════════════════════
+   THRESHOLD NODE
+══════════════════════════════ */
+.thresh-node {
+  background: var(--thresh-bg);
+  border-color: var(--thresh-bd);
+}
+.thresh-node .node-tag { color: var(--thresh-fg); }
+.thresh-node h2 { color: var(--thresh-fg); }
+.thresh-bands {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: 12px;
+}
+.thresh-band {
+  border-radius: 10px;
+  padding: 12px 14px;
+  border: 1.5px solid;
+  text-align: center;
+}
+.t-low   { background: #edfaf3; border-color: var(--mcar-bd); }
+.t-med   { background: var(--mar-bg); border-color: var(--mar-bd); }
+.t-high  { background: var(--mnar-bg); border-color: var(--mnar-bd); }
+.t-vhigh { background: #fce8e8; border-color: #f5a8a8; }
+.thresh-band .pct { font-size: 18px; font-weight: 800; margin-bottom: 4px; }
+.t-low .pct   { color: var(--mcar-fg); }
+.t-med .pct   { color: var(--mar-fg); }
+.t-high .pct  { color: var(--mnar-fg); }
+.t-vhigh .pct { color: #8b0000; }
+.thresh-band .rec { font-size: 11px; font-weight: 600; line-height: 1.5; color: var(--ink2); }
+.thresh-band .action { margin-top: 6px; font-size: 11px; font-weight: 700; }
+.t-low .action   { color: var(--mcar-fg); }
+.t-med .action   { color: var(--mar-fg); }
+.t-high .action  { color: var(--mnar-fg); }
+.t-vhigh .action { color: #8b0000; }
+
+/* ══════════════════════════════
+   STRATEGY SECTION
+══════════════════════════════ */
+.strat-intro {
+  background: var(--strat-bg);
+  border-color: var(--strat-bd);
+}
+.strat-intro .node-tag { color: var(--strat-fg); }
+.strat-intro h2 { color: var(--strat-fg); }
+
+.strat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  width: 100%;
+  max-width: 900px;
+  animation: fadeUp 0.45s ease both;
+}
+.strat-card {
+  border-radius: 14px;
+  padding: 18px 20px;
+  border: 2px solid;
+}
+
+/* Drop */
+.sc-drop { background: var(--drop-bg); border-color: var(--drop-bd); }
+.sc-drop h3 { color: var(--drop-fg); }
+/* Statistical */
+.sc-stat { background: var(--stat-bg); border-color: var(--stat-bd); grid-column: span 2; }
+.sc-stat h3 { color: var(--stat-fg); }
+/* Advanced */
+.sc-adv { background: var(--adv-bg); border-color: var(--adv-bd); grid-column: span 2; }
+.sc-adv h3 { color: var(--adv-fg); }
+/* MNAR */
+.sc-mnar { background: var(--mnar-s-bg); border-color: var(--mnar-s-bd); }
+.sc-mnar h3 { color: var(--mnar-s-fg); }
+
+.strat-card h3 {
+  font-size: 15px;
+  font-weight: 800;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.when-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.sc-drop .when-badge  { background: #dbeafe; color: var(--drop-fg); border: 1px solid var(--drop-bd); }
+.sc-stat .when-badge  { background: #d1fae5; color: var(--stat-fg); border: 1px solid var(--stat-bd); }
+.sc-adv  .when-badge  { background: #fef3c7; color: var(--adv-fg);  border: 1px solid var(--adv-bd); }
+.sc-mnar .when-badge  { background: var(--mnar-bg); color: var(--mnar-fg); border: 1px solid var(--mnar-bd); }
+
+.strat-card > p {
+  font-size: 12.5px;
+  color: var(--ink2);
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.method-grid {
+  display: grid;
+  gap: 8px;
+}
+.method-grid.cols2 { grid-template-columns: repeat(2, 1fr); }
+.method-grid.cols3 { grid-template-columns: repeat(3, 1fr); }
+.method-grid.cols4 { grid-template-columns: repeat(4, 1fr); }
+.method-item {
+  background: white;
+  border-radius: 10px;
+  padding: 10px 12px;
+  border: 1.5px solid rgba(0,0,0,0.07);
+}
+.method-item h5 { font-size: 12.5px; font-weight: 700; margin-bottom: 4px; color: var(--ink); }
+.method-item p  { font-size: 11.5px; color: var(--ink2); line-height: 1.55; }
+.method-item .when { margin-top: 5px; font-size: 11px; font-weight: 600; color: var(--ink3); font-style: italic; }
+.method-item .pros { color: #0d6b3a; }
+.method-item .cons { color: #9e2210; }
+
+/* ══════════════════════════════
+   MISSING INDICATOR BOX
+══════════════════════════════ */
+.indicator-box {
+  width: 100%;
+  max-width: 900px;
+  border-radius: 12px;
+  background: #fffaeb;
+  border: 2px solid #f0cc7a;
+  padding: 16px 20px;
+  animation: fadeUp 0.45s ease both;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.indicator-icon {
+  font-size: 26px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.indicator-box h4 { font-size: 14px; font-weight: 800; color: var(--mar-fg); margin-bottom: 5px; }
+.indicator-box p  { font-size: 12.5px; color: var(--ink2); line-height: 1.6; }
+.indicator-rules {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.ind-rule {
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: #fef2cc;
+  color: var(--mar-fg);
+  border: 1px solid var(--mar-bd);
+}
+
+/* ══════════════════════════════
+   VALIDATION
+══════════════════════════════ */
+.val-node {
+  background: var(--val-bg);
+  border-color: var(--val-bd);
+}
+.val-node .node-tag { color: var(--val-fg); }
+.val-node h2 { color: var(--val-fg); }
+.val-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 14px;
+}
+.val-item {
+  background: white;
+  border: 1.5px solid var(--val-bd);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.val-num {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--val-fg);
+  color: white;
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 7px;
+}
+.val-item h5 { font-size: 13px; font-weight: 700; color: var(--val-fg); margin-bottom: 4px; }
+.val-item p  { font-size: 12px; color: var(--ink2); line-height: 1.55; }
+.val-threshold {
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: var(--val-bg);
+  border-radius: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--val-fg);
+  line-height: 1.5;
+}
+
+/* ══════════════════════════════
+   PITFALLS
+══════════════════════════════ */
+.pit-node {
+  background: var(--pit-bg);
+  border-color: var(--pit-bd);
+}
+.pit-node .node-tag { color: var(--pit-fg); }
+.pit-node h2 { color: var(--pit-fg); }
+.pit-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 12px;
+}
+.pit-item {
+  background: white;
+  border: 1.5px solid var(--pit-bd);
+  border-radius: 10px;
+  padding: 11px 13px;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+.pit-x {
+  width: 20px; height: 20px;
+  background: #dc2626;
+  color: white;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.pit-item p { font-size: 12px; color: var(--ink2); line-height: 1.55; }
+.pit-item strong { color: var(--pit-fg); }
+
+/* ══════════════════════════════
+   LOOP NOTE
+══════════════════════════════ */
+.loop-note {
+  width: 100%;
+  max-width: 900px;
+  border-radius: 12px;
+  background: var(--paper);
+  border: 2px dashed var(--border);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  animation: fadeUp 0.45s ease both;
+}
+.loop-icon { font-size: 28px; flex-shrink: 0; }
+.loop-note h4 { font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 3px; }
+.loop-note p  { font-size: 12.5px; color: var(--ink2); line-height: 1.5; }
+
+/* ══════════════════════════════
+   LEGEND
+══════════════════════════════ */
+.legend {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 48px;
+  max-width: 900px;
+  width: 100%;
+  padding-top: 24px;
+  border-top: 1.5px solid var(--border);
+}
+.leg-item { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--ink2); }
+.leg-swatch { width: 20px; height: 14px; border-radius: 4px; border: 2px solid; flex-shrink: 0; }
+
+/* ══════════════════════════════
+   ANIMATION
+══════════════════════════════ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.d1 { animation-delay:.05s } .d2 { animation-delay:.10s } .d3 { animation-delay:.15s }
+.d4 { animation-delay:.20s } .d5 { animation-delay:.25s } .d6 { animation-delay:.30s }
+.d7 { animation-delay:.35s } .d8 { animation-delay:.40s } .d9 { animation-delay:.45s }
+.d10{ animation-delay:.50s } .d11{ animation-delay:.55s } .d12{ animation-delay:.60s }
+
+/* ══════════════════════════════
+   YES/NO BRANCH LAYOUT
+══════════════════════════════ */
+.branch-row {
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0;
+  position: relative;
+  animation: fadeUp 0.45s ease both;
+}
+.branch-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.branch-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 74px;
+}
+.branch-hline {
+  height: 2px;
+  background: var(--arr-no);
+  width: 60px;
+  margin-top: 74px;
+}
+.branch-vline-down {
+  width: 2px;
+  height: 40px;
+  background: var(--arr-no);
+}
+
+code {
+  font-family: 'JetBrains Mono', monospace;
+  background: #e8e5de;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 11.5px;
+}
+
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="eyebrow">Data Science · Classroom Reference Chart</div>
+  <h1>Missing Value<br>Decision Framework</h1>
+  <p>A complete step-by-step process to detect, diagnose, and handle missing values in any dataset — from raw data to model-ready. Every column treated independently.</p>
+</div>
+
+<div class="flow">
+
+  <!-- ════ START ════ -->
+  <div class="terminal start d1" style="width:300px;">
+    🗂 Start — You have a Raw Dataset
+  </div>
+
+  <div class="arrow d1"><div class="a-line"></div><div class="a-head"></div></div>
+
+  <!-- ════ STEP 1: DETECT ════ -->
+  <div class="sec-label d2">
+    <div class="sec-label-line"></div>
+    <div class="sec-label-text">Step 1 — Detect Missing Values</div>
+    <div class="sec-label-line"></div>
+  </div>
+
+  <div class="node detect-node d2">
+    <div class="node-tag">Process · Do this first for every column</div>
+    <h2>Identify All Forms of Missingness</h2>
+    <p>Missing values don't always look the same. Scan for every representation before computing any statistics.</p>
+    <div class="detect-chips">
+      <span class="detect-chip">NaN</span>
+      <span class="detect-chip">None</span>
+      <span class="detect-chip">NULL</span>
+      <span class="detect-chip">""  (empty string)</span>
+      <span class="detect-chip">" " (whitespace)</span>
+      <span class="detect-chip">-999 / -1 / 9999</span>
+      <span class="detect-chip">"unknown" / "N/A"</span>
+      <span class="detect-chip">0 (domain-specific)</span>
+    </div>
+    <div class="detect-steps">
+      <div class="detect-step">
+        <div class="ds-num">Action 1</div>
+        <p>Compute <strong>missing % per column</strong> using <code>df.isnull().mean()*100</code> — not just total counts.</p>
+      </div>
+      <div class="detect-step">
+        <div class="ds-num">Action 2</div>
+        <p>Plot a <strong>missingness heatmap</strong> to visually inspect which columns and rows are affected together.</p>
+      </div>
+      <div class="detect-step">
+        <div class="ds-num">Action 3</div>
+        <p>Check for <strong>co-occurring missingness</strong> — two columns often missing together may share a cause.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow d3"><div class="a-line"></div><div class="a-head"></div></div>
+
+  <!-- ════ DECISION: ANY MISSING? ════ -->
+  <div class="branch-row d3">
+    <div style="flex:1;display:flex;justify-content:flex-end;align-items:flex-start;padding-top:52px;padding-right:0;">
+      <div style="display:flex;align-items:center;gap:0;">
+        <div class="branch-hline" style="background:var(--arr-no);"></div>
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <div class="branch-vline-down" style="background:var(--arr-no);"></div>
+          <div style="width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:9px solid var(--arr-no);"></div>
+          <div class="terminal no-miss" style="margin-top:6px;width:210px;text-align:center;border-radius:10px;padding:10px 14px;font-size:12px;">
+            ✓ No Missing Values<br><span style="font-weight:400;font-size:11px;opacity:0.8;">Dataset is clean → proceed to feature engineering or modelling</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="branch-center">
+      <div class="diamond-outer">
+        <div class="diamond-shape"></div>
+        <div class="diamond-inner">
+          <span>Decision Gate</span>
+          <strong>Any missing<br>values found?</strong>
+        </div>
+      </div>
+      <div class="arr-badge no" style="margin-bottom:2px;">← No</div>
+      <div class="arr-badge yes">Yes ↓</div>
+      <div class="arrow"><div class="a-line-short"></div><div class="a-head"></div></div>
+    </div>
+    <div style="flex:1;"></div>
+  </div>
+
+  <!-- ════ STEP 2: DIAGNOSE ════ -->
+  <div class="sec-label d4">
+    <div class="sec-label-line"></div>
+    <div class="sec-label-text">Step 2 — Diagnose the Mechanism (per column)</div>
+    <div class="sec-label-line"></div>
+  </div>
+
+  <div class="node diag-node d4">
+    <div class="node-tag">Analysis · Run all 3 tests for each column with missing values</div>
+    <h2>Why Is This Column Missing? — 3 Diagnostic Tests</h2>
+    <p>Understanding <em>why</em> data is missing is the most critical step. The same imputation applied to different mechanisms produces different results — some misleading.</p>
+    <div class="diag-tests">
+      <div class="diag-test">
+        <div class="t-num">Test 1 — Pattern Analysis</div>
+        <h4>Missingness Map</h4>
+        <p>Create a binary indicator: 1 = missing, 0 = present. Visualise it across the dataset rows.</p>
+        <div class="t-result">🔎 Random scatter → MCAR signal<br>🔎 Clusters in rows/time → MAR or MNAR</div>
+      </div>
+      <div class="diag-test">
+        <div class="t-num">Test 2 — Feature Dependency</div>
+        <h4>Compare Groups</h4>
+        <p>Split rows into "missing" vs "not missing" groups. Compare distributions of <em>other</em> features across both groups.</p>
+        <div class="t-result">🔎 &lt;5% difference → weak signal (MCAR likely)<br>🔎 10–30% difference → strong MAR signal</div>
+      </div>
+      <div class="diag-test">
+        <div class="t-num">Test 3 — Target Dependency</div>
+        <h4>Check the Target Variable</h4>
+        <p>Compare the target (y) distribution for missing vs. non-missing rows in this column.</p>
+        <div class="t-result">🔎 &lt;5% target diff → no strong signal<br>🔎 &gt;10% target diff + domain logic → MNAR</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow d5"><div class="a-line"></div><div class="a-head"></div></div>
+
+  <!-- ════ MECHANISM CARDS ════ -->
+  <div class="mech-row d5">
+    <div class="mech-card mcar">
+      <div class="mech-tag-pill">MCAR</div>
+      <h3>Missing Completely At Random</h3>
+      <p>The probability of a value being missing is <strong>independent of all variables</strong> — observed or unobserved. Missingness is a random accident.</p>
+      <div class="mech-signal">
+        ✓ All 3 tests show no pattern<br>
+        ✓ Missing rows look like non-missing rows<br>
+        ✓ No target difference detected
+      </div>
+      <div class="mech-examples">
+        <strong>Examples:</strong> Sensor dropout, survey respondent skipped randomly, manual data entry error
+      </div>
+    </div>
+    <div class="mech-card mar">
+      <div class="mech-tag-pill">MAR</div>
+      <h3>Missing At Random</h3>
+      <p>Missingness depends on <strong>other observed columns</strong>, but not on the missing value itself. Systematic, but explainable using available data.</p>
+      <div class="mech-signal">
+        ⚠ Missing rate differs across groups<br>
+        ⚠ Explainable by another feature<br>
+        ⚠ Some target difference via groups
+      </div>
+      <div class="mech-examples">
+        <strong>Examples:</strong> Income missing more for self-employed; test results skipped for outpatients
+      </div>
+    </div>
+    <div class="mech-card mnar">
+      <div class="mech-tag-pill">MNAR</div>
+      <h3>Missing Not At Random</h3>
+      <p>Missingness depends on the <strong>missing value itself</strong>. People or systems suppress the value because of what it reveals.</p>
+      <div class="mech-signal">
+        🚨 Strong target association<br>
+        🚨 Domain reasoning confirms suppression<br>
+        🚨 Cannot be explained by other columns
+      </div>
+      <div class="mech-examples">
+        <strong>Examples:</strong> Low income not reported; severe illness skipping a test; credit-risky customer hiding data
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow d6"><div class="a-line"></div><div class="a-head"></div></div>
+
+  <!-- ════ STEP 3: THRESHOLD ════ -->
+  <div class="sec-label d6">
+    <div class="sec-label-line"></div>
+    <div class="sec-label-text">Step 3 — How Much Is Missing? (Threshold Decision)</div>
+    <div class="sec-label-line"></div>
+  </div>
+
+  <div class="node thresh-node d6">
+    <div class="node-tag">Rule · Check missing % before choosing any strategy</div>
+    <h2>Missing Percentage Thresholds</h2>
+    <p>The same mechanism can require different actions depending on how much data is missing. Always check the percentage first.</p>
+    <div class="thresh-bands">
+      <div class="thresh-band t-low">
+        <div class="pct">≤ 5%</div>
+        <div class="rec">Very low missingness. Low risk of bias.</div>
+        <div class="action">Drop rows (MCAR only) or simple imputation</div>
+      </div>
+      <div class="thresh-band t-med">
+        <div class="pct">5% – 15%</div>
+        <div class="rec">Moderate. Imputation preferred over dropping.</div>
+        <div class="action">Impute + consider missing indicator</div>
+      </div>
+      <div class="thresh-band t-high">
+        <div class="pct">15% – 30%</div>
+        <div class="rec">High. Dropping loses too much data.</div>
+        <div class="action">Advanced imputation + missing indicator mandatory</div>
+      </div>
+      <div class="thresh-band t-vhigh">
+        <div class="pct">> 30%</div>
+        <div class="rec">Very high. Consider dropping the column entirely.</div>
+        <div class="action">Re-evaluate column usefulness + domain check</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow d7"><div class="a-line"></div><div class="a-head"></div></div>
+
+  <!-- ════ STEP 4: STRATEGY ════ -->
+  <div class="sec-label d7">
+    <div class="sec-label-line"></div>
+    <div class="sec-label-text">Step 4 — Choose a Handling Strategy</div>
+    <div class="sec-label-line"></div>
+  </div>
+
+  <div class="node strat-intro d7">
+    <div class="node-tag">Decision · Match strategy to mechanism + missing %</div>
+    <h2>Strategy Selection Rules</h2>
+    <p>There is no single correct imputation method. The right choice depends on the missingness mechanism, data type, missing %, and available features. Use the strategy cards below.</p>
+  </div>
+
+  <div class="arrow d7"><div class="a-line-short"></div><div class="a-head"></div></div>
+
+  <!-- ════ STRATEGY CARDS ════ -->
+  <div class="strat-grid d8">
+
+    <!-- DROP -->
+    <div class="strat-card sc-drop">
+      <h3>🗑 Drop Rows / Column <span class="when-badge">MCAR only</span></h3>
+      <p>Remove rows where the value is missing. Only safe when missingness is MCAR and loss is small.</p>
+      <div class="method-grid cols2">
+        <div class="method-item">
+          <h5>Drop Rows</h5>
+          <p>Remove entire row. Safe only if missing ≤ 5% and MCAR is confirmed.</p>
+          <p class="when pros">✓ No artificial data introduced</p>
+          <p class="when cons">✗ Loses information if overused</p>
+        </div>
+        <div class="method-item">
+          <h5>Drop Column</h5>
+          <p>Remove entire column if missing > 40–50% and the feature has low predictive value.</p>
+          <p class="when pros">✓ Eliminates noise</p>
+          <p class="when cons">✗ Irreversible — verify with domain expert first</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- MISSING INDICATOR (sits beside drop) -->
+    <div class="strat-card sc-mnar">
+      <h3>🚩 Missing Indicator Flag <span class="when-badge">MAR ≥10% · All MNAR</span></h3>
+      <p>Add a new binary column (1 = was missing, 0 = was present) <strong>before</strong> imputation. This preserves the information that the value was missing.</p>
+      <div class="method-grid" style="grid-template-columns:1fr;">
+        <div class="method-item">
+          <h5>When to Always Add</h5>
+          <p>• Any MNAR column (mandatory)<br>• MAR columns with missing ≥ 10%<br>• Any column where missingness correlates with target</p>
+          <p class="when pros" style="margin-top:6px;">✓ Lets model learn from the fact of missingness<br>✓ Prevents signal loss when imputing</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATISTICAL IMPUTATION — full width -->
+    <div class="strat-card sc-stat">
+      <h3>📊 Statistical Imputation — Simple Methods <span class="when-badge">MCAR · MAR (low %)</span></h3>
+      <p>Replace missing values using a single summary statistic computed from non-missing rows. Train-set statistics only — <strong>never compute on full dataset before splitting.</strong></p>
+      <div class="method-grid cols4">
+        <div class="method-item">
+          <h5>Mean Imputation</h5>
+          <p>Replace with column mean. Best for symmetric, normally distributed numerical data with no outliers.</p>
+          <p class="when">Use when: MCAR, symmetric dist.</p>
+          <p class="when cons">✗ Reduces variance; sensitive to outliers</p>
+        </div>
+        <div class="method-item">
+          <h5>Median Imputation</h5>
+          <p>Replace with column median. Robust to outliers and skewed distributions. Preferred over mean in most cases.</p>
+          <p class="when">Use when: MCAR/MAR, skewed data</p>
+          <p class="when pros">✓ Outlier-resistant; recommended default</p>
+        </div>
+        <div class="method-item">
+          <h5>Mode Imputation</h5>
+          <p>Replace with most frequent value. Used for categorical or ordinal columns.</p>
+          <p class="when">Use when: Categorical columns, MCAR</p>
+          <p class="when cons">✗ Can over-represent dominant category</p>
+        </div>
+        <div class="method-item">
+          <h5>Arbitrary / Constant</h5>
+          <p>Replace with a fixed value like 0, -1, -999, "Unknown", or "Missing". Must have semantic meaning.</p>
+          <p class="when">Use when: MNAR or when flag is needed</p>
+          <p class="when cons">✗ Can mislead model if value is meaningless</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADVANCED IMPUTATION — full width -->
+    <div class="strat-card sc-adv">
+      <h3>🤖 Advanced Imputation — Model-Based Methods <span class="when-badge">MAR (moderate–high %)</span></h3>
+      <p>Use relationships between features to predict missing values. These methods respect feature interactions but carry risks of data leakage and computational cost. <strong>Never include the target variable as a predictor.</strong></p>
+      <div class="method-grid cols3">
+        <div class="method-item">
+          <h5>KNN Imputation</h5>
+          <p>Find the K most similar rows (by other features) and impute using their values. Captures local structure in data.</p>
+          <p class="when">Use when: Well-scaled features, strong local similarity, moderate missing %</p>
+          <p class="when pros">✓ Preserves local patterns</p>
+          <p class="when cons">✗ Slow on large datasets; sensitive to scale and noise; suffers in high dimensions</p>
+          <p class="when" style="margin-top:5px;"><strong>Key rule:</strong> Always scale features before applying KNN imputer</p>
+        </div>
+        <div class="method-item">
+          <h5>Iterative Imputer<br>(MICE)</h5>
+          <p>Models each column with missing values as a function of all other columns, iterating until convergence. Uses any regression model internally.</p>
+          <p class="when">Use when: Multiple columns are missing, strong inter-feature correlations, MAR confirmed</p>
+          <p class="when pros">✓ Accounts for relationships between all features<br>✓ Most statistically principled approach</p>
+          <p class="when cons">✗ Expensive to compute; risk of instability; requires careful convergence check</p>
+        </div>
+        <div class="method-item">
+          <h5>Group-wise Imputation</h5>
+          <p>Compute mean/median within subgroups defined by a related categorical feature. Respects group-level distributions.</p>
+          <p class="when">Use when: MAR — missingness depends on a known group variable</p>
+          <p class="when pros">✓ Preserves group-level variance<br>✓ Simple and interpretable</p>
+          <p class="when cons">✗ Group sizes must be large enough to compute stable statistics</p>
+          <p class="when" style="margin-top:5px;"><strong>Example:</strong> Impute salary by employment type; impute age by education band</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ════ INDICATOR NOTE ════ -->
+  <div class="arrow d8"><div class="a-line"></div><div class="a-head"></div></div>
+
+  <div class="indicator-box d8">
+    <div class="indicator-icon">🚩</div>
+    <div>
+      <h4>Reminder — Missing Indicator Must Be Created BEFORE Imputation</h4>
+      <p>Once you impute, the information that a value was missing is permanently erased. Always create the binary indicator column first, then impute. For MNAR columns the indicator is <strong>mandatory</strong> — it may become one of your most important features.</p>
+      <div class="indicator-rules">
+        <span class="ind-rule">MNAR → indicator always required</span>
+        <span class="ind-rule">MAR ≥ 10% → indicator strongly recommended</span>
+        <span class="ind-rule">MCAR &lt; 5% → indicator optional</span>
+        <span class="ind-rule">Create flag BEFORE imputing, not after</span>
+        <span class="ind-rule">Fit imputer on train set only</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow d9"><div class="a-line"></div><div class="a-head"></div></div>
+
+  <!-- ════ STEP 5: VALIDATE ════ -->
+  <div class="sec-label d9">
+    <div class="sec-label-line"></div>
+    <div class="sec-label-text">Step 5 — Validate Your Strategy</div>
+    <div class="sec-label-line"></div>
+  </div>
+
+  <div class="node val-node d9">
+    <div class="node-tag">Checks · Run after every imputation decision — not optional</div>
+    <h2>6 Validation Checks Before Accepting Any Strategy</h2>
+    <p>A strategy that looks correct can still distort the data silently. These checks confirm that imputation preserved the data's statistical properties and did not introduce leakage or bias.</p>
+    <div class="val-grid">
+      <div class="val-item">
+        <div class="val-num">1</div>
+        <h5>Distribution Check</h5>
+        <p>Plot histograms before and after imputation. The shape should not change significantly.</p>
+        <div class="val-threshold">Mean shift ≤ 5%<br>Median shift ≤ 3%<br>No new extreme values</div>
+      </div>
+      <div class="val-item">
+        <div class="val-num">2</div>
+        <h5>Variance Check</h5>
+        <p>Imputation artificially reduces variance because all missing values get the same or similar value.</p>
+        <div class="val-threshold">≤ 10% change → Excellent<br>10–20% → Acceptable<br>≥ 30% → Over-smoothing 🚨</div>
+      </div>
+      <div class="val-item">
+        <div class="val-num">3</div>
+        <h5>Correlation Check</h5>
+        <p>Imputation should not change how features relate to each other or to the target.</p>
+        <div class="val-threshold">Δ correlation ≤ 0.05<br>Sign must not flip<br>Check feature–target corr too</div>
+      </div>
+      <div class="val-item">
+        <div class="val-num">4</div>
+        <h5>Data Leakage Check</h5>
+        <p>Imputation statistics (mean, median, KNN neighbours) must be computed on training data only, then applied to test data.</p>
+        <div class="val-threshold">Split BEFORE imputing<br>Never fit on full dataset<br>Use Pipeline in sklearn</div>
+      </div>
+      <div class="val-item">
+        <div class="val-num">5</div>
+        <h5>Model Cross-Validation</h5>
+        <p>Compare model performance with different strategies. Check stability, not just average accuracy.</p>
+        <div class="val-threshold">Performance Δ ≤ ±1–2%<br>Low variance across folds<br>Consistency preferred over peak</div>
+      </div>
+      <div class="val-item">
+        <div class="val-num">6</div>
+        <h5>Missing Indicator Check</h5>
+        <p>If you added a missing indicator, check whether the model assigns it importance. High importance confirms MNAR.</p>
+        <div class="val-threshold">Importance > 0 → missingness is informative<br>High importance → MNAR confirmed<br>Zero importance → consider dropping flag</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow d10"><div class="a-line"></div><div class="a-head"></div></div>
+
+  <!-- ════ PITFALLS ════ -->
+  <div class="sec-label d10">
+    <div class="sec-label-line"></div>
+    <div class="sec-label-text">Common Pitfalls — Avoid These Mistakes</div>
+    <div class="sec-label-line"></div>
+  </div>
+
+  <div class="node pit-node d10">
+    <div class="node-tag">Warnings · Mistakes that invalidate even the best model</div>
+    <h2>⚠ 6 Most Common Pitfalls</h2>
+    <div class="pit-grid">
+      <div class="pit-item">
+        <div class="pit-x">✕</div>
+        <p><strong>Treating all columns identically.</strong> Each column has its own mechanism. One-size-fits-all imputation is wrong by default.</p>
+      </div>
+      <div class="pit-item">
+        <div class="pit-x">✕</div>
+        <p><strong>Imputing before train-test split.</strong> This leaks test-set statistics into training, producing inflated performance metrics.</p>
+      </div>
+      <div class="pit-item">
+        <div class="pit-x">✕</div>
+        <p><strong>Using the target variable to impute.</strong> Including y in your imputation model causes data leakage and overfit.</p>
+      </div>
+      <div class="pit-item">
+        <div class="pit-x">✕</div>
+        <p><strong>Assuming MAR when MNAR is likely.</strong> Overconfident imputation of MNAR values creates false signals and biased predictions.</p>
+      </div>
+      <div class="pit-item">
+        <div class="pit-x">✕</div>
+        <p><strong>Ignoring the missing indicator.</strong> For MNAR, the fact of missingness is the signal. Imputing without a flag destroys it permanently.</p>
+      </div>
+      <div class="pit-item">
+        <div class="pit-x">✕</div>
+        <p><strong>Validating only with accuracy.</strong> Accuracy can stay the same while variance collapses. Always check distribution, variance, and correlation too.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow d11"><div class="a-line"></div><div class="a-head"></div></div>
+
+  <!-- ════ LOOP ════ -->
+  <div class="loop-note d11">
+    <div class="loop-icon">↻</div>
+    <div>
+      <h4>Repeat Steps 2–5 for Every Column Independently</h4>
+      <p>Each column in your dataset is a separate decision. One column may be MCAR (drop rows), another MAR (KNN imputation), another MNAR (indicator + conservative median). Work column by column — never apply one method to all columns at once.</p>
+    </div>
+  </div>
+
+  <div class="arrow d12"><div class="a-line"></div><div class="a-head"></div></div>
+
+  <!-- ════ END ════ -->
+  <div class="terminal end d12" style="width:420px;text-align:center;">
+    ✓ Dataset is Clean, Validated &amp; Model-Ready
+    <div style="font-size:12px;font-weight:400;opacity:0.6;margin-top:5px;">Missing signals preserved · Bias minimised · No leakage · Validated statistically</div>
+  </div>
+
+  <!-- ════ LEGEND ════ -->
+  <div class="legend">
+    <div class="leg-item"><div class="leg-swatch" style="background:var(--mcar-bg);border-color:var(--mcar-bd);"></div>MCAR — Fully random</div>
+    <div class="leg-item"><div class="leg-swatch" style="background:var(--mar-bg);border-color:var(--mar-bd);"></div>MAR — Depends on other features</div>
+    <div class="leg-item"><div class="leg-swatch" style="background:var(--mnar-bg);border-color:var(--mnar-bd);"></div>MNAR — Depends on missing value itself</div>
+    <div class="leg-item"><div class="leg-swatch" style="background:var(--drop-bg);border-color:var(--drop-bd);"></div>Drop strategy</div>
+    <div class="leg-item"><div class="leg-swatch" style="background:var(--stat-bg);border-color:var(--stat-bd);"></div>Statistical imputation</div>
+    <div class="leg-item"><div class="leg-swatch" style="background:var(--adv-bg);border-color:var(--adv-bd);"></div>Advanced imputation</div>
+    <div class="leg-item"><div class="leg-swatch" style="background:var(--val-bg);border-color:var(--val-bd);"></div>Validation</div>
+  </div>
+
+  <div style="margin-top:28px;text-align:center;font-size:12px;color:var(--ink3);font-family:'JetBrains Mono',monospace;letter-spacing:0.06em;font-style:italic;">
+    "Missing values are not gaps to be filled — they are signals to be understood, preserved, and modelled responsibly."
+  </div>
+
+</div>
+</body>
+</html>
