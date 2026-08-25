@@ -19,7 +19,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, event, text
 
 HERE = Path(__file__).parent
 RED = "#e10600"
@@ -225,6 +225,16 @@ def flag_country_html(country: str) -> str:
 def esc(value) -> str:
     """Escape database text before inserting it into a small HTML component."""
     return html.escape(str(value))
+
+
+def fmt_date(value) -> str:
+    """SQLite hands dates back as strings; MySQL as date objects."""
+    if value is None or (isinstance(value, float) and pd.isna(value)):
+        return ""
+    try:
+        return pd.to_datetime(value).strftime("%d %b %Y")
+    except Exception:
+        return str(value)[:10]
 
 
 def display_grid(grid) -> str:
@@ -749,17 +759,71 @@ def panel_open(title, pill=""):
 
 
 # ----------------------------------------------------------------------------
+SQLITE_PATH = HERE / "data" / "f1_analytics.sqlite"
+
+
+def _register_sqlite_functions(dbapi_con, _):
+    """Teach SQLite the handful of MySQL functions the queries rely on."""
+    import math
+    from datetime import date, datetime
+
+    def _concat(*parts):
+        return "".join("" if p is None else str(p) for p in parts)
+
+    def _timestampdiff(unit, start, end):
+        if start is None or end is None:
+            return None
+        def _d(v):
+            if isinstance(v, (date, datetime)):
+                return v
+            return datetime.fromisoformat(str(v)[:10])
+        a, b = _d(start), _d(end)
+        years = b.year - a.year - ((b.month, b.day) < (a.month, a.day))
+        return years if str(unit).upper() == "YEAR" else (b - a).days
+
+    dbapi_con.create_function("CONCAT", -1, _concat)
+    dbapi_con.create_function("TIMESTAMPDIFF", 3, _timestampdiff)
+    dbapi_con.create_function("FLOOR", 1, lambda x: None if x is None else math.floor(x))
+
+
 @st.cache_resource
 def get_engine():
+    """MySQL when it is reachable, otherwise the bundled read-only SQLite build."""
+    url = os.getenv("F1_DB_URL")
+    if url:
+        eng = create_engine(url)
+        if eng.dialect.name == "sqlite":
+            event.listen(eng, "connect", _register_sqlite_functions)
+        return eng
+
     if enabled_env("F1_DEPLOYED"):
-        missing = [key for key in ("F1_DB_USER", "F1_DB_PASSWORD", "F1_DB_HOST", "F1_DB_NAME")
-                   if not os.getenv(key)]
-        if missing:
-            raise RuntimeError("Missing required deployment configuration: " + ", ".join(missing))
-    u = os.getenv("F1_DB_USER", "root"); p = os.getenv("F1_DB_PASSWORD", "root")
-    h = os.getenv("F1_DB_HOST", "127.0.0.1"); port = os.getenv("F1_DB_PORT", "3306")
-    name = os.getenv("F1_DB_NAME", "f1_analytics")
-    return create_engine(f"mysql+pymysql://{u}:{p}@{h}:{port}/{name}?charset=utf8mb4")
+        missing = [k for k in ("F1_DB_USER", "F1_DB_PASSWORD", "F1_DB_HOST", "F1_DB_NAME")
+                   if not os.getenv(k)]
+        if missing and not SQLITE_PATH.exists():
+            raise RuntimeError("Missing deployment configuration: " + ", ".join(missing))
+
+    if not (enabled_env("F1_DEPLOYED") and not os.getenv("F1_DB_HOST")):
+        u = os.getenv("F1_DB_USER", "root"); p = os.getenv("F1_DB_PASSWORD", "root")
+        h = os.getenv("F1_DB_HOST", "127.0.0.1"); port = os.getenv("F1_DB_PORT", "3306")
+        name = os.getenv("F1_DB_NAME", "f1_analytics")
+        try:
+            eng = create_engine(f"mysql+pymysql://{u}:{p}@{h}:{port}/{name}?charset=utf8mb4",
+                                pool_pre_ping=True, connect_args={"connect_timeout": 4})
+            with eng.connect() as c:
+                c.execute(text("SELECT 1"))
+            return eng
+        except Exception:
+            pass
+
+    if not SQLITE_PATH.exists():
+        raise RuntimeError("No MySQL server reachable and no bundled SQLite database found.")
+    eng = create_engine(f"sqlite:///{SQLITE_PATH.as_posix()}")
+    event.listen(eng, "connect", _register_sqlite_functions)
+    return eng
+
+
+def is_sqlite() -> bool:
+    return get_engine().dialect.name == "sqlite"
 
 
 @st.cache_data(ttl=300, show_spinner=False)
@@ -770,6 +834,9 @@ def q(sql: str) -> pd.DataFrame:
 
 def has_features() -> bool:
     try:
+        if is_sqlite():
+            return not q("SELECT name FROM sqlite_master WHERE type='table' "
+                         "AND name='f1_result_features'").empty
         return int(q("""SELECT COUNT(*) n FROM information_schema.tables
             WHERE table_schema=DATABASE() AND table_name='f1_result_features'""").iloc[0, 0]) > 0
     except Exception:
@@ -864,21 +931,29 @@ def page_overview():
         st.markdown(panel_open("Championship leaders"), unsafe_allow_html=True)
         t1, t2, t3 = st.tabs(["Most drivers' titles", "Most constructors' titles", "Most race wins"])
         with t1:
-            dt = q("""SELECT d.driverId, CONCAT(d.forename,' ',d.surname) driver, d.nationality,
-                        COUNT(*) titles, GROUP_CONCAT(x.year ORDER BY x.year) yrs FROM
-                        (SELECT r.year, ds.driverId FROM driver_standings ds JOIN races r ON r.raceId=ds.raceId
-                         WHERE ds.position=1 AND r.round=(SELECT MAX(round) FROM races r2 WHERE r2.year=r.year)) x
-                        JOIN drivers d ON d.driverId=x.driverId
-                        GROUP BY x.driverId ORDER BY titles DESC, driver LIMIT 10""")
+            dt = q("""SELECT driverId, driver, nationality, COUNT(*) titles,
+                        GROUP_CONCAT(year) yrs FROM (
+                        SELECT d.driverId, CONCAT(d.forename,' ',d.surname) driver,
+                               d.nationality, r.year
+                        FROM driver_standings ds JOIN races r ON r.raceId=ds.raceId
+                        JOIN drivers d ON d.driverId=ds.driverId
+                        WHERE ds.position=1
+                          AND r.round=(SELECT MAX(round) FROM races r2 WHERE r2.year=r.year)
+                        ORDER BY r.year) x
+                        GROUP BY driverId, driver, nationality
+                        ORDER BY titles DESC, driver LIMIT 10""")
             cards = "".join(lead_card(r.titles, int(r.driverId), r.driver, str(r.yrs).replace(",", ", "),
                             r.nationality, RED) for r in dt.itertuples())
             st.markdown(f'<div class="lead-scroll">{cards}</div>', unsafe_allow_html=True)
         with t2:
-            ct = q("""SELECT c.name, COUNT(*) titles, GROUP_CONCAT(x.year ORDER BY x.year) yrs FROM
-                        (SELECT r.year, cs.constructorId FROM constructor_standings cs JOIN races r ON r.raceId=cs.raceId
-                         WHERE cs.position=1 AND r.round=(SELECT MAX(round) FROM races r2 WHERE r2.year=r.year)) x
-                        JOIN constructors c ON c.constructorId=x.constructorId
-                        GROUP BY x.constructorId ORDER BY titles DESC LIMIT 10""")
+            ct = q("""SELECT name, COUNT(*) titles, GROUP_CONCAT(year) yrs FROM (
+                        SELECT c.name, r.year
+                        FROM constructor_standings cs JOIN races r ON r.raceId=cs.raceId
+                        JOIN constructors c ON c.constructorId=cs.constructorId
+                        WHERE cs.position=1
+                          AND r.round=(SELECT MAX(round) FROM races r2 WHERE r2.year=r.year)
+                        ORDER BY r.year) x
+                        GROUP BY name ORDER BY titles DESC LIMIT 10""")
             cards = ""
             for r in ct.itertuples():
                 tc = team_color(r.name)
@@ -1123,7 +1198,8 @@ def page_race_explorer():
                 JOIN status s ON s.statusId=re.statusId
                 WHERE re.raceId={rid} ORDER BY re.positionOrder""")
 
-    date_txt = "" if pd.isna(info["date"]) else f'<span class="dot">•</span>{info["date"]:%d %b %Y}'
+    _d = fmt_date(info["date"])
+    date_txt = f'<span class="dot">•</span>{_d}' if _d else ""
     coords = circuit_coords().get(int(info["circuitId"]))
     rows = res.head(3).to_dict("records")
 
@@ -1159,6 +1235,14 @@ def page_race_explorer():
 @st.cache_resource(show_spinner=False)
 def _champ_view():
     """Create the champion view plus helper indexes once per app process."""
+    if is_sqlite():
+        with get_engine().begin() as conn:
+            conn.execute(text("DROP VIEW IF EXISTS v_season_champion"))
+            conn.execute(text("""CREATE VIEW v_season_champion AS
+                SELECT r.year, ds.driverId FROM driver_standings ds JOIN races r ON r.raceId=ds.raceId
+                WHERE ds.position=1
+                  AND r.round=(SELECT MAX(round) FROM races r2 WHERE r2.year=r.year)"""))
+        return True
     with get_engine().begin() as conn:
         conn.execute(text("""CREATE OR REPLACE VIEW v_season_champion AS
             SELECT r.year, ds.driverId FROM driver_standings ds JOIN races r ON r.raceId=ds.raceId
@@ -1295,15 +1379,45 @@ TABLE_ORDER = ["seasons", "circuits", "drivers", "constructors", "status", "race
                "driver_standings", "constructor_standings", "constructor_results"]
 
 
+def _sqlite_schema():
+    """PRAGMA-based schema read for the bundled demo database."""
+    rows, fk_map = [], {}
+    names = q("SELECT name FROM sqlite_master WHERE type='table' "
+              "AND name NOT LIKE 'f1!_%' ESCAPE '!' AND name NOT LIKE 'sqlite!_%' ESCAPE '!' "
+              "ORDER BY name")["name"].tolist()
+    for t in names:
+        for c in q(f'PRAGMA table_info("{t}")').itertuples():
+            rows.append({"tn": t, "cn": c.name, "ct": (c.type or "TEXT").upper(),
+                         "ck": "PRI" if c.pk else ""})
+    # The exported copy carries no declared constraints; use the documented model.
+    pk_of = {"seasons": "year", "circuits": "circuitId", "drivers": "driverId",
+             "constructors": "constructorId", "status": "statusId", "races": "raceId"}
+    present = set(names)
+    for child, parent in ERD_LINKS:
+        if child in present and parent in pk_of:
+            fk_map[(child, pk_of[parent])] = parent
+    # primary keys are not preserved by the export either
+    for t in present:
+        pk = pk_of.get(t)
+        if pk:
+            for r in rows:
+                if r["tn"] == t and r["cn"] == pk:
+                    r["ck"] = "PRI"
+    return pd.DataFrame(rows), fk_map
+
+
 def schema_html() -> str:
-    cols = q("""SELECT TABLE_NAME tn, COLUMN_NAME cn, COLUMN_TYPE ct, COLUMN_KEY ck
-                FROM information_schema.columns WHERE table_schema=DATABASE()
-                  AND TABLE_NAME NOT LIKE 'f1\\_%' AND TABLE_NAME NOT LIKE 'v\\_%'
-                ORDER BY TABLE_NAME, ORDINAL_POSITION""")
-    fks = q("""SELECT TABLE_NAME tn, COLUMN_NAME cn, REFERENCED_TABLE_NAME rt
-               FROM information_schema.KEY_COLUMN_USAGE
-               WHERE table_schema=DATABASE() AND REFERENCED_TABLE_NAME IS NOT NULL""")
-    fk_map = {(r.tn, r.cn): r.rt for r in fks.itertuples()}
+    if is_sqlite():
+        cols, fk_map = _sqlite_schema()
+    else:
+        cols = q("""SELECT TABLE_NAME tn, COLUMN_NAME cn, COLUMN_TYPE ct, COLUMN_KEY ck
+                    FROM information_schema.columns WHERE table_schema=DATABASE()
+                      AND TABLE_NAME NOT LIKE 'f1\\_%' AND TABLE_NAME NOT LIKE 'v\\_%'
+                    ORDER BY TABLE_NAME, ORDINAL_POSITION""")
+        fks = q("""SELECT TABLE_NAME tn, COLUMN_NAME cn, REFERENCED_TABLE_NAME rt
+                   FROM information_schema.KEY_COLUMN_USAGE
+                   WHERE table_schema=DATABASE() AND REFERENCED_TABLE_NAME IS NOT NULL""")
+        fk_map = {(r.tn, r.cn): r.rt for r in fks.itertuples()}
     order = {t: i for i, t in enumerate(TABLE_ORDER)}
     tables = sorted(cols["tn"].unique(), key=lambda t: order.get(t, 99))
     cards = ""
@@ -1433,6 +1547,10 @@ def page_runner():
             st.error(str(e))
 
     section_header("Database schema", "14 tables · 23 foreign keys — ◆ many side, ● one side.")
+    if is_sqlite():
+        st.caption("Running on the bundled read-only SQLite build. It mirrors the MySQL schema "
+                   "except for `lap_times` (589k rows), which is omitted to keep the deployment "
+                   "light; the full MySQL build created by `01_schema.sql` includes it.")
     st.markdown(schema_erd_svg(), unsafe_allow_html=True)
     st.markdown('<div style="height:14px"></div>', unsafe_allow_html=True)
     st.markdown(panel_open("Table detail", "All columns"), unsafe_allow_html=True)
@@ -1462,4 +1580,4 @@ if side_circuit is not None:
             <div class="st-meta">{int(side_circuit['wins'])} RACE WINS</div>
             {circuit_map_svg(side_coords, w=182, h=104, pad=11)}</div>''', unsafe_allow_html=True)
 st.sidebar.markdown("<span style='color:#e10600'>●</span> <span style='font-family:Barlow Condensed;font-weight:700;letter-spacing:.08em;color:#d7d7dd'>RACE CONTROL ONLINE</span>", unsafe_allow_html=True)
-st.sidebar.caption("DATASET 1950–2024 · MYSQL 8.0 · STREAMLIT")
+st.sidebar.caption(f"DATASET 1950–2024 · {'SQLITE (DEMO)' if is_sqlite() else 'MYSQL 8.0'} · STREAMLIT")
