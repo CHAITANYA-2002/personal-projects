@@ -1,0 +1,7 @@
+# Extra dependencies for the two Jupyter notebooks in imarticus projects/sql/notebook/.
+# Install alongside requirements.txt:
+#   pip install -r requirements.txt -r requirements-notebooks.txt
+jupyter>=1.0
+matplotlib>=3.7
+seaborn>=0.13
+sqlparse>=0.4

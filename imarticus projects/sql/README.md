@@ -6,7 +6,7 @@
 
 [![Streamlit](https://img.shields.io/badge/Live%20demo-Streamlit-e10600?style=for-the-badge&logo=streamlit&logoColor=white)](#-live-demo)
 [![MySQL](https://img.shields.io/badge/MySQL-8.0-00618A?style=for-the-badge&logo=mysql&logoColor=white)](#-running-it-locally)
-[![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](requirements.txt)
+[![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](../../requirements.txt)
 [![Notebooks](https://img.shields.io/badge/Jupyter-EDA-F37626?style=for-the-badge&logo=jupyter&logoColor=white)](notebook/)
 
 ![Overview](docs/app/01-overview.jpg)
@@ -158,8 +158,12 @@ SOURCE run_all.sql;     -- schema → load → profiling
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
+# dependency files live at the repository root
+pip install -r ..\..equirements.txt -r ..\..equirements-notebooks.txt
 ```
+
+> The dashboard itself only needs `requirements.txt`; `requirements-notebooks.txt`
+> adds Jupyter, matplotlib and seaborn for the two notebooks.
 
 ### 3. Point at your database (optional)
 
@@ -193,6 +197,10 @@ The app is deployment-ready: the bundled SQLite build means **no database server
 3. **Create app** → pick the repository and branch.
 4. Set **Main file path** to `imarticus projects/sql/app.py`.
 5. Deploy. The app detects that no MySQL is reachable and serves the bundled SQLite database.
+
+> Dependencies are read from `requirements.txt` **at the repository root**, not from this
+> folder: Streamlit Cloud does not quote the requirements path, so the space in the
+> "imarticus projects" directory name breaks the install if the file sits beside the app.
 
 To point a deployment at a real MySQL server instead, add a `F1_DB_URL` secret in the Streamlit app settings:
 
