@@ -2,9 +2,18 @@
 
 # Data Analytics Portfolio
 
-**Chaitanya Khandelwal** · SQL · Python · MySQL · Streamlit
+**Chaitanya Khandelwal** · SQL · Python · MySQL · Excel · Streamlit
 
 </div>
+
+---
+
+## Projects
+
+| Project | Stack | Highlights | Links |
+|---|---|---|---|
+| **🏎️ Formula 1 — What Makes a Champion?** | MySQL · Python · Streamlit · Jupyter | 14-table database, tiered SQL curriculum through recursive CTEs, 2 EDA notebooks, 6-page dashboard | **[Live app](https://f1-what-makes-a-champion.streamlit.app/)** · [README](imarticus%20projects/sql/README.md) |
+| **📊 Indian Startup Funding Tracker** | Microsoft Excel | PivotTables, PivotCharts, slicers and KPI cards over a 700-deal dataset | [README](imarticus%20projects/excel/README.md) · [Workbook](imarticus%20projects/excel/Startup_Funding_Dashboard.xlsx) |
 
 ---
 
@@ -49,11 +58,40 @@ A SQL case study across **75 seasons of Formula 1 (1950–2024)**: a 14-table My
 
 ---
 
-## 📊 Startup Funding — Excel Dashboard
+## 📊 Indian Startup Funding Tracker — Excel Dashboard
 
-An interactive Excel dashboard analysing startup funding data with pivot tables, slicers and summary reporting.
+An interactive **Microsoft Excel** dashboard analysing India's startup-funding landscape from **2019–2024**, built entirely with native **PivotTables, PivotCharts and Slicers** — no add-ins, no macros. One click on any slicer re-filters every chart and KPI at once.
 
-📁 [`imarticus projects/excel/`](imarticus%20projects/excel/)
+### **[Project README](imarticus%20projects/excel/README.md)** · **[Download the workbook](imarticus%20projects/excel/Startup_Funding_Dashboard.xlsx)**
+
+[![Excel](https://img.shields.io/badge/Microsoft%20Excel-Dashboard-217346?style=for-the-badge&logo=microsoftexcel&logoColor=white)](imarticus%20projects/excel/README.md)
+[![PivotTables](https://img.shields.io/badge/PivotTables%20%26%20Slicers-native-1D6F42?style=for-the-badge)](imarticus%20projects/excel/README.md)
+
+![Startup funding dashboard](imarticus%20projects/excel/screenshots/1-dashboard.png)
+
+| Metric | Value |
+|---|---:|
+| Total funding | **$31,623 M** (≈ $31.6 B) |
+| Total deals | **700** |
+| Average deal size | **$45.2 M** |
+| Largest single deal | **$494.1 M** |
+
+**What the analysis found:** late-stage rounds (Series C & D+) account for **~79%** of all capital while Seed is only ~2% by value; Bengaluru and Delhi NCR together attract roughly **half** of all funding; Fintech and SaaS lead on deal *volume* even where individual rounds are smaller.
+
+<table>
+<tr>
+<td width="50%"><img src="imarticus%20projects/excel/screenshots/2-pivot-tables.png" alt="Pivot tables"></td>
+<td width="50%"><img src="imarticus%20projects/excel/screenshots/3-raw-data.png" alt="Raw data"></td>
+</tr>
+<tr>
+<td align="center"><b>The pivot engine</b> behind the dashboard</td>
+<td align="center"><b>The 700-row source dataset</b></td>
+</tr>
+</table>
+
+**What it demonstrates:** data modelling in Excel · PivotTable/PivotChart design · KPI cards · slicer-driven interactivity · dashboard layout · written insight reporting.
+
+📁 [`imarticus projects/excel/`](imarticus%20projects/excel/) — workbook, screenshots and full write-up.
 
 ---
 
