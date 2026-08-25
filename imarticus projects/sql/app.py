@@ -545,7 +545,7 @@ def plot(fig, h=380):
                       margin=dict(l=10, r=55, t=20, b=10),
                       font=dict(family="Rajdhani, sans-serif", size=14))
     fig.update_xaxes(gridcolor=LINE); fig.update_yaxes(gridcolor=LINE)
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
 
 
 import json as _json
@@ -925,7 +925,7 @@ def page_overview():
         fig.update_layout(margin=dict(l=0, r=0, t=6, b=0), height=330,
                           paper_bgcolor="rgba(0,0,0,0)", coloraxis_showscale=True,
                           coloraxis_colorbar=dict(title="", thickness=8, len=.6))
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
         st.markdown("</div>", unsafe_allow_html=True)
     with mright:
         st.markdown(panel_open("Championship leaders"), unsafe_allow_html=True)
@@ -1542,7 +1542,7 @@ def page_runner():
     st.code(sql, language="sql")
     if st.button("▶  Run sample", type="primary"):
         try:
-            st.dataframe(q(sql), use_container_width=True, height=400, hide_index=True)
+            st.dataframe(q(sql), width='stretch', height=400, hide_index=True)
         except Exception as e:
             st.error(str(e))
 

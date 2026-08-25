@@ -4,7 +4,7 @@
 
 **A SQL case study across 75 seasons of Formula 1 (1950–2024), delivered as a MySQL database, two analysis notebooks, and an interactive dashboard.**
 
-[![Streamlit](https://img.shields.io/badge/Live%20demo-Streamlit-e10600?style=for-the-badge&logo=streamlit&logoColor=white)](#-live-demo)
+[![Streamlit](https://img.shields.io/badge/Live%20demo-f1--what--makes--a--champion-e10600?style=for-the-badge&logo=streamlit&logoColor=white)](https://f1-what-makes-a-champion.streamlit.app/)
 [![MySQL](https://img.shields.io/badge/MySQL-8.0-00618A?style=for-the-badge&logo=mysql&logoColor=white)](#-running-it-locally)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](../../requirements.txt)
 [![Notebooks](https://img.shields.io/badge/Jupyter-EDA-F37626?style=for-the-badge&logo=jupyter&logoColor=white)](notebook/)
@@ -39,9 +39,17 @@ Full write-up: [`docs/findings_report.md`](docs/findings_report.md).
 
 ## 🚀 Live demo
 
-**▶ [Open the live dashboard](https://share.streamlit.io)** *(link added once deployed — see [Deploying](#-deploying-your-own-copy))*
+### **▶ [f1-what-makes-a-champion.streamlit.app](https://f1-what-makes-a-champion.streamlit.app/)**
 
-The deployed app runs on a bundled read-only **SQLite** build of the same database, so it needs no server. Locally it connects to **MySQL** automatically when one is reachable.
+The deployed app runs on a bundled read-only **SQLite** build of the same database, so it needs no
+server and no credentials. Run it locally and it connects to **MySQL** automatically instead,
+whenever a server is reachable.
+
+| | |
+|---|---|
+| **Live app** | [f1-what-makes-a-champion.streamlit.app](https://f1-what-makes-a-champion.streamlit.app/) |
+| **Engine in the cloud** | SQLite (`data/f1_analytics.sqlite`, 6.7 MB) |
+| **Engine locally** | MySQL 8.0, or SQLite if no server answers |
 
 ---
 
@@ -159,7 +167,9 @@ SOURCE run_all.sql;     -- schema → load → profiling
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 # dependency files live at the repository root
-pip install -r ..\..equirements.txt -r ..\..equirements-notebooks.txt
+pip install -r ..\..
+equirements.txt -r ..\..
+equirements-notebooks.txt
 ```
 
 > The dashboard itself only needs `requirements.txt`; `requirements-notebooks.txt`
@@ -208,7 +218,7 @@ To point a deployment at a real MySQL server instead, add a `F1_DB_URL` secret i
 F1_DB_URL = "mysql+pymysql://user:password@host:3306/f1_analytics?charset=utf8mb4"
 ```
 
-Once deployed, replace the placeholder in the [Live demo](#-live-demo) section with your app URL.
+This repository is already deployed at **[f1-what-makes-a-champion.streamlit.app](https://f1-what-makes-a-champion.streamlit.app/)**.
 
 ---
 
