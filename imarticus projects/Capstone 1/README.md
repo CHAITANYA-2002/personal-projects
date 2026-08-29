@@ -27,6 +27,9 @@ split. It beat random forest (0.366) and XGBoost (0.334) on the test split —
 both trees overfit hard at this sample size, which the train/test gap makes
 plain.
 
+Intended use, out-of-scope use, failure modes and biases are in
+[`docs/model-card.md`](docs/model-card.md). Read it before quoting a score.
+
 **1.5× lift over base rate.** That is a real but modest signal, and the honest
 reading is that the ceiling here is *predictor resolution*, not model choice —
 see [Limitations](#limitations). The bracketed interval is a bootstrap 95% CI
