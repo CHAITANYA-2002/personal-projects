@@ -1,0 +1,856 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="End-to-end build and deploy plan for SIH 2026 PS 26192.">
+<title>Slopewatch Build Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+/* ---------- tokens: light (default, un-stamped) ---------- */
+:root{
+  --ground:#EDEFEC;
+  --surface:#F6F7F4;
+  --surface-2:#E4E7E2;
+  --rule:#CDD3CC;
+  --rule-soft:#DDE2DB;
+  --ink:#16211F;
+  --ink-2:#3D4B47;
+  --ink-3:#66756F;
+  --accent:#0F6E5C;
+  --accent-soft:#DCEAE5;
+  --sql:#9A6414;
+  --sql-soft:#F0E6D4;
+  --py:#0F6E5C;
+  --py-soft:#DCEAE5;
+  --bi:#37538A;
+  --bi-soft:#DFE5F1;
+  --crit:#9C332B;
+  --crit-soft:#F2DFDC;
+  --shadow:0 1px 2px rgba(22,33,31,.05), 0 4px 14px rgba(22,33,31,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0E1412;
+    --surface:#161E1B;
+    --surface-2:#1F2926;
+    --rule:#2C3833;
+    --rule-soft:#232E2A;
+    --ink:#DEE6E2;
+    --ink-2:#AEBAB5;
+    --ink-3:#7D8B85;
+    --accent:#48B79B;
+    --accent-soft:#16302A;
+    --sql:#D5A155;
+    --sql-soft:#2E2517;
+    --py:#48B79B;
+    --py-soft:#16302A;
+    --bi:#8AA4DA;
+    --bi-soft:#1B2436;
+    --crit:#D9756A;
+    --crit-soft:#33201D;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 4px 14px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0E1412;
+  --surface:#161E1B;
+  --surface-2:#1F2926;
+  --rule:#2C3833;
+  --rule-soft:#232E2A;
+  --ink:#DEE6E2;
+  --ink-2:#AEBAB5;
+  --ink-3:#7D8B85;
+  --accent:#48B79B;
+  --accent-soft:#16302A;
+  --sql:#D5A155;
+  --sql-soft:#2E2517;
+  --py:#48B79B;
+  --py-soft:#16302A;
+  --bi:#8AA4DA;
+  --bi-soft:#1B2436;
+  --crit:#D9756A;
+  --crit-soft:#33201D;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 4px 14px rgba(0,0,0,.25);
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--ground);
+  color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:16px;
+  line-height:1.62;
+  margin:0;
+  padding:0 20px 96px;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:840px;margin:0 auto}
+
+/* ---------- type ---------- */
+h1,h2,h3,h4{font-family:Newsreader,Georgia,"Times New Roman",serif;font-weight:500;text-wrap:balance;margin:0}
+h1{font-size:clamp(2.1rem,5.4vw,3.1rem);line-height:1.08;letter-spacing:-.015em}
+h2{font-size:clamp(1.5rem,3.4vw,2rem);line-height:1.16;letter-spacing:-.01em}
+h3{font-size:1.18rem;line-height:1.3;font-weight:600}
+h4{font-size:1rem;line-height:1.35;font-weight:600;font-family:"IBM Plex Sans",sans-serif}
+p{margin:0}
+a{color:var(--accent);text-underline-offset:2px}
+a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:3px}
+code,kbd{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.88em}
+:not(pre)>code{background:var(--surface-2);padding:.1em .36em;border-radius:3px;color:var(--ink-2)}
+
+.eyebrow{
+  font-family:"IBM Plex Mono",monospace;
+  font-size:.72rem;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:500;
+}
+.lede{font-size:1.16rem;line-height:1.55;color:var(--ink-2)}
+.note{font-size:.9rem;color:var(--ink-3);line-height:1.55}
+
+/* ---------- layout primitives ---------- */
+.stack{display:flex;flex-direction:column}
+.g8{gap:8px}.g12{gap:12px}.g16{gap:16px}.g20{gap:20px}.g28{gap:28px}.g40{gap:40px}
+section{display:flex;flex-direction:column;gap:22px;padding-top:56px}
+.sec-head{display:flex;flex-direction:column;gap:9px;border-top:2px solid var(--ink);padding-top:14px}
+.prose{display:flex;flex-direction:column;gap:14px;max-width:66ch}
+
+/* ---------- header ---------- */
+header.masthead{padding:64px 0 8px;display:flex;flex-direction:column;gap:22px}
+.meta-row{
+  display:flex;flex-wrap:wrap;gap:0;
+  border:1px solid var(--rule);border-radius:7px;overflow:hidden;background:var(--surface);
+}
+.meta-cell{flex:1 1 150px;padding:12px 16px;border-right:1px solid var(--rule);display:flex;flex-direction:column;gap:3px}
+.meta-cell:last-child{border-right:0}
+.meta-cell .k{font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3)}
+.meta-cell .v{font-size:.94rem;font-weight:500;color:var(--ink)}
+
+/* ---------- pillar chips ---------- */
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{
+  font-family:"IBM Plex Mono",monospace;font-size:.68rem;font-weight:500;
+  letter-spacing:.06em;text-transform:uppercase;
+  padding:3px 8px;border-radius:4px;border:1px solid transparent;white-space:nowrap;
+}
+.chip.sql{color:var(--sql);background:var(--sql-soft);border-color:var(--sql)}
+.chip.py{color:var(--py);background:var(--py-soft);border-color:var(--py)}
+.chip.bi{color:var(--bi);background:var(--bi-soft);border-color:var(--bi)}
+.chip.plain{color:var(--ink-3);background:var(--surface-2);border-color:var(--rule)}
+
+/* ---------- pipeline diagram ---------- */
+.flow{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(124px,1fr));gap:10px;
+  padding:22px;background:var(--surface);border:1px solid var(--rule);border-radius:9px;
+}
+.flow-node{
+  display:flex;flex-direction:column;gap:5px;padding:12px 13px;
+  background:var(--ground);border:1px solid var(--rule-soft);border-radius:6px;
+  border-left:3px solid var(--accent);
+}
+.flow-node .n{font-family:"IBM Plex Mono",monospace;font-size:.64rem;letter-spacing:.1em;color:var(--ink-3)}
+.flow-node .t{font-size:.9rem;font-weight:600;line-height:1.25}
+.flow-node .d{font-size:.78rem;color:var(--ink-3);line-height:1.4}
+.flow-node.sql{border-left-color:var(--sql)}
+.flow-node.bi{border-left-color:var(--bi)}
+
+/* ---------- phase cards ---------- */
+.phase{
+  display:grid;grid-template-columns:52px 1fr;gap:0;
+  background:var(--surface);border:1px solid var(--rule);border-radius:9px;overflow:hidden;
+  box-shadow:var(--shadow);
+}
+.phase-num{
+  display:flex;align-items:flex-start;justify-content:center;padding:18px 0;
+  background:var(--surface-2);border-right:1px solid var(--rule);
+  font-family:"IBM Plex Mono",monospace;font-size:.82rem;font-weight:600;color:var(--ink-2);
+  font-variant-numeric:tabular-nums;
+}
+.phase-body{padding:18px 20px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.phase-top{display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;justify-content:space-between}
+.phase-top h3{flex:1 1 240px}
+.dur{font-family:"IBM Plex Mono",monospace;font-size:.74rem;color:var(--ink-3);white-space:nowrap}
+.phase-body p{font-size:.95rem;color:var(--ink-2)}
+.deliv{
+  display:flex;gap:9px;align-items:baseline;padding-top:11px;border-top:1px dashed var(--rule);
+  font-size:.87rem;color:var(--ink-2);
+}
+.deliv .lbl{
+  font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);flex:0 0 auto;padding-top:2px;
+}
+
+/* ---------- lists ---------- */
+ul.tick{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:7px}
+ul.tick li{position:relative;padding-left:19px;font-size:.94rem;color:var(--ink-2);line-height:1.5}
+ul.tick li::before{
+  content:"";position:absolute;left:0;top:.6em;width:7px;height:2px;background:var(--accent);
+}
+ol.num{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:7px}
+ol.num li{font-size:.94rem;color:var(--ink-2);line-height:1.5;padding-left:.2em}
+ol.num li::marker{font-family:"IBM Plex Mono",monospace;font-size:.82rem;color:var(--ink-3)}
+
+/* ---------- tables ---------- */
+.tw{overflow-x:auto;border:1px solid var(--rule);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.88rem;min-width:520px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--rule-soft);vertical-align:top}
+thead th{
+  font-family:"IBM Plex Mono",monospace;font-size:.67rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:500;background:var(--surface-2);border-bottom:1px solid var(--rule);
+  white-space:nowrap;
+}
+tbody tr:last-child td{border-bottom:0}
+td.num{font-variant-numeric:tabular-nums;font-family:"IBM Plex Mono",monospace;white-space:nowrap}
+td strong{color:var(--ink);font-weight:600}
+.stat{font-family:"IBM Plex Mono",monospace;font-size:.7rem;font-weight:600;letter-spacing:.05em;white-space:nowrap}
+.stat.ok{color:var(--accent)}
+.stat.no{color:var(--crit)}
+.stat.mid{color:var(--sql)}
+
+/* ---------- code ---------- */
+pre{
+  margin:0;padding:16px 18px;background:var(--surface);border:1px solid var(--rule);
+  border-radius:8px;overflow-x:auto;font-size:.815rem;line-height:1.65;color:var(--ink-2);
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+}
+pre .c{color:var(--ink-3);font-style:italic}
+pre .k{color:var(--accent);font-weight:500}
+
+/* ---------- callout ---------- */
+.call{
+  display:flex;flex-direction:column;gap:10px;padding:18px 20px;border-radius:8px;
+  background:var(--surface);border:1px solid var(--rule);border-left:3px solid var(--crit);
+}
+.call.acc{border-left-color:var(--accent)}
+.call .hd{
+  font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--crit);font-weight:600;
+}
+.call.acc .hd{color:var(--accent)}
+.call p{font-size:.94rem;color:var(--ink-2)}
+
+/* ---------- BI page cards ---------- */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(238px,1fr));gap:12px}
+.card{
+  display:flex;flex-direction:column;gap:9px;padding:16px 17px;
+  background:var(--surface);border:1px solid var(--rule);border-radius:8px;
+}
+.card .pg{font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.1em;color:var(--bi);text-transform:uppercase;font-weight:600}
+.card h4{color:var(--ink)}
+.card ul.tick li{font-size:.86rem}
+.card ul.tick li::before{background:var(--bi)}
+
+/* ---------- footer ---------- */
+footer{margin-top:64px;padding-top:22px;border-top:1px solid var(--rule);display:flex;flex-direction:column;gap:8px}
+
+@media (max-width:560px){
+  body{padding:0 15px 72px}
+  .phase{grid-template-columns:1fr}
+  .phase-num{justify-content:flex-start;padding:9px 16px;border-right:0;border-bottom:1px solid var(--rule)}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<header class="masthead">
+  <div class="stack g12">
+    <div class="eyebrow">SIH 2026 · Problem Statement 26192 · Ministry of Home Affairs</div>
+    <h1>Slopewatch</h1>
+    <p class="lede">A landslide and flash-flood early warning engine for India's hill states — built from public data that has already been verified as reachable, wired through SQL, Python and Power BI, and deployed on free-tier infrastructure.</p>
+  </div>
+
+  <div class="meta-row">
+    <div class="meta-cell"><span class="k">Target</span><span class="v">Himalayan arc + NER</span></div>
+    <div class="meta-cell"><span class="k">Labelled events</span><span class="v">1,719 landslides</span></div>
+    <div class="meta-cell"><span class="k">Record window</span><span class="v">2007 – 2016</span></div>
+    <div class="meta-cell"><span class="k">Grid</span><span class="v">0.1° ≈ 11 km</span></div>
+  </div>
+</header>
+
+<section>
+  <div class="sec-head">
+    <div class="eyebrow">The thesis</div>
+    <h2>What we are actually building</h2>
+  </div>
+
+  <div class="prose">
+    <p>Every part of this project answers one question: <strong>given what the sky and the soil have been doing for the last 60 days, which 11-kilometre cell in the Indian hills is most likely to fail in the next three days — and who lives downhill of it?</strong></p>
+    <p>That second clause is the whole differentiator. A model that outputs a probability is a science-fair project. A system that converts that probability into <em>"these four villages, two bridges and this 9 km stretch of NH-37 need an inspection team today"</em> is a decision-support product, and that is what MHA's problem statement is asking for.</p>
+    <p>The pipeline below is the spine. Each stage exists because the next one needs it — nothing is bolted on to satisfy a syllabus.</p>
+  </div>
+
+  <div class="flow">
+    <div class="flow-node"><span class="n">01</span><span class="t">Acquire</span><span class="d">Landslide labels, weather, terrain, rivers, infrastructure</span></div>
+    <div class="flow-node"><span class="n">02</span><span class="t">Grid &amp; label</span><span class="d">Snap events to cells; design the negatives</span></div>
+    <div class="flow-node"><span class="n">03</span><span class="t">Engineer</span><span class="d">Antecedent rainfall, slope, wetness, exposure</span></div>
+    <div class="flow-node sql"><span class="n">04</span><span class="t">Warehouse</span><span class="d">Star schema in Postgres, marts for reporting</span></div>
+    <div class="flow-node"><span class="n">05</span><span class="t">Model</span><span class="d">Calibrated gradient boosting, blocked validation</span></div>
+    <div class="flow-node"><span class="n">06</span><span class="t">Score</span><span class="d">Daily forecast job writes risk + drivers</span></div>
+    <div class="flow-node bi"><span class="n">07</span><span class="t">Decide</span><span class="d">Power BI command centre, Streamlit field app</span></div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <div class="eyebrow">Foundation</div>
+    <h2>The data, and what is actually reachable</h2>
+  </div>
+
+  <div class="prose">
+    <p>Every row below was tested live, not taken from documentation. This matters more than it sounds — two of the sources that get recommended for this kind of project in every blog post turn out to be unusable, and one source nobody mentions quietly solves three problems at once.</p>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead>
+        <tr><th>Source</th><th>Gives us</th><th>Access</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>NASA Global Landslide Catalog</strong></td>
+          <td>Ground-truth events: lat, lon, date, trigger, size, fatalities</td>
+          <td class="num">CSV, no auth</td>
+          <td><span class="stat ok">DOWNLOADED</span></td>
+        </tr>
+        <tr>
+          <td><strong>Open-Meteo ERA5-Land archive</strong></td>
+          <td>Daily rainfall, temperature, soil moisture at 4 depths, evapotranspiration, wind</td>
+          <td class="num">REST, no key</td>
+          <td><span class="stat ok">VERIFIED</span></td>
+        </tr>
+        <tr>
+          <td><strong>Open-Meteo Flood (GloFAS)</strong></td>
+          <td>River discharge m³/s — historical <em>and</em> 30-day forecast</td>
+          <td class="num">REST, no key</td>
+          <td><span class="stat ok">VERIFIED</span></td>
+        </tr>
+        <tr>
+          <td><strong>Copernicus DEM GLO-30</strong></td>
+          <td>Elevation → slope, aspect, curvature, ruggedness, wetness index</td>
+          <td class="num">S3 COG, no auth</td>
+          <td><span class="stat ok">VERIFIED</span></td>
+        </tr>
+        <tr>
+          <td><strong>Geofabrik OSM extracts</strong></td>
+          <td>Roads, bridges, settlements, schools, hospitals, waterways, land use</td>
+          <td class="num">Shapefile ZIP</td>
+          <td><span class="stat ok">VERIFIED</span></td>
+        </tr>
+        <tr>
+          <td><strong>Copernicus CDS (ERA5-Land)</strong></td>
+          <td>Same weather variables, bulk gridded NetCDF — the escape hatch for a full panel</td>
+          <td class="num">Free account + <code>cdsapi</code></td>
+          <td><span class="stat mid">FALLBACK</span></td>
+        </tr>
+        <tr>
+          <td><strong>IMD API</strong></td>
+          <td>Official Indian forecasts, district warnings, station observations</td>
+          <td class="num">Key required</td>
+          <td><span class="stat mid">REGISTER</span></td>
+        </tr>
+        <tr>
+          <td><strong>ISRO Bhuvan Landslide Atlas</strong></td>
+          <td>~80,000 mapped landslides — but locked inside a web viewer</td>
+          <td class="num">No bulk endpoint</td>
+          <td><span class="stat no">VIEWER ONLY</span></td>
+        </tr>
+        <tr>
+          <td><strong>NASA COOLR REST services</strong></td>
+          <td>Live landslide feature service</td>
+          <td class="num">HTTP 503</td>
+          <td><span class="stat no">DEAD</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="call acc">
+    <span class="hd">The quiet win</span>
+    <p>Open-Meteo returns rainfall <em>and</em> four-depth soil moisture from a single unauthenticated call, and its sister flood endpoint returns GloFAS river discharge the same way. That one host replaces the three hardest integrations in the problem statement — NASA GPM for precipitation, NASA SMAP for soil moisture, and a hydrological model for flash-flood signal — with zero credentials and no gigabytes on disk. A ten-year daily series for one location returned 3,653 days in 0.9 seconds.</p>
+  </div>
+
+  <div class="call">
+    <span class="hd">The correction worth making loudly</span>
+    <p>ISRO's Landslide Atlas is the dataset every write-up recommends for this problem, and its 80,000-event inventory is real. It is also not downloadable — it lives behind a Bhuvan WebGIS viewer with no bulk or WFS endpoint. Build training labels on it and the project stalls in week one. Use it as a WMS overlay for visual credibility and cite it; take the labels from NASA's catalogue.</p>
+  </div>
+
+  <h3>What the labels actually look like</h3>
+  <div class="prose">
+    <p>The catalogue holds 11,033 global events. 2,037 fall inside the study bounding box, and 1,719 survive the date and country filters. The box spans the whole Himalayan orogen rather than India alone — a deliberate choice, since Nepal and northern Pakistan share the same geology and monsoon regime, and training on the full arc nearly doubles the sample. Evaluation is still reported on India.</p>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Region</th><th>Events</th><th>Note</th></tr></thead>
+      <tbody>
+        <tr><td>Kashmir</td><td class="num">204</td><td>Largest single Indian block</td></tr>
+        <tr><td>Uttarakhand</td><td class="num">189</td><td>Includes 2013 Kedarnath cluster</td></tr>
+        <tr><td>Himachal Pradesh</td><td class="num">153</td><td>Dense road-corridor reporting</td></tr>
+        <tr><td>North Eastern Region</td><td class="num">351</td><td>Assam 82, Nagaland 78, Manipur 56, Arunachal 45, Sikkim 31, Meghalaya 29, Mizoram 27, Tripura 3</td></tr>
+        <tr><td>Bengal (Darjeeling hills)</td><td class="num">74</td><td>Split across two spellings upstream</td></tr>
+        <tr><td><strong>India — evaluation set</strong></td><td class="num"><strong>1,017</strong></td><td>2007–2016</td></tr>
+        <tr><td>Nepal</td><td class="num">481</td><td>Same orogen, same monsoon</td></tr>
+        <tr><td>Pakistan · Bangladesh · Myanmar · Bhutan · China</td><td class="num">221</td><td>118 · 42 · 23 · 20 · 18</td></tr>
+        <tr><td><strong>Full arc — training set</strong></td><td class="num"><strong>1,719</strong></td><td>973 distinct cells, 303 of them with more than one event</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="call">
+    <span class="hd">A trap worth naming</span>
+    <p>The catalogue stores state names with inconsistent diacritics — <code>Nagaland</code> and <code>Nāgāland</code> are separate values, as are <code>Arunāchal Pradesh</code> and <code>Meghālaya</code>. Grouping on the raw column undercounts Nagaland by 82% and silently drops Darjeeling's events under a second spelling of Bengal. Every count here folds diacritics first, and the study area is selected by bounding box rather than by name — a coordinate cannot be misspelled.</p>
+  </div>
+
+  <div class="prose">
+    <p>Two properties of these labels shape every downstream decision. First, <strong>89% are rainfall-triggered</strong> — 1,518 of 1,719 events are tagged downpour, rain, continuous rain, monsoon or cyclone, against 24 for mining and 22 for earthquake. A rainfall-and-moisture model is not a simplification here; it is the correct physical hypothesis, and the seismic and anthropogenic minority is a documented exclusion rather than a blind spot.</p>
+    <p>Second, <strong>location accuracy is coarse</strong>. The median recorded error is 10 km, only 14 events in the whole set are marked exact, and 249 are accurate to no better than 50 km. This is the single hardest fact to design around, and it is why the grid is 0.1° and not finer. Modelling at 100 m resolution against a label that could be 25 km off produces a confident, meaningless map.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <div class="eyebrow">Critical path</div>
+    <h2>The decision that determines whether this works</h2>
+  </div>
+
+  <div class="prose">
+    <p>Not the model choice. Not the dashboard. <strong>How the negatives are constructed.</strong></p>
+    <p>There are 1,719 positive events. Everything else in ten years across the study grid is, nominally, a negative — 40,800 cells against 3,653 days is close to 150 million cell-days, and even after the slope mask the negative pool runs to tens of millions. Sample those naively and the model reaches 99.99% accuracy by predicting "no landslide" forever, and the project is dead on arrival regardless of how good the Power BI looks.</p>
+    <p>Worse, a randomly drawn negative is usually a dry January day in a flat valley. A model trained against those learns to separate <em>monsoon from winter</em> and <em>mountain from plain</em> — both trivially true, neither useful. It will fire on every hill in India every July.</p>
+    <p>So the negatives are engineered in three deliberate strata:</p>
+  </div>
+
+  <ol class="num">
+    <li><strong>Temporal controls — same cell, different date.</strong> For each event cell, draw non-event days matched on season. This forces the model to explain why <em>this</em> monsoon day failed when 900 other monsoon days in the same cell did not. Highest-value stratum.</li>
+    <li><strong>Spatial controls — different cell, same date.</strong> Neighbouring cells that stayed intact on the day of the event. This removes the "it was raining across the whole state" confound and pushes the model onto terrain and antecedent moisture.</li>
+    <li><strong>Background controls — random hill cells and dates.</strong> A smaller stratum that keeps the model calibrated against the true base rate.</li>
+  </ol>
+
+  <div class="prose">
+    <p>Ratio starts at 1 positive to 15 negatives, with residual imbalance handled by <code>scale_pos_weight</code> rather than further resampling. One guard rail matters: <strong>a candidate negative within 15 km and ±2 days of any recorded event is discarded, not labelled zero.</strong> The catalogue is a record of <em>reported</em> landslides, and unreported ones are common in remote terrain — labelling a probable event as a confident negative actively teaches the model the wrong thing.</p>
+  </div>
+
+  <div class="call acc">
+    <span class="hd">Why this also solves the API budget</span>
+    <p>Case-control sampling is not a compromise forced by rate limits — it is the standard design in landslide-susceptibility literature. It happens to also be the reason the free tier suffices. Pulling 60-day windows for roughly 27,000 sampled cell-dates costs a few days of background fetching inside the 10,000-calls-per-day allowance, where a full gridded panel would take months. Multi-location batching cuts the request count further, and if a larger panel is wanted later, Copernicus CDS supplies gridded NetCDF in bulk with no per-call limit.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <div class="eyebrow">Execution</div>
+    <h2>Build phases</h2>
+  </div>
+
+  <div class="prose">
+    <p>Ordered by dependency, not preference — each phase consumes the previous one's output. The tags show which of the three pillars each phase feeds.</p>
+    <div class="chips" style="margin-top:4px">
+      <span class="chip sql">SQL</span><span class="chip py">Python</span><span class="chip bi">Power BI</span>
+    </div>
+  </div>
+
+  <div class="stack g12">
+
+    <article class="phase">
+      <div class="phase-num">00</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>Scope lock and skeleton</h3><span class="dur">2 days</span></div>
+        <p>Fix the study area to the Himalayan arc plus NER, the window to 2007–2016, and the grid to 0.1°. Stand up the repo with a strict raw / interim / processed data separation, a Postgres instance (Neon or Supabase free tier — cloud, not local, for reasons that surface in Phase 09), and environment pinning.</p>
+        <div class="chips"><span class="chip plain">Setup</span></div>
+        <div class="deliv"><span class="lbl">Ships</span><span>Reproducible repo, empty schema, one-command environment</span></div>
+      </div>
+    </article>
+
+    <article class="phase">
+      <div class="phase-num">01</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>Acquisition</h3><span class="dur">4 days, mostly unattended</span></div>
+        <p>Landslide CSV is already in hand. Pull the Copernicus DEM tiles covering the study bbox as cloud-optimised GeoTIFFs, and the Geofabrik OSM extracts for the northern and north-eastern zones. Then start the long-running Open-Meteo fetch for weather and river discharge — write raw JSON to Parquet on arrival, and make the fetcher resumable and idempotent so an interrupted run never re-spends API budget.</p>
+        <div class="chips"><span class="chip py">Python</span></div>
+        <div class="deliv"><span class="lbl">Ships</span><span>Raw Parquet weather store, DEM mosaic, OSM layers, event CSV</span></div>
+      </div>
+    </article>
+
+    <article class="phase">
+      <div class="phase-num">02</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>Grid construction and label assignment</h3><span class="dur">3 days</span></div>
+        <p>Generate the 0.1° lattice, clip it to state boundaries, and mask to genuinely hilly cells using DEM slope so the negative pool is not diluted with floodplain. Snap each event to its cell and date. Then build the case-control sample using the three strata from the previous section, applying the 15 km / ±2 day exclusion buffer.</p>
+        <div class="chips"><span class="chip py">Python</span></div>
+        <div class="deliv"><span class="lbl">Ships</span><span><code>samples.parquet</code> — the labelled modelling frame</span></div>
+      </div>
+    </article>
+
+    <article class="phase">
+      <div class="phase-num">03</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>Feature engineering</h3><span class="dur">5 days</span></div>
+        <p>Three families. <strong>Dynamic:</strong> rolling rainfall at 1, 3, 7, 15, 30 and 60 days; an exponentially-decayed antecedent precipitation index; rainfall percentile against the cell's own day-of-year climatology; soil moisture level and 1- and 7-day deltas across depths; consecutive wet days; river discharge and its anomaly. <strong>Static:</strong> slope mean, max and standard deviation, aspect encoded as sine and cosine, terrain ruggedness, curvature, topographic wetness, elevation band. <strong>Contextual:</strong> distance to nearest road and stream, road density, land-cover fractions, and neighbourhood historical event count computed <em>strictly from the training window</em>.</p>
+        <div class="chips"><span class="chip py">Python</span><span class="chip sql">SQL</span></div>
+        <div class="deliv"><span class="lbl">Ships</span><span>~70-column feature matrix with a written leakage audit</span></div>
+      </div>
+    </article>
+
+    <article class="phase">
+      <div class="phase-num">04</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>Warehouse</h3><span class="dur">4 days</span></div>
+        <p>Load into a star schema in Postgres with PostGIS. Facts hold weather-days, events, predictions and infrastructure exposure; dimensions hold cells, dates, districts, roads and settlements. Rolling windows, percentile ranks and neighbour joins are implemented as SQL views over the raw fact table rather than as pandas code, so the same logic serves both the model and the dashboard. Reporting marts are materialised on top.</p>
+        <div class="chips"><span class="chip sql">SQL</span></div>
+        <div class="deliv"><span class="lbl">Ships</span><span>Loaded warehouse, indexed, with marts and a query portfolio</span></div>
+      </div>
+    </article>
+
+    <article class="phase">
+      <div class="phase-num">05</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>Exploratory analysis</h3><span class="dur">4 days</span></div>
+        <p>Not a chart dump — a set of questions with answers. Does antecedent rainfall separate event days from matched non-event days, and at what lead time? Where does landslide density sit on the slope curve? Which month-by-state cells carry the burden? And the domain-specific one worth doing properly: fit a <strong>rainfall intensity–duration threshold</strong> on log–log axes, the standard diagnostic in landslide hydrology, and check whether our events sit above it.</p>
+        <div class="chips"><span class="chip py">Python</span><span class="chip sql">SQL</span></div>
+        <div class="deliv"><span class="lbl">Ships</span><span>EDA notebook, I–D threshold curve, feature shortlist</span></div>
+      </div>
+    </article>
+
+    <article class="phase">
+      <div class="phase-num">06</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>Modelling and validation</h3><span class="dur">6 days</span></div>
+        <p>Logistic regression as an interpretable floor, random forest as a check, gradient boosting as the production model. Then the part that separates a real result from a leaky one: <strong>validation is blocked in time and space, never random.</strong> Train on 2007–2013, validate on 2014, hold out 2015–2016 — and additionally run leave-one-region-out so the model must prove it generalises from the western Himalaya to the north-east. Probabilities are calibrated with isotonic regression so a "70%" means something operationally.</p>
+        <div class="chips"><span class="chip py">Python</span></div>
+        <div class="deliv"><span class="lbl">Ships</span><span>Calibrated model artefact, evaluation report, SHAP explainer</span></div>
+      </div>
+    </article>
+
+    <article class="phase">
+      <div class="phase-num">07</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>Exposure and prioritisation</h3><span class="dur">3 days</span></div>
+        <p>The layer that turns a probability into a decision. For every cell, pre-compute what is inside and immediately downslope of it from OSM: kilometres of road by class, bridges, settlements, schools, health facilities, estimated population. Priority score combines calibrated risk with exposure weight, so a 60% cell above a district road and two villages outranks an 85% cell in empty forest.</p>
+        <div class="chips"><span class="chip sql">SQL</span><span class="chip py">Python</span></div>
+        <div class="deliv"><span class="lbl">Ships</span><span><code>fact_infrastructure_exposure</code>, priority ranking logic</span></div>
+      </div>
+    </article>
+
+    <article class="phase">
+      <div class="phase-num">08</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>Scoring service</h3><span class="dur">4 days</span></div>
+        <p>A daily job pulls the 16-day weather forecast and 30-day discharge forecast for every cell, rebuilds the same features through the same code path used in training, scores, and writes probability, risk band and the top three SHAP drivers into <code>fact_risk_prediction</code>. Guarded by a feature-parity assertion so training and serving cannot silently diverge — the most common way systems like this rot.</p>
+        <div class="chips"><span class="chip py">Python</span><span class="chip sql">SQL</span></div>
+        <div class="deliv"><span class="lbl">Ships</span><span>Scheduled scoring job, FastAPI risk endpoint</span></div>
+      </div>
+    </article>
+
+    <article class="phase">
+      <div class="phase-num">09</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>Interfaces</h3><span class="dur">6 days</span></div>
+        <p>Power BI connects to the cloud Postgres marts for the authority-facing command centre. Streamlit covers what Power BI cannot: the citizen and field-officer side of the problem statement — geo-tagged photo upload of cracks and blocked roads, offline-tolerant queueing, and an interactive risk map.</p>
+        <div class="chips"><span class="chip bi">Power BI</span><span class="chip py">Python</span></div>
+        <div class="deliv"><span class="lbl">Ships</span><span>Five-page report, published Streamlit app, alert hooks</span></div>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <div class="eyebrow">Pillar one</div>
+    <h2>The SQL layer</h2>
+  </div>
+
+  <div class="prose">
+    <p>SQL earns its place here by doing work that would otherwise be duplicated. The rolling-window features the model trains on are the same aggregates the dashboard reports — so they are defined once, in the warehouse, and consumed by both.</p>
+    <p><strong>Postgres with PostGIS</strong>, not MySQL. Two reasons: real spatial predicates make "every road within 5 km of a critical cell" a single query instead of a Python loop, and Postgres window functions handle the rolling and ranking logic that MySQL makes awkward. It is also what Power BI and every free cloud host support cleanly.</p>
+  </div>
+
+  <h3>Schema</h3>
+  <pre><span class="c">-- dimensions</span>
+dim_cell            cell_id, lat_c, lon_c, geom, state, district,
+                    elev_mean, slope_mean, slope_max, aspect_sin, aspect_cos,
+                    tri, twi, landcover_class, dist_road_km, dist_stream_km
+dim_date            date_id, date, year, month, doy, season, is_monsoon
+dim_district        district_id, name, state, geom, population
+dim_road            osm_id, name, road_class, length_km, geom
+dim_settlement      osm_id, name, place_type, geom, est_population
+
+<span class="c">-- facts</span>
+fact_weather_daily  cell_id, date_id, precip_mm, temp_max, temp_min,
+                    sm_0_7, sm_7_28, sm_28_100, et0, wind_max,
+                    river_discharge              <span class="c">&lt;- the big one</span>
+fact_landslide      event_id, cell_id, date_id, lat, lon, trigger,
+                    size_class, fatalities, source, loc_accuracy_km
+fact_risk_pred      cell_id, date_id, model_version, probability,
+                    risk_band, driver_1, driver_2, driver_3
+fact_exposure       cell_id, road_km, bridges, settlements, schools,
+                    health_facilities, est_population
+
+<span class="c">-- marts (materialised, this is what Power BI reads)</span>
+mart_cell_daily_risk · mart_district_daily_risk
+mart_model_performance · mart_exposure_summary</pre>
+
+  <h3>The query work worth showing</h3>
+  <div class="prose">
+    <p>Ten patterns that carry the analysis. These are not exercises bolted on — each one produces something the model or the dashboard consumes.</p>
+  </div>
+  <ul class="tick">
+    <li><strong>Rolling rainfall windows</strong> — <code>SUM() OVER (PARTITION BY cell_id ORDER BY date ROWS BETWEEN 29 PRECEDING AND CURRENT ROW)</code> for the 1/3/7/15/30/60-day accumulations that drive the model.</li>
+    <li><strong>Soil moisture deltas</strong> — <code>LAG()</code> across depth columns to capture how fast the profile is wetting, which matters more than its level.</li>
+    <li><strong>Rainfall anomaly by percentile</strong> — <code>PERCENT_RANK()</code> partitioned by cell and day-of-year, so 200 mm in Cherrapunji and 200 mm in Leh are correctly scored as different events.</li>
+    <li><strong>Antecedent precipitation index</strong> — a recursive CTE applying exponential decay to prior rainfall.</li>
+    <li><strong>Neighbourhood aggregation</strong> — self-join on the 3×3 cell block for spatially smoothed rainfall and neighbour event history.</li>
+    <li><strong>Spatial exposure joins</strong> — PostGIS <code>ST_DWithin</code> to attach roads, settlements and facilities within the risk radius of each cell.</li>
+    <li><strong>District risk ranking</strong> — <code>DENSE_RANK()</code> over daily aggregated risk, feeding the dashboard's priority table.</li>
+    <li><strong>Month-over-month and year-over-year risk movement</strong> — window comparisons for the trend panels.</li>
+    <li><strong>Event-frequency cohorts</strong> — landslide rate by state × month × elevation band, the backbone of the historical page.</li>
+    <li><strong>Alert-precision tracking</strong> — join predictions back to subsequent observed events to measure how the system performs in production, not just in the notebook.</li>
+  </ul>
+</section>
+
+<section>
+  <div class="sec-head">
+    <div class="eyebrow">Pillar two</div>
+    <h2>Python — analysis and model</h2>
+  </div>
+
+  <div class="prose">
+    <p>Stack: <code>pandas</code>, <code>geopandas</code>, <code>rasterio</code> and <code>richdem</code> for terrain derivatives, <code>scikit-learn</code>, <code>xgboost</code>, <code>shap</code>, <code>sqlalchemy</code>. Notebooks for exploration; the pipeline itself lives in importable modules, because Phase 08 must call the exact same feature code that Phase 06 trained on.</p>
+  </div>
+
+  <h3>Evaluation — and why accuracy is not on the list</h3>
+  <div class="prose">
+    <p>At a 1:15 sampling ratio a model predicting "safe" everywhere scores 94%. Accuracy is actively misleading here, and quoting it in a viva invites the obvious question. The metrics that matter reflect the real asymmetry: a missed landslide can cost lives, a false alarm costs an inspection vehicle.</p>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Metric</th><th>Why it is on the list</th></tr></thead>
+      <tbody>
+        <tr><td><strong>PR-AUC</strong></td><td>Primary. The only headline number that stays honest under heavy class imbalance.</td></tr>
+        <tr><td><strong>Recall @ fixed alert budget</strong></td><td>The operational question: if a district can inspect its top 5% of cells today, what fraction of real events did we catch? This is the number to lead with.</td></tr>
+        <tr><td><strong>Brier score + reliability curve</strong></td><td>Proves the probabilities are calibrated. An officer acting on "80%" needs it to mean 80%.</td></tr>
+        <tr><td><strong>Lead time distribution</strong></td><td>How many hours of warning before the event — the entire point of an early-warning system.</td></tr>
+        <tr><td><strong>Spatial-block CV score</strong></td><td>Guards against the model memorising known landslide locations rather than learning conditions.</td></tr>
+        <tr><td><strong>Confusion matrix at operating threshold</strong></td><td>Threshold chosen from the false-negative to false-positive cost ratio, and stated explicitly.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="call acc">
+    <span class="hd">Explainability is a requirement, not a garnish</span>
+    <p>A district magistrate will not evacuate on an unexplained number. SHAP values per cell convert the output into a sentence a human can act on and argue with: <em>"Critical — 88%. Driven by 340 mm over seven days against a 40-year 97th-percentile, saturated upper soil profile, and a mean slope of 38°."</em> That sentence is the actual deliverable of the model.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <div class="eyebrow">Pillar three</div>
+    <h2>Power BI — the command centre</h2>
+  </div>
+
+  <div class="prose">
+    <p>Connected to the Postgres marts, not the raw seven-column-wide fact table. Import mode with scheduled refresh on the aggregated marts; DirectQuery only on the daily prediction table where freshness is the point.</p>
+    <p>Five pages, each answering a different person's question.</p>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <span class="pg">Page 01</span>
+      <h4>Command Centre</h4>
+      <ul class="tick">
+        <li>Cells at critical and high risk, right now</li>
+        <li>Districts affected, population exposed, road-kilometres at risk</li>
+        <li>Choropleth risk map across the hill states</li>
+        <li>14-day risk trajectory</li>
+        <li>Top ten districts by priority score</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="pg">Page 02</span>
+      <h4>District Deep Dive</h4>
+      <ul class="tick">
+        <li>Drill-through from any map or table selection</li>
+        <li>Rainfall, soil moisture and discharge time series</li>
+        <li>Risk history against recorded events</li>
+        <li>Cell-level breakdown within the district</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="pg">Page 03</span>
+      <h4>Response Priority</h4>
+      <ul class="tick">
+        <li>Ranked action list, not a map</li>
+        <li>Exposure detail per high-risk cell</li>
+        <li>Road connectivity status and severed routes</li>
+        <li>Immediate / short-term / watch classification</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="pg">Page 04</span>
+      <h4>Historical Intelligence</h4>
+      <ul class="tick">
+        <li>Ten years of events by state, month, elevation</li>
+        <li>Trigger and size distribution</li>
+        <li>Rainfall intensity–duration threshold scatter</li>
+        <li>Fatality and damage concentration</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="pg">Page 05</span>
+      <h4>Model Performance</h4>
+      <ul class="tick">
+        <li>Precision–recall curve and calibration plot</li>
+        <li>Model comparison and feature importance</li>
+        <li>Alert precision tracked over time</li>
+        <li>Data freshness and pipeline health</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="prose">
+    <p>DAX worth building deliberately rather than clicking together: risk-band classification from calibrated probability, exposure-weighted district risk, rolling alert precision against subsequent observed events, and period-over-period risk movement.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <div class="eyebrow">Deploy</div>
+    <h2>Running it for real</h2>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Component</th><th>Host</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>Warehouse</td><td><strong>Neon or Supabase Postgres</strong></td><td>Free tier, and being cloud-hosted is what lets Power BI Service refresh without an on-premises data gateway</td></tr>
+        <tr><td>Daily scoring job</td><td><strong>GitHub Actions cron</strong></td><td>Free, versioned with the code, logs retained, no server to maintain</td></tr>
+        <tr><td>Risk API</td><td><strong>FastAPI on Render or Fly.io</strong></td><td>Serves the Streamlit app and any external consumer</td></tr>
+        <tr><td>Field and citizen app</td><td><strong>Streamlit Community Cloud</strong></td><td>Free, and covers geo-tagged reporting that Power BI cannot</td></tr>
+        <tr><td>Authority dashboard</td><td><strong>Power BI Service</strong></td><td>Scheduled refresh against the cloud warehouse</td></tr>
+        <tr><td>Alerts</td><td><strong>Webhook / Telegram bot</strong></td><td>Demonstrates the SMS architecture without a telecom gateway</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="call">
+    <span class="hd">The deployment trap</span>
+    <p>Build the warehouse on a local Postgres and Power BI Service cannot refresh it without installing an on-premises data gateway on a machine that stays awake. Start on a cloud Postgres from Phase 00. Migrating later means rebuilding every connection in the report.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <div class="eyebrow">Schedule</div>
+    <h2>Eight weeks</h2>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Week</th><th>Focus</th><th>Gate — do not proceed without this</th></tr></thead>
+      <tbody>
+        <tr><td class="num">1</td><td>Scope, repo, cloud Postgres, start the weather fetch</td><td>Fetcher running unattended and resumable</td></tr>
+        <tr><td class="num">2</td><td>DEM and OSM ingest, grid construction</td><td>Slope raster validates against known terrain</td></tr>
+        <tr><td class="num">3</td><td>Labels, negative sampling, exclusion buffers</td><td>Sample composition reviewed and defended</td></tr>
+        <tr><td class="num">4</td><td>Feature engineering, warehouse load</td><td>Leakage audit written and signed off</td></tr>
+        <tr><td class="num">5</td><td>EDA, SQL query portfolio, I–D threshold</td><td>Antecedent rainfall visibly separates the classes</td></tr>
+        <tr><td class="num">6</td><td>Modelling, blocked validation, calibration</td><td>Spatial-block score holds up, not just the random split</td></tr>
+        <tr><td class="num">7</td><td>Exposure joins, scoring job, API</td><td>Training and serving features assert identical</td></tr>
+        <tr><td class="num">8</td><td>Power BI, Streamlit, deploy, documentation</td><td>End-to-end run from cold start</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prose">
+    <p>Week 1's fetch is the long pole and it runs unattended — start it before anything else, then build the rest of the pipeline against a partial dataset while it completes.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <div class="eyebrow">Exposure</div>
+    <h2>What can go wrong</h2>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Risk</th><th>Severity</th><th>Mitigation</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>1,719 positives is still a thin training set</strong></td>
+          <td><span class="stat no">HIGH</span></td>
+          <td>Case-control design, class weighting, blocked CV, and a stated confidence interval rather than a single point score</td>
+        </tr>
+        <tr>
+          <td><strong>Label positions accurate only to 5–25 km</strong></td>
+          <td><span class="stat no">HIGH</span></td>
+          <td>Grid fixed at 0.1° to match label precision; documented as a stated limitation rather than hidden</td>
+        </tr>
+        <tr>
+          <td><strong>Negatives may contain unreported events</strong></td>
+          <td><span class="stat mid">MEDIUM</span></td>
+          <td>Exclusion buffer of 15 km / ±2 days; framed as presence-versus-background, not presence-versus-absence</td>
+        </tr>
+        <tr>
+          <td><strong>Catalogue ends 2016 — no recent validation</strong></td>
+          <td><span class="stat mid">MEDIUM</span></td>
+          <td>Assemble a small recent event set manually for qualitative back-testing; state the gap openly</td>
+        </tr>
+        <tr>
+          <td><strong>API budget exhausted mid-pull</strong></td>
+          <td><span class="stat mid">MEDIUM</span></td>
+          <td>Idempotent resumable fetcher, aggressive local caching, Copernicus CDS as the bulk fallback</td>
+        </tr>
+        <tr>
+          <td><strong>Training and serving features drift apart</strong></td>
+          <td><span class="stat no">HIGH</span></td>
+          <td>Single shared feature module plus a parity assertion in the scoring job that fails loudly</td>
+        </tr>
+        <tr>
+          <td><strong>Scope creep into the full platform</strong></td>
+          <td><span class="stat no">HIGH</span></td>
+          <td>The out-of-scope list below is fixed, and everything on it is presented as designed architecture rather than built software</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <div class="eyebrow">Boundaries</div>
+    <h2>What we are deliberately not building</h2>
+  </div>
+
+  <div class="prose">
+    <p>The problem statement describes a national platform: IoT sensor networks, satellite computer vision, telecom SMS gateways, multilingual mobile apps, offline synchronisation. Attempting all of it produces eight shallow demos and no working prediction. Each item below is designed and diagrammed, and honestly labelled as architecture rather than implementation.</p>
+  </div>
+
+  <ul class="tick">
+    <li><strong>Physical IoT sensor network</strong> — the ingestion schema and API contract are specified; no hardware is deployed. Open-Meteo's modelled soil moisture stands in for sensor readings, and the swap is a single adapter.</li>
+    <li><strong>Deep learning on satellite imagery</strong> — terrain and land-cover features derived from satellite products are used; no imagery model is trained. Flagged as the natural version-two extension.</li>
+    <li><strong>Telecom SMS gateway</strong> — alert dispatch is built against a webhook, provably working end to end; a licensed SMS provider is a configuration change, not a rewrite.</li>
+    <li><strong>Native mobile application</strong> — the Streamlit app is mobile-responsive and handles the geo-tagged reporting requirement.</li>
+    <li><strong>True offline synchronisation</strong> — local queueing with deferred upload is demonstrated; full conflict-resolving sync is not.</li>
+  </ul>
+
+  <div class="call acc">
+    <span class="hd">How to frame this in the viva</span>
+    <p>Not "we ran out of time", but: <em>"We scoped to the predictive core because a warning system's value is entirely determined by whether the prediction is trustworthy. The integration surfaces are specified and stubbed; the model is validated with spatially blocked cross-validation, which is the harder problem and the one that fails silently if you skip it."</em></p>
+  </div>
+</section>
+
+<footer>
+  <p class="note">Data sources verified live on 26 August 2026 — NASA Global Landslide Catalog, Open-Meteo ERA5-Land and Flood APIs, Copernicus DEM GLO-30, Geofabrik OpenStreetMap extracts. IMD API requires registration. ISRO Bhuvan Landslide Atlas confirmed as viewer-only with no bulk endpoint.</p>
+  <p class="note">Smart India Hackathon 2026 · Problem Statement 26192 · Flash Flood Prediction System for Hilly Regions using Multi-Source Data · Ministry of Home Affairs.</p>
+</footer>
+
+</div>
+
+</body>
+</html>

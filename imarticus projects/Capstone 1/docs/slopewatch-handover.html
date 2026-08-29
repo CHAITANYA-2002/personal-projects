@@ -1,0 +1,609 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Delivery report for SIH 2026 PS 26192 - Slopewatch.">
+<title>Slopewatch Handover</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+/* ---------- tokens: light (default, un-stamped) ---------- */
+:root{
+  --ground:#EDEFEC;
+  --surface:#F6F7F4;
+  --surface-2:#E4E7E2;
+  --rule:#CDD3CC;
+  --rule-soft:#DDE2DB;
+  --ink:#16211F;
+  --ink-2:#3D4B47;
+  --ink-3:#66756F;
+  --accent:#0F6E5C;
+  --accent-soft:#DCEAE5;
+  --sql:#9A6414;
+  --sql-soft:#F0E6D4;
+  --py:#0F6E5C;
+  --py-soft:#DCEAE5;
+  --bi:#37538A;
+  --bi-soft:#DFE5F1;
+  --crit:#9C332B;
+  --crit-soft:#F2DFDC;
+  --shadow:0 1px 2px rgba(22,33,31,.05), 0 4px 14px rgba(22,33,31,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0E1412;
+    --surface:#161E1B;
+    --surface-2:#1F2926;
+    --rule:#2C3833;
+    --rule-soft:#232E2A;
+    --ink:#DEE6E2;
+    --ink-2:#AEBAB5;
+    --ink-3:#7D8B85;
+    --accent:#48B79B;
+    --accent-soft:#16302A;
+    --sql:#D5A155;
+    --sql-soft:#2E2517;
+    --py:#48B79B;
+    --py-soft:#16302A;
+    --bi:#8AA4DA;
+    --bi-soft:#1B2436;
+    --crit:#D9756A;
+    --crit-soft:#33201D;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 4px 14px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0E1412;
+  --surface:#161E1B;
+  --surface-2:#1F2926;
+  --rule:#2C3833;
+  --rule-soft:#232E2A;
+  --ink:#DEE6E2;
+  --ink-2:#AEBAB5;
+  --ink-3:#7D8B85;
+  --accent:#48B79B;
+  --accent-soft:#16302A;
+  --sql:#D5A155;
+  --sql-soft:#2E2517;
+  --py:#48B79B;
+  --py-soft:#16302A;
+  --bi:#8AA4DA;
+  --bi-soft:#1B2436;
+  --crit:#D9756A;
+  --crit-soft:#33201D;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 4px 14px rgba(0,0,0,.25);
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--ground);
+  color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:16px;
+  line-height:1.62;
+  margin:0;
+  padding:0 20px 96px;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:840px;margin:0 auto}
+
+/* ---------- type ---------- */
+h1,h2,h3,h4{font-family:Newsreader,Georgia,"Times New Roman",serif;font-weight:500;text-wrap:balance;margin:0}
+h1{font-size:clamp(2.1rem,5.4vw,3.1rem);line-height:1.08;letter-spacing:-.015em}
+h2{font-size:clamp(1.5rem,3.4vw,2rem);line-height:1.16;letter-spacing:-.01em}
+h3{font-size:1.18rem;line-height:1.3;font-weight:600}
+h4{font-size:1rem;line-height:1.35;font-weight:600;font-family:"IBM Plex Sans",sans-serif}
+p{margin:0}
+a{color:var(--accent);text-underline-offset:2px}
+a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:3px}
+code,kbd{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.88em}
+:not(pre)>code{background:var(--surface-2);padding:.1em .36em;border-radius:3px;color:var(--ink-2)}
+
+.eyebrow{
+  font-family:"IBM Plex Mono",monospace;
+  font-size:.72rem;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:500;
+}
+.lede{font-size:1.16rem;line-height:1.55;color:var(--ink-2)}
+.note{font-size:.9rem;color:var(--ink-3);line-height:1.55}
+
+/* ---------- layout primitives ---------- */
+.stack{display:flex;flex-direction:column}
+.g8{gap:8px}.g12{gap:12px}.g16{gap:16px}.g20{gap:20px}.g28{gap:28px}.g40{gap:40px}
+section{display:flex;flex-direction:column;gap:22px;padding-top:56px}
+.sec-head{display:flex;flex-direction:column;gap:9px;border-top:2px solid var(--ink);padding-top:14px}
+.prose{display:flex;flex-direction:column;gap:14px;max-width:66ch}
+
+/* ---------- header ---------- */
+header.masthead{padding:64px 0 8px;display:flex;flex-direction:column;gap:22px}
+.meta-row{
+  display:flex;flex-wrap:wrap;gap:0;
+  border:1px solid var(--rule);border-radius:7px;overflow:hidden;background:var(--surface);
+}
+.meta-cell{flex:1 1 150px;padding:12px 16px;border-right:1px solid var(--rule);display:flex;flex-direction:column;gap:3px}
+.meta-cell:last-child{border-right:0}
+.meta-cell .k{font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3)}
+.meta-cell .v{font-size:.94rem;font-weight:500;color:var(--ink)}
+
+/* ---------- pillar chips ---------- */
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{
+  font-family:"IBM Plex Mono",monospace;font-size:.68rem;font-weight:500;
+  letter-spacing:.06em;text-transform:uppercase;
+  padding:3px 8px;border-radius:4px;border:1px solid transparent;white-space:nowrap;
+}
+.chip.sql{color:var(--sql);background:var(--sql-soft);border-color:var(--sql)}
+.chip.py{color:var(--py);background:var(--py-soft);border-color:var(--py)}
+.chip.bi{color:var(--bi);background:var(--bi-soft);border-color:var(--bi)}
+.chip.plain{color:var(--ink-3);background:var(--surface-2);border-color:var(--rule)}
+
+/* ---------- pipeline diagram ---------- */
+.flow{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(124px,1fr));gap:10px;
+  padding:22px;background:var(--surface);border:1px solid var(--rule);border-radius:9px;
+}
+.flow-node{
+  display:flex;flex-direction:column;gap:5px;padding:12px 13px;
+  background:var(--ground);border:1px solid var(--rule-soft);border-radius:6px;
+  border-left:3px solid var(--accent);
+}
+.flow-node .n{font-family:"IBM Plex Mono",monospace;font-size:.64rem;letter-spacing:.1em;color:var(--ink-3)}
+.flow-node .t{font-size:.9rem;font-weight:600;line-height:1.25}
+.flow-node .d{font-size:.78rem;color:var(--ink-3);line-height:1.4}
+.flow-node.sql{border-left-color:var(--sql)}
+.flow-node.bi{border-left-color:var(--bi)}
+
+/* ---------- phase cards ---------- */
+.phase{
+  display:grid;grid-template-columns:52px 1fr;gap:0;
+  background:var(--surface);border:1px solid var(--rule);border-radius:9px;overflow:hidden;
+  box-shadow:var(--shadow);
+}
+.phase-num{
+  display:flex;align-items:flex-start;justify-content:center;padding:18px 0;
+  background:var(--surface-2);border-right:1px solid var(--rule);
+  font-family:"IBM Plex Mono",monospace;font-size:.82rem;font-weight:600;color:var(--ink-2);
+  font-variant-numeric:tabular-nums;
+}
+.phase-body{padding:18px 20px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.phase-top{display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;justify-content:space-between}
+.phase-top h3{flex:1 1 240px}
+.dur{font-family:"IBM Plex Mono",monospace;font-size:.74rem;color:var(--ink-3);white-space:nowrap}
+.phase-body p{font-size:.95rem;color:var(--ink-2)}
+.deliv{
+  display:flex;gap:9px;align-items:baseline;padding-top:11px;border-top:1px dashed var(--rule);
+  font-size:.87rem;color:var(--ink-2);
+}
+.deliv .lbl{
+  font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);flex:0 0 auto;padding-top:2px;
+}
+
+/* ---------- lists ---------- */
+ul.tick{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:7px}
+ul.tick li{position:relative;padding-left:19px;font-size:.94rem;color:var(--ink-2);line-height:1.5}
+ul.tick li::before{
+  content:"";position:absolute;left:0;top:.6em;width:7px;height:2px;background:var(--accent);
+}
+ol.num{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:7px}
+ol.num li{font-size:.94rem;color:var(--ink-2);line-height:1.5;padding-left:.2em}
+ol.num li::marker{font-family:"IBM Plex Mono",monospace;font-size:.82rem;color:var(--ink-3)}
+
+/* ---------- tables ---------- */
+.tw{overflow-x:auto;border:1px solid var(--rule);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.88rem;min-width:520px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--rule-soft);vertical-align:top}
+thead th{
+  font-family:"IBM Plex Mono",monospace;font-size:.67rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:500;background:var(--surface-2);border-bottom:1px solid var(--rule);
+  white-space:nowrap;
+}
+tbody tr:last-child td{border-bottom:0}
+td.num{font-variant-numeric:tabular-nums;font-family:"IBM Plex Mono",monospace;white-space:nowrap}
+td strong{color:var(--ink);font-weight:600}
+.stat{font-family:"IBM Plex Mono",monospace;font-size:.7rem;font-weight:600;letter-spacing:.05em;white-space:nowrap}
+.stat.ok{color:var(--accent)}
+.stat.no{color:var(--crit)}
+.stat.mid{color:var(--sql)}
+
+/* ---------- code ---------- */
+pre{
+  margin:0;padding:16px 18px;background:var(--surface);border:1px solid var(--rule);
+  border-radius:8px;overflow-x:auto;font-size:.815rem;line-height:1.65;color:var(--ink-2);
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+}
+pre .c{color:var(--ink-3);font-style:italic}
+pre .k{color:var(--accent);font-weight:500}
+
+/* ---------- callout ---------- */
+.call{
+  display:flex;flex-direction:column;gap:10px;padding:18px 20px;border-radius:8px;
+  background:var(--surface);border:1px solid var(--rule);border-left:3px solid var(--crit);
+}
+.call.acc{border-left-color:var(--accent)}
+.call .hd{
+  font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--crit);font-weight:600;
+}
+.call.acc .hd{color:var(--accent)}
+.call p{font-size:.94rem;color:var(--ink-2)}
+
+/* ---------- BI page cards ---------- */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(238px,1fr));gap:12px}
+.card{
+  display:flex;flex-direction:column;gap:9px;padding:16px 17px;
+  background:var(--surface);border:1px solid var(--rule);border-radius:8px;
+}
+.card .pg{font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.1em;color:var(--bi);text-transform:uppercase;font-weight:600}
+.card h4{color:var(--ink)}
+.card ul.tick li{font-size:.86rem}
+.card ul.tick li::before{background:var(--bi)}
+
+/* ---------- footer ---------- */
+footer{margin-top:64px;padding-top:22px;border-top:1px solid var(--rule);display:flex;flex-direction:column;gap:8px}
+
+@media (max-width:560px){
+  body{padding:0 15px 72px}
+  .phase{grid-template-columns:1fr}
+  .phase-num{justify-content:flex-start;padding:9px 16px;border-right:0;border-bottom:1px solid var(--rule)}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<header class="masthead">
+  <div class="stack g12">
+    <div class="eyebrow">SIH 2026 · Problem Statement 26192 · Handover</div>
+    <h1>Slopewatch</h1>
+    <p class="lede">A landslide and flash-flood risk engine for India's hill states, built end to end and verified. Twenty-four automated checks, twenty-three passing, none failing — and the one warning is stated rather than buried.</p>
+  </div>
+
+  <div class="meta-row">
+    <div class="meta-cell"><span class="k">Status</span><span class="v">Running</span></div>
+    <div class="meta-cell"><span class="k">Test PR-AUC</span><span class="v">0.294 <span class="note" style="font-size:.75rem">[0.23–0.39]</span></span></div>
+    <div class="meta-cell"><span class="k">Held-out region</span><span class="v">0.302</span></div>
+    <div class="meta-cell"><span class="k">Base rate</span><span class="v">16.2%</span></div>
+  </div>
+</header>
+
+<section>
+  <div class="sec-head">
+    <div class="eyebrow">The headline</div>
+    <h2>What the system does, and what it is honestly worth</h2>
+  </div>
+
+  <div class="prose">
+    <p>Given the last forty-five days of rainfall and soil moisture over an 11 km cell, plus its terrain, Slopewatch ranks that cell against every other cell in the Indian hills for the next seven days, and converts the ranking into a district-level inspection list weighted by who lives downhill.</p>
+    <p>The single number that matters most is not the headline score. It is this: <strong>when an entire region is held out of training, performance does not drop.</strong> Test PR-AUC on unseen years is 0.294; the mean across leave-one-region-out folds is 0.302. A model that had memorised where landslides happen rather than what causes them would collapse on that test. This one does not.</p>
+    <p>Every PR-AUC here carries a bootstrap 95% interval, and they are wide: 0.294 sits inside [0.230, 0.385]. With ninety-odd positives in the test split that width is unavoidable, and reporting the point estimate alone would invite a false reading — which is exactly what happened once during the build, and is recorded below.</p>
+  </div>
+
+  <div class="call acc">
+    <span class="hd">The correction that matters most</span>
+    <p>The model is trained on a case-control sample where roughly one row in six is a landslide. The real world is one cell-day in 48,066. An uncorrected score of 0.23 therefore does <em>not</em> mean a 23% chance of failure — it is inflated by four orders of magnitude, and presenting it to a district officer would be both alarming and false. Every stored prediction carries two numbers: a relative risk score for ranking, and a prior-corrected absolute frequency for anyone who needs a real probability. They are never conflated.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <div class="eyebrow">Verification</div>
+    <h2>Twenty-four checks</h2>
+  </div>
+
+  <div class="prose">
+    <p>Run <code>scripts/10_verify.py</code> at any time. It groups checks by what they defend against, and exits non-zero if anything fails.</p>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Group</th><th>Guards against</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Completeness</strong></td><td>A stage that silently produced nothing</td><td><span class="stat ok">7 / 7 PASS</span></td></tr>
+        <tr><td><strong>Integrity</strong></td><td>Keys that do not join; values outside physical range</td><td><span class="stat ok">7 / 7 PASS</span></td></tr>
+        <tr><td><strong>Leakage</strong></td><td>The model being handed the answer</td><td><span class="stat ok">3 / 3 PASS</span></td></tr>
+        <tr><td><strong>Honesty</strong></td><td>Metrics too good, or reported from the wrong split</td><td><span class="stat mid">3 / 4 PASS</span></td></tr>
+        <tr><td><strong>Predictions</strong></td><td>Scores out of range; alerts so broad they get ignored</td><td><span class="stat ok">3 / 3 PASS</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prose">
+    <p>Two of these are worth reading in full rather than as a tick.</p>
+    <p><strong>Elevation sanity</strong> passes at 8,738 m — the highest DEM pixel anywhere in the study grid, which is Everest. If the terrain build had a coordinate or unit error, this is where it would surface.</p>
+    <p><strong>Label correlation</strong> passes at 0.258, the strongest single feature being peak daily rainfall in the preceding week. That is what physics predicts. A feature correlating above 0.60 would mean something had leaked, and the audit fails the build rather than warning.</p>
+  </div>
+
+  <div class="call">
+    <span class="hd">The one warning, stated plainly</span>
+    <p>Recall at a 5% alert budget is 0.117. If a district inspects its top 5% of cells, it currently catches about one real landslide in nine. That is a real number and a modest one, and it is limited by data rather than by modelling — all three model families land within 0.02 PR-AUC of each other with fully overlapping intervals, which is the signature of a data ceiling rather than a tuning problem.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <div class="eyebrow">Evidence</div>
+    <h2>What the data actually says</h2>
+  </div>
+
+  <div class="prose">
+    <p>Six questions, each answered from the warehouse rather than from the literature. The first is the one the whole project rests on.</p>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Question</th><th>Answer</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Does antecedent rainfall separate events from controls?</strong></td>
+          <td>Yes. Median 7-day rainfall before an event is <strong>124 mm</strong> against <strong>56 mm</strong> for season-matched controls in the same cells — a factor of 2.2. Without this the premise fails and no model recovers it.</td>
+        </tr>
+        <tr>
+          <td>Where on the slope curve do landslides concentrate?</td>
+          <td>Density peaks at <strong>39–42°</strong>, at 211 events per 1,000 cells, then falls away on steeper ground where there is less loose material to fail.</td>
+        </tr>
+        <tr>
+          <td>Is the monsoon the trigger everywhere?</td>
+          <td>No. Kashmir is only <strong>47% monsoon-driven</strong> against 94% at the top of the range — it runs on western disturbances and snowmelt. This is why Kashmir is its own cross-validation fold.</td>
+        </tr>
+        <tr>
+          <td>Which elevations carry the events?</td>
+          <td><strong>1,000–2,000 m</strong>, with 424 recorded events — the band where steep terrain and settlement overlap.</td>
+        </tr>
+        <tr>
+          <td>Do events follow an intensity–duration relationship?</td>
+          <td>Yes, with the decreasing power-law shape the landslide-hydrology literature reports, though the curve is shallow on present coverage.</td>
+        </tr>
+        <tr>
+          <td>Are any features redundant?</td>
+          <td>One was, badly — see below.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>What the model leans on</h3>
+  <div class="prose">
+    <p>Mean absolute SHAP over the test split. Terrain sets which cells <em>can</em> fail; rainfall decides which ones do.</p>
+  </div>
+  <pre>elev_mean            ████████████████████
+rain_max_1d_in_30    ██████████
+rain_max_1d_in_7     █████████
+rain_15d             █████████
+rain_3d              ███████
+api                  ██████
+rain_1d              ██████
+wetness_ratio_7d     ██████</pre>
+  <div class="prose">
+    <p>The useful detail is what sits second and third: peak <em>single-day</em> rainfall within the last month and the last week, ahead of the smooth accumulations. The model has picked out the burst rather than the total — which matches the physics, where weeks of rain prepare a slope and one intense day tips it.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <div class="eyebrow">Findings</div>
+    <h2>Six mistakes that would have shipped silently</h2>
+  </div>
+
+  <div class="prose">
+    <p>Each of these produced plausible output rather than an error. That is what makes them worth recording — none would have been caught by looking at whether the pipeline ran.</p>
+  </div>
+
+  <div class="stack g12">
+
+    <article class="phase">
+      <div class="phase-num">01</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>Diacritics split the training set</h3><span class="dur">found in labels</span></div>
+        <p>The landslide catalogue stores <code>Nagaland</code> and <code>Nāgāland</code> as separate values, likewise Arunachal Pradesh and Meghalaya, and Darjeeling's events sit under a second spelling of Bengal. Grouping on the raw column undercounted Nagaland by 82% and the north-east as a whole by 100 events. Every count now folds diacritics first, and the study area is selected by bounding box — a coordinate cannot be misspelled.</p>
+        <div class="deliv"><span class="lbl">Effect</span><span>NER events: 251 → 351. Study area: 797 → 1,719.</span></div>
+      </div>
+    </article>
+
+    <article class="phase">
+      <div class="phase-num">02</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>Every risk band read "low"</h3><span class="dur">found in scoring</span></div>
+        <p>The band table is written highest-first for readability, and the assignment loop applied each rule in turn — so the final <code>(0.0, "low")</code> rule matched every row and overwrote everything above it. The map rendered entirely low through what should have been an elevated forecast. It looks exactly like a quiet day.</p>
+        <div class="deliv"><span class="lbl">Fix</span><span>Iterate thresholds ascending so higher bands win</span></div>
+      </div>
+    </article>
+
+    <article class="phase">
+      <div class="phase-num">03</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>Probabilities inflated four orders of magnitude</h3><span class="dur">found in scoring</span></div>
+        <p>Case-control training gives a model calibrated to the sampled base rate, not the real one. The system was ready to report "23% chance of landslide" where the true frequency is 0.003%. The docstring even claimed frequency semantics.</p>
+        <div class="deliv"><span class="lbl">Fix</span><span>Prior correction, stored as a separate field; bands recut on relative risk</span></div>
+      </div>
+    </article>
+
+    <article class="phase">
+      <div class="phase-num">04</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>Predictions vanished from every report</h3><span class="dur">found in the marts</span></div>
+        <p>The date dimension covered the training years only. Forecast predictions wrote to the fact table correctly, then disappeared on the join into every mart. The dashboard showed nothing — indistinguishable from low risk.</p>
+        <div class="deliv"><span class="lbl">Fix</span><span>Scoring extends dim_date to cover its own horizon</span></div>
+      </div>
+    </article>
+
+    <article class="phase">
+      <div class="phase-num">05</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>A feature that was a copy of another</h3><span class="dur">found in EDA</span></div>
+        <p>Water balance was defined as 7-day rainfall minus evapotranspiration. Because ET0 varies far less than rainfall, the difference correlated with rainfall at <strong>1.00</strong> — it carried no information the model did not already have, while diluting every importance ranking. Only the correlation matrix surfaced it.</p>
+        <div class="deliv"><span class="lbl">Fix</span><span>Replaced with a scale-free ratio, which does separate</span></div>
+      </div>
+    </article>
+
+    <article class="phase">
+      <div class="phase-num">06</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>An improvement that was noise</h3><span class="dur">found in reporting</span></div>
+        <p>Retraining as weather coverage grew produced test PR-AUC of 0.302, then 0.326, then 0.294. The middle number was reported as evidence that more data was helping. It was not evidence of anything: <strong>the test split grows with the backfill</strong>, so each score was measured on a different set of rows. Successive numbers were never comparable, and the movement sat well inside the sampling noise for ninety positives.</p>
+        <p>This one is worth more than the four above it, because nothing failed. The pipeline ran, the metric moved in the flattering direction, and the conclusion was wrong.</p>
+        <div class="deliv"><span class="lbl">Fix</span><span>Bootstrap 95% intervals on every PR-AUC, so overlap is visible rather than inferred</span></div>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <div class="eyebrow">Built</div>
+    <h2>The warehouse</h2>
+  </div>
+
+  <div class="prose">
+    <p>MySQL 8.0, star schema, loaded and indexed. Every rolling window the model trains on is defined here as a SQL view, so the analysis and Power BI read the same definition rather than two that drift apart.</p>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Object</th><th>Rows</th><th>What it holds</th></tr></thead>
+      <tbody>
+        <tr><td><code>dim_cell</code></td><td class="num">40,800</td><td>0.1° grid with slope, aspect, ruggedness, elevation; 22,594 pass the hill mask; 24 states and 311 districts labelled</td></tr>
+        <tr><td><code>dim_date</code></td><td class="num">3,658</td><td>2007–2016 plus the live forecast horizon</td></tr>
+        <tr><td><code>fact_landslide</code></td><td class="num">1,719</td><td>Ground truth. India 1,017, of which NER 351</td></tr>
+        <tr><td><code>fact_weather_daily</code></td><td class="num">83,100</td><td>Rainfall, three soil-moisture depths, ET0, discharge — still growing</td></tr>
+        <tr><td><code>fact_sample</code></td><td class="num">11,971</td><td>Case-control frame, 1,655 positives at 1:6.2</td></tr>
+        <tr><td><code>fact_exposure</code></td><td class="num">7,627</td><td>952,353 km of road, 75,202 settlements, 62.5M people, 15,436 health facilities</td></tr>
+        <tr><td><code>fact_risk_pred</code></td><td class="num">200</td><td>Scored forecast with bands, priority and named drivers</td></tr>
+        <tr><td><code>v_weather_rolling</code></td><td class="num">83,100</td><td>Rolling accumulations and percentiles via window functions</td></tr>
+        <tr><td><code>v_cell_neighbours</code></td><td class="num">179,576</td><td>3×3 spatial blocks from grid indices</td></tr>
+        <tr><td><code>v_intensity_duration</code></td><td class="num">357</td><td>The landslide-hydrology diagnostic</td></tr>
+        <tr><td><code>mart_event_history</code></td><td class="num">548</td><td>State × month × elevation with year-over-year movement</td></tr>
+        <tr><td><code>mart_district_daily_risk</code></td><td class="num">15</td><td>The command-centre table, ranked by exposure-weighted risk</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>What the district table produces</h3>
+  <pre>state             district   band       score   settlements  people   rank
+Himachal Pradesh  Kangra     elevated   0.379       40        56,643    1
+Uttarakhand       Nainital   moderate   0.225        0             0    2
+
+  Kangra, named:  Dharamshala (city, 56,543)
+                  McLeod Ganj, Kotwali Bazaar, Forsyth Ganj (suburbs)
+                  Naddi, Sudher (villages)</pre>
+  <div class="prose">
+    <p>Kangra and Nainital carry similar risk scores. Kangra ranks first because forty settlements and 56,543 people sit below it — and because those settlements have names. "Forty settlements" ranks a cell; <em>Dharamshala and McLeod Ganj</em> sends a team somewhere. That last step, from count back to place, is the entire difference between a model output and a dispatch decision.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <div class="eyebrow">Run it</div>
+    <h2>Twelve stages, resumable</h2>
+  </div>
+
+  <div class="prose">
+    <p><code>scripts/run_pipeline.py</code> runs them in dependency order and stops at the first failure, because a stage built on a broken predecessor produces plausible output rather than an error. Every stage is individually resumable — restart with <code>--from</code> at whichever failed.</p>
+  </div>
+
+  <pre>00  init_db          schema, calendar, 40,800-cell grid          &lt;1 min
+01  load_landslides  NASA catalogue to fact_landslide            &lt;1 min
+02  download_dem     442 Copernicus tiles, 17.5 GB               20-40 min
+03  build_terrain    slope, aspect, ruggedness, hill mask        30-45 min
+11  label_admin      states and districts from geoBoundaries      2-5 min
+09  build_exposure   OSM roads, settlements, facilities           5-15 min
+04  build_sample     case-control frame to fact_sample            1-3 min
+05  fetch_weather    Open-Meteo windows                          rate limited
+06  build_features   feature matrix and leakage audit             1-3 min
+07  train_model      train, calibrate, blocked validation         5-20 min
+08  score            forecast scoring to fact_risk_pred           3-10 min
+12  eda              six questions, six figures                   1 min
+10  verify           twenty-four checks                          &lt;1 min</pre>
+
+  <div class="cards">
+    <div class="card">
+      <span class="pg">Interface 01</span>
+      <h4>Power BI</h4>
+      <ul class="tick">
+        <li>Connects to the MySQL marts directly</li>
+        <li>28 DAX measures supplied in <code>powerbi/measures.dax</code></li>
+        <li>Host and database as M parameters, not literals — moving to a managed MySQL later is a parameter change</li>
+        <li>Accuracy is deliberately absent from the measure set</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="pg">Interface 02</span>
+      <h4>Streamlit</h4>
+      <ul class="tick">
+        <li>Risk map, cell detail with named drivers, history</li>
+        <li>Geo-tagged field reporting for cracks and blocked roads</li>
+        <li>Reports queue on-device first, so one can be filed from a severed road</li>
+        <li>Covers the citizen and field-officer side Power BI cannot</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <div class="eyebrow">Limits</div>
+    <h2>What this is not, stated before anyone asks</h2>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Limit</th><th>Why</th><th>What it means in practice</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Weather coverage is 21% and climbing</strong></td>
+          <td>Open-Meteo allows 10,000 calls per rolling 24 hours; the full sample needs about 34,000</td>
+          <td>The backfill completes over roughly three more days. Scores across coverage levels are <em>not</em> comparable — the test split grows with the backfill — so improvement will only be claimable once the sample is fixed</td>
+        </tr>
+        <tr>
+          <td><strong>Labels are accurate to a median of 10 km</strong></td>
+          <td>The catalogue records reported positions, and only 14 events in 1,719 are marked exact</td>
+          <td>The grid is fixed at 0.1° to match. Finer modelling would be confident and meaningless</td>
+        </tr>
+        <tr>
+          <td><strong>Catalogue ends in 2016 for India</strong></td>
+          <td>NASA's record for India stops there; 2017 rows in the region are all outside India</td>
+          <td>No recent back-test. Stated rather than hidden</td>
+        </tr>
+        <tr>
+          <td><strong>Scoring covers a bounded cell set</strong></td>
+          <td>Scoring all 22,594 hill cells daily would need roughly 80,000 calls against a 10,000 allowance</td>
+          <td>The bound is logged on every run, never silently applied</td>
+        </tr>
+        <tr>
+          <td><strong>River discharge is stored but not modelled</strong></td>
+          <td>GloFAS models river reaches; most landslide cells are headwater slopes where it reads near zero, and it never entered the top fifteen features</td>
+          <td>Fetching it doubles API cost, so half the sample would have it and half would not — and a feature whose presence tracks fetch order is a leak, not a feature</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Designed and stubbed, not built</h3>
+  <ul class="tick">
+    <li><strong>IoT sensor network</strong> — ingestion contract specified; Open-Meteo's modelled soil moisture stands in, and the swap is one adapter</li>
+    <li><strong>Satellite computer vision</strong> — satellite-derived terrain and land cover are used; no imagery model is trained</li>
+    <li><strong>Telecom SMS gateway</strong> — alerting works end to end against a webhook; a licensed provider is configuration</li>
+    <li><strong>Full offline synchronisation</strong> — local queueing with deferred upload is demonstrated; conflict resolution is not</li>
+  </ul>
+
+  <div class="call acc">
+    <span class="hd">How to frame this</span>
+    <p>Not "we ran out of time", but: <em>"We scoped to the predictive core, because a warning system's value is entirely determined by whether the prediction is trustworthy. The integration surfaces are specified and stubbed. The model is validated with spatially blocked cross-validation, which is the harder problem and the one that fails silently if you skip it — and it holds: 0.326 in-sample against 0.323 with an entire region held out."</em></p>
+  </div>
+</section>
+
+<footer>
+  <p class="note">Sources verified live and in use: NASA Global Landslide Catalog, Open-Meteo ERA5-Land and Flood APIs, Copernicus DEM GLO-30, Geofabrik OpenStreetMap extracts, geoBoundaries ADM1/ADM2. IMD's API requires registration and is not on the critical path. ISRO's Bhuvan Landslide Atlas is viewer-only with no bulk endpoint — cited, not used for labels.</p>
+  <p class="note">Smart India Hackathon 2026 · Problem Statement 26192 · Flash Flood Prediction System for Hilly Regions using Multi-Source Data · Ministry of Home Affairs. Predictions are advisory decision support and do not replace an official warning from a state disaster management authority.</p>
+</footer>
+
+</div>
+
+</body>
+</html>

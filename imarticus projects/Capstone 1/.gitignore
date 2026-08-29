@@ -1,0 +1,50 @@
+# secrets
+.env
+*.env
+!.env.example
+
+# data — rebuildable, never committed
+data/raw/
+data/interim/
+data/processed/
+*.parquet
+*.tif
+*.nc
+*.zip
+*.csv
+!data/reference/*.csv
+
+# logs — runtime artefacts, rewritten on every run
+logs/
+
+# reference boundaries are fetched from geoBoundaries on demand (12 MB)
+data/reference/*.geojson
+
+# local editor and agent state
+.claude/
+
+# ...but result tables the README cites are committed
+!models/*.csv
+!reports/*.csv
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
+
+# model artefacts
+models/*.pkl
+models/*.joblib
+
+# power bi
+*.pbix.bak
+
+# os / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

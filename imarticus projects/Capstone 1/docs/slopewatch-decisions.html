@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Twenty build decisions behind Slopewatch - what was chosen, what was rejected, and why.">
+<title>Slopewatch Decisions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+/* ---------- tokens: light (default, un-stamped) ---------- */
+:root{
+  --ground:#EDEFEC;
+  --surface:#F6F7F4;
+  --surface-2:#E4E7E2;
+  --rule:#CDD3CC;
+  --rule-soft:#DDE2DB;
+  --ink:#16211F;
+  --ink-2:#3D4B47;
+  --ink-3:#66756F;
+  --accent:#0F6E5C;
+  --accent-soft:#DCEAE5;
+  --sql:#9A6414;
+  --sql-soft:#F0E6D4;
+  --py:#0F6E5C;
+  --py-soft:#DCEAE5;
+  --bi:#37538A;
+  --bi-soft:#DFE5F1;
+  --crit:#9C332B;
+  --crit-soft:#F2DFDC;
+  --shadow:0 1px 2px rgba(22,33,31,.05), 0 4px 14px rgba(22,33,31,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0E1412;
+    --surface:#161E1B;
+    --surface-2:#1F2926;
+    --rule:#2C3833;
+    --rule-soft:#232E2A;
+    --ink:#DEE6E2;
+    --ink-2:#AEBAB5;
+    --ink-3:#7D8B85;
+    --accent:#48B79B;
+    --accent-soft:#16302A;
+    --sql:#D5A155;
+    --sql-soft:#2E2517;
+    --py:#48B79B;
+    --py-soft:#16302A;
+    --bi:#8AA4DA;
+    --bi-soft:#1B2436;
+    --crit:#D9756A;
+    --crit-soft:#33201D;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 4px 14px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0E1412;
+  --surface:#161E1B;
+  --surface-2:#1F2926;
+  --rule:#2C3833;
+  --rule-soft:#232E2A;
+  --ink:#DEE6E2;
+  --ink-2:#AEBAB5;
+  --ink-3:#7D8B85;
+  --accent:#48B79B;
+  --accent-soft:#16302A;
+  --sql:#D5A155;
+  --sql-soft:#2E2517;
+  --py:#48B79B;
+  --py-soft:#16302A;
+  --bi:#8AA4DA;
+  --bi-soft:#1B2436;
+  --crit:#D9756A;
+  --crit-soft:#33201D;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 4px 14px rgba(0,0,0,.25);
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--ground);
+  color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:16px;
+  line-height:1.62;
+  margin:0;
+  padding:0 20px 96px;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:840px;margin:0 auto}
+
+/* ---------- type ---------- */
+h1,h2,h3,h4{font-family:Newsreader,Georgia,"Times New Roman",serif;font-weight:500;text-wrap:balance;margin:0}
+h1{font-size:clamp(2.1rem,5.4vw,3.1rem);line-height:1.08;letter-spacing:-.015em}
+h2{font-size:clamp(1.5rem,3.4vw,2rem);line-height:1.16;letter-spacing:-.01em}
+h3{font-size:1.18rem;line-height:1.3;font-weight:600}
+h4{font-size:1rem;line-height:1.35;font-weight:600;font-family:"IBM Plex Sans",sans-serif}
+p{margin:0}
+a{color:var(--accent);text-underline-offset:2px}
+a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:3px}
+code,kbd{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.88em}
+:not(pre)>code{background:var(--surface-2);padding:.1em .36em;border-radius:3px;color:var(--ink-2)}
+
+.eyebrow{
+  font-family:"IBM Plex Mono",monospace;
+  font-size:.72rem;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:500;
+}
+.lede{font-size:1.16rem;line-height:1.55;color:var(--ink-2)}
+.note{font-size:.9rem;color:var(--ink-3);line-height:1.55}
+
+/* ---------- layout primitives ---------- */
+.stack{display:flex;flex-direction:column}
+.g8{gap:8px}.g12{gap:12px}.g16{gap:16px}.g20{gap:20px}.g28{gap:28px}.g40{gap:40px}
+section{display:flex;flex-direction:column;gap:22px;padding-top:56px}
+.sec-head{display:flex;flex-direction:column;gap:9px;border-top:2px solid var(--ink);padding-top:14px}
+.prose{display:flex;flex-direction:column;gap:14px;max-width:66ch}
+
+/* ---------- header ---------- */
+header.masthead{padding:64px 0 8px;display:flex;flex-direction:column;gap:22px}
+.meta-row{
+  display:flex;flex-wrap:wrap;gap:0;
+  border:1px solid var(--rule);border-radius:7px;overflow:hidden;background:var(--surface);
+}
+.meta-cell{flex:1 1 150px;padding:12px 16px;border-right:1px solid var(--rule);display:flex;flex-direction:column;gap:3px}
+.meta-cell:last-child{border-right:0}
+.meta-cell .k{font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3)}
+.meta-cell .v{font-size:.94rem;font-weight:500;color:var(--ink)}
+
+/* ---------- pillar chips ---------- */
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{
+  font-family:"IBM Plex Mono",monospace;font-size:.68rem;font-weight:500;
+  letter-spacing:.06em;text-transform:uppercase;
+  padding:3px 8px;border-radius:4px;border:1px solid transparent;white-space:nowrap;
+}
+.chip.sql{color:var(--sql);background:var(--sql-soft);border-color:var(--sql)}
+.chip.py{color:var(--py);background:var(--py-soft);border-color:var(--py)}
+.chip.bi{color:var(--bi);background:var(--bi-soft);border-color:var(--bi)}
+.chip.plain{color:var(--ink-3);background:var(--surface-2);border-color:var(--rule)}
+
+/* ---------- pipeline diagram ---------- */
+.flow{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(124px,1fr));gap:10px;
+  padding:22px;background:var(--surface);border:1px solid var(--rule);border-radius:9px;
+}
+.flow-node{
+  display:flex;flex-direction:column;gap:5px;padding:12px 13px;
+  background:var(--ground);border:1px solid var(--rule-soft);border-radius:6px;
+  border-left:3px solid var(--accent);
+}
+.flow-node .n{font-family:"IBM Plex Mono",monospace;font-size:.64rem;letter-spacing:.1em;color:var(--ink-3)}
+.flow-node .t{font-size:.9rem;font-weight:600;line-height:1.25}
+.flow-node .d{font-size:.78rem;color:var(--ink-3);line-height:1.4}
+.flow-node.sql{border-left-color:var(--sql)}
+.flow-node.bi{border-left-color:var(--bi)}
+
+/* ---------- phase cards ---------- */
+.phase{
+  display:grid;grid-template-columns:52px 1fr;gap:0;
+  background:var(--surface);border:1px solid var(--rule);border-radius:9px;overflow:hidden;
+  box-shadow:var(--shadow);
+}
+.phase-num{
+  display:flex;align-items:flex-start;justify-content:center;padding:18px 0;
+  background:var(--surface-2);border-right:1px solid var(--rule);
+  font-family:"IBM Plex Mono",monospace;font-size:.82rem;font-weight:600;color:var(--ink-2);
+  font-variant-numeric:tabular-nums;
+}
+.phase-body{padding:18px 20px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.phase-top{display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;justify-content:space-between}
+.phase-top h3{flex:1 1 240px}
+.dur{font-family:"IBM Plex Mono",monospace;font-size:.74rem;color:var(--ink-3);white-space:nowrap}
+.phase-body p{font-size:.95rem;color:var(--ink-2)}
+.deliv{
+  display:flex;gap:9px;align-items:baseline;padding-top:11px;border-top:1px dashed var(--rule);
+  font-size:.87rem;color:var(--ink-2);
+}
+.deliv .lbl{
+  font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);flex:0 0 auto;padding-top:2px;
+}
+
+/* ---------- lists ---------- */
+ul.tick{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:7px}
+ul.tick li{position:relative;padding-left:19px;font-size:.94rem;color:var(--ink-2);line-height:1.5}
+ul.tick li::before{
+  content:"";position:absolute;left:0;top:.6em;width:7px;height:2px;background:var(--accent);
+}
+ol.num{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:7px}
+ol.num li{font-size:.94rem;color:var(--ink-2);line-height:1.5;padding-left:.2em}
+ol.num li::marker{font-family:"IBM Plex Mono",monospace;font-size:.82rem;color:var(--ink-3)}
+
+/* ---------- tables ---------- */
+.tw{overflow-x:auto;border:1px solid var(--rule);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.88rem;min-width:520px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--rule-soft);vertical-align:top}
+thead th{
+  font-family:"IBM Plex Mono",monospace;font-size:.67rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:500;background:var(--surface-2);border-bottom:1px solid var(--rule);
+  white-space:nowrap;
+}
+tbody tr:last-child td{border-bottom:0}
+td.num{font-variant-numeric:tabular-nums;font-family:"IBM Plex Mono",monospace;white-space:nowrap}
+td strong{color:var(--ink);font-weight:600}
+.stat{font-family:"IBM Plex Mono",monospace;font-size:.7rem;font-weight:600;letter-spacing:.05em;white-space:nowrap}
+.stat.ok{color:var(--accent)}
+.stat.no{color:var(--crit)}
+.stat.mid{color:var(--sql)}
+
+/* ---------- code ---------- */
+pre{
+  margin:0;padding:16px 18px;background:var(--surface);border:1px solid var(--rule);
+  border-radius:8px;overflow-x:auto;font-size:.815rem;line-height:1.65;color:var(--ink-2);
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+}
+pre .c{color:var(--ink-3);font-style:italic}
+pre .k{color:var(--accent);font-weight:500}
+
+/* ---------- callout ---------- */
+.call{
+  display:flex;flex-direction:column;gap:10px;padding:18px 20px;border-radius:8px;
+  background:var(--surface);border:1px solid var(--rule);border-left:3px solid var(--crit);
+}
+.call.acc{border-left-color:var(--accent)}
+.call .hd{
+  font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--crit);font-weight:600;
+}
+.call.acc .hd{color:var(--accent)}
+.call p{font-size:.94rem;color:var(--ink-2)}
+
+/* ---------- BI page cards ---------- */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(238px,1fr));gap:12px}
+.card{
+  display:flex;flex-direction:column;gap:9px;padding:16px 17px;
+  background:var(--surface);border:1px solid var(--rule);border-radius:8px;
+}
+.card .pg{font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.1em;color:var(--bi);text-transform:uppercase;font-weight:600}
+.card h4{color:var(--ink)}
+.card ul.tick li{font-size:.86rem}
+.card ul.tick li::before{background:var(--bi)}
+
+/* ---------- footer ---------- */
+footer{margin-top:64px;padding-top:22px;border-top:1px solid var(--rule);display:flex;flex-direction:column;gap:8px}
+
+@media (max-width:560px){
+  body{padding:0 15px 72px}
+  .phase{grid-template-columns:1fr}
+  .phase-num{justify-content:flex-start;padding:9px 16px;border-right:0;border-bottom:1px solid var(--rule)}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<header class="masthead">
+  <div class="stack g12">
+    <div class="eyebrow">SIH 2026 · Problem Statement 26192 · Decision log</div>
+    <h1>Why Slopewatch<br>Is Built This Way</h1>
+    <p class="lede">Twenty decisions, each with what was rejected and the reason. Most of them are not about modelling — they are about the small choices that decide whether a landslide warning system tells the truth.</p>
+  </div>
+
+  <div class="meta-row">
+    <div class="meta-cell"><span class="k">Decisions</span><span class="v">20 recorded</span></div>
+    <div class="meta-cell"><span class="k">Reversed</span><span class="v">4</span></div>
+    <div class="meta-cell"><span class="k">Data verified</span><span class="v">Live, not documented</span></div>
+    <div class="meta-cell"><span class="k">Backfill</span><span class="v">21% · ~2.7 days</span></div>
+  </div>
+</header>
+
+<section>
+  <div class="sec-head">
+    <div class="eyebrow">One</div>
+    <h2>Choosing the problem</h2>
+  </div>
+
+  <div class="stack g12">
+
+    <article class="phase">
+      <div class="phase-num">01</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>PS 26192 over PS 26001</h3><span class="dur">MHA over MDoNER</span></div>
+        <p>Both ask for landslide early warning. 26001 restricts to the North Eastern Region, which the ground-truth catalogue covers with 351 events. 26192 says "hilly states", which legitimately admits the whole Himalayan arc — and that is 1,719.</p>
+        <p>The second reason is less scientific and just as real: 26001 is the first entry on the problem-statement list and will be picked by a large number of teams. 26192 sits at position 192.</p>
+        <div class="deliv"><span class="lbl">Rejected</span><span>26001 — five times fewer labels, many times more competition</span></div>
+      </div>
+    </article>
+
+    <article class="phase">
+      <div class="phase-num">02</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>Verify every source by calling it</h3><span class="dur">before writing any code</span></div>
+        <p>Every write-up of this problem recommends ISRO's Bhuvan Landslide Atlas and its ~80,000 mapped landslides. It is real, and it is <strong>not downloadable</strong> — it lives behind a WebGIS viewer with no bulk or WFS endpoint. NASA's COOLR feature services return HTTP 503. IMD's API answers <code>{"error":"API key missing"}</code>.</p>
+        <p>Each of those would have been discovered in week two, after the architecture had been built around it.</p>
+        <div class="deliv"><span class="lbl">Result</span><span>Labels taken from NASA's Global Landslide Catalog, which is a plain CSV behind a redirect</span></div>
+      </div>
+    </article>
+
+    <article class="phase">
+      <div class="phase-num">03</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>Open-Meteo instead of three separate integrations</h3><span class="dur">the quiet win</span></div>
+        <p>The problem statement asks for rainfall, soil moisture and flash-flood signal. The obvious route is NASA GPM for precipitation, NASA SMAP for soil moisture, and a hydrological model for discharge — three archives, two credential systems, gigabytes on disk.</p>
+        <p>Open-Meteo serves ERA5-Land rainfall and four-depth soil moisture from one unauthenticated endpoint, and GloFAS river discharge from a sister endpoint. A ten-year daily series for one point returned 3,653 days in 0.9 seconds.</p>
+        <div class="deliv"><span class="lbl">Cost</span><span>A hard rate limit, which shaped several later decisions</span></div>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <div class="eyebrow">Two</div>
+    <h2>Defining the study area</h2>
+  </div>
+
+  <div class="stack g12">
+
+    <article class="phase">
+      <div class="phase-num">04</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>Select by bounding box, never by state name</h3><span class="dur">reversed a first attempt</span></div>
+        <p>The first filter matched state names. It undercounted Nagaland by 82%, because the catalogue stores <code>Nagaland</code> and <code>Nāgāland</code> as separate values — likewise Arunachal Pradesh and Meghalaya, and Darjeeling's events sit under a second spelling of Bengal.</p>
+        <p>A coordinate cannot be misspelled. Selection moved to a bounding box, and names are only used for reporting, after folding diacritics.</p>
+        <div class="deliv"><span class="lbl">Effect</span><span>NER 251 → 351 events; study area 797 → 1,719</span></div>
+      </div>
+    </article>
+
+    <article class="phase">
+      <div class="phase-num">05</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>Train on the whole arc, evaluate on India</h3><span class="dur">a config flag, not an accident</span></div>
+        <p>The bounding box catches Nepal (481 events), Pakistan (118), Bangladesh, Bhutan, Myanmar and China. Discovering that could have meant filtering them out. Instead it became a deliberate setting: the same orogen and the same monsoon produce the same physics, and training on all of it nearly doubles the sample.</p>
+        <p>Reporting is always on India. Leave-one-country-out then becomes a real generalisation test rather than a formality.</p>
+        <div class="deliv"><span class="lbl">Reversible</span><span><code>INCLUDE_COUNTRIES = ("India",)</code> restricts to 1,017 events</span></div>
+      </div>
+    </article>
+
+    <article class="phase">
+      <div class="phase-num">06</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>A 0.1-degree grid, and no finer</h3><span class="dur">set by the labels</span></div>
+        <p>The temptation is to model at DEM resolution, 30 m. The catalogue's median location error is <strong>10 km</strong>, and only 14 events in 1,719 are marked exact. Modelling at 100 m against a label that could be 25 km off produces a confident, meaningless map.</p>
+        <p>0.1° is roughly 11 km, which matches both the label accuracy and ERA5-Land's native grid — so one cell is one weather pixel, with no resampling inventing precision.</p>
+        <div class="deliv"><span class="lbl">Rejected</span><span>Finer grids, which would look more impressive and mean less</span></div>
+      </div>
+    </article>
+
+    <article class="phase">
+      <div class="phase-num">07</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>A slope mask on the negative pool</h3><span class="dur">22,594 of 40,800 cells</span></div>
+        <p>Drawing negatives from the whole grid would include the Gangetic plain. The model would then learn to separate mountain from plain — true, trivial, and useless, since it would fire on every hill in India every July.</p>
+        <div class="deliv"><span class="lbl">Threshold</span><span>Mean slope ≥ 5°, computed from the DEM rather than assumed</span></div>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <div class="eyebrow">Three</div>
+    <h2>The sampling design</h2>
+  </div>
+
+  <div class="prose">
+    <p>This is the part that decides whether the project works, and it gets four decisions of its own.</p>
+  </div>
+
+  <div class="stack g12">
+
+    <article class="phase">
+      <div class="phase-num">08</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>Case-control, not a full panel</h3><span class="dur">science and budget agreeing</span></div>
+        <p>The full grid over ten years is roughly 150 million cell-days against 1,719 positives. A model trained on that reaches 99.99% accuracy by never predicting a landslide.</p>
+        <p>Case-control sampling is the standard design in landslide-susceptibility work. It also happens to be the only thing the API allowance can pay for — but it was the right answer before the budget was a factor.</p>
+        <div class="deliv"><span class="lbl">Rejected</span><span>Full panel; also naive undersampling, which loses the matching</span></div>
+      </div>
+    </article>
+
+    <article class="phase">
+      <div class="phase-num">09</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>Three negative strata, each killing one confound</h3><span class="dur">the core idea</span></div>
+        <p><strong>Temporal</strong> — same cell, season-matched different date. Forces the model to explain why <em>this</em> monsoon day failed when hundreds of others in the same cell did not.</p>
+        <p><strong>Spatial</strong> — a hill cell 25–300 km away, same date. Removes "it was raining across the whole state": the comparison cell saw the same weather system and held.</p>
+        <p><strong>Background</strong> — random hill cell and date, keeping the model anchored to the base rate.</p>
+        <div class="deliv"><span class="lbl">Rejected</span><span>Uniform random negatives, which are mostly dry January days on flat ground</span></div>
+      </div>
+    </article>
+
+    <article class="phase">
+      <div class="phase-num">10</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>Discard near-misses instead of labelling them zero</h3><span class="dur">15 km, ±2 days</span></div>
+        <p>The catalogue records <em>reported</em> landslides. In remote terrain many go unreported. A candidate negative sitting next to a known event in space and time is quite likely a landslide nobody wrote down — and teaching the model that a probable event is a confident negative is worse than not using the sample at all.</p>
+        <div class="deliv"><span class="lbl">Cost</span><span>46,234 cell-date pairs excluded from the negative pool</span></div>
+      </div>
+    </article>
+
+    <article class="phase">
+      <div class="phase-num">11</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>1:6 rather than 1:15</h3><span class="dur">reversed under the budget</span></div>
+        <p>The design started at 1:15. Each sample needs its own multi-week weather window, and the allowance is 10,000 calls a day, so 1:15 meant most rows would never receive weather at all.</p>
+        <p>A fully covered 1:6 sample beats a 1:15 sample that is 40% empty. Residual imbalance is handled by class weighting, which costs nothing.</p>
+        <div class="deliv"><span class="lbl">Also cut</span><span>Feature window 60 → 45 days, keeping the 30-day accumulation the literature relies on</span></div>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <div class="eyebrow">Four</div>
+    <h2>Engineering under constraints</h2>
+  </div>
+
+  <div class="stack g12">
+
+    <article class="phase">
+      <div class="phase-num">12</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>MySQL, and therefore no geometry in the database</h3><span class="dur">stack was given</span></div>
+        <p>Postgres with PostGIS would be the default choice. MySQL was the requirement, and MySQL 8 has everything the analysis actually needs — window functions, recursive CTEs, ranking.</p>
+        <p>What it lacks is comfortable spatial predicates, and its SRID 4326 axis order is a well-known trap. So no geometry columns at all: distance work happens once in GeoPandas and lands as numbers in <code>fact_exposure</code>. The database never has to be spatial.</p>
+        <div class="deliv"><span class="lbl">Bonus</span><span>The schema stays portable to any SQL engine</span></div>
+      </div>
+    </article>
+
+    <article class="phase">
+      <div class="phase-num">13</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>Road segments, not polygon overlay</h3><span class="dur">hours to twenty seconds</span></div>
+        <p>Attributing a 40 km highway to whichever cell holds its midpoint would burden one cell and spare five. The exact fix is clipping every line against the grid, which on 2.19 million OSM road features takes hours.</p>
+        <p>Instead the roads are decomposed into vertex-to-vertex segments and each segment goes to the cell holding <em>its</em> midpoint. OSM segments are tens of metres against 11 km cells, so the error is negligible. <strong>29 million segments processed in twenty seconds.</strong></p>
+        <div class="deliv"><span class="lbl">Rejected</span><span><code>gpd.overlay</code> — correct, and unusable at this scale</span></div>
+      </div>
+    </article>
+
+    <article class="phase">
+      <div class="phase-num">14</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>Discharge is stored but not modelled</h3><span class="dur">a leak avoided</span></div>
+        <p>Fetching river discharge doubles the API cost. It never entered the top fifteen features, because GloFAS models river reaches and most landslide cells are headwater slopes where it reads near zero.</p>
+        <p>The tempting compromise — fetch it for some samples and not others — would have been a genuine leak: a feature whose <em>presence</em> tracks fetch order, which in turn tracks stratum. Excluded from the model entirely, kept in the warehouse for the flash-flood reporting.</p>
+        <div class="deliv"><span class="lbl">Effect</span><span>Remaining backfill halved, from ~6 days to ~2.7</span></div>
+      </div>
+    </article>
+
+    <article class="phase">
+      <div class="phase-num">15</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>Measure the API's billing rather than read it</h3><span class="dur">reversed a guess</span></div>
+        <p>The documentation reads as though requests are billed per call, which would make eight-location batching eight times cheaper. That reading was adopted, and the plan said the whole fetch would take one day.</p>
+        <p>The quota then ran out after exactly 1,385 windows — which is 1,385 × 3.2 × 2 ≈ 8,900 units against a 10,000 allowance. Billing is per coordinate. Batching saves round trips and nothing else.</p>
+        <div class="deliv"><span class="lbl">Now</span><span>The cost model matches observed behaviour, and says 2.7 days</span></div>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <div class="eyebrow">Five</div>
+    <h2>Making the output honest</h2>
+  </div>
+
+  <div class="stack g12">
+
+    <article class="phase">
+      <div class="phase-num">16</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>Blocked validation, in time and in space</h3><span class="dur">non-negotiable</span></div>
+        <p>Weather is autocorrelated over days and terrain is constant per cell, so a random split lets the model score beautifully by recognising cells it has already seen. The failure is silent — every metric looks excellent and the system generalises to nothing.</p>
+        <p>Train 2007–2013, validate 2014, test 2015–2016. Then leave-one-region-out on top, with Kashmir as its own fold because only 47% of its events are monsoon-driven against 94% elsewhere.</p>
+        <div class="deliv"><span class="lbl">Result</span><span>Held-out-region 0.302 against in-sample 0.294 — it holds</span></div>
+      </div>
+    </article>
+
+    <article class="phase">
+      <div class="phase-num">17</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>Correct the probability scale before showing anyone</h3><span class="dur">four orders of magnitude</span></div>
+        <p>Case-control training calibrates to the sampled base rate — one row in six. The real rate is one cell-day in 48,066. The system was ready to report "23% chance of landslide" where the true frequency is 0.003%.</p>
+        <p>Every prediction now carries two numbers: a relative risk score for ranking, and a prior-corrected absolute frequency for anyone who needs a real probability. They are stored separately and never conflated.</p>
+        <div class="deliv"><span class="lbl">Knock-on</span><span>Bands recut on relative risk, since a "critical at 0.80" rule could never fire</span></div>
+      </div>
+    </article>
+
+    <article class="phase">
+      <div class="phase-num">18</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>Accuracy is not reported anywhere</h3><span class="dur">including in the DAX</span></div>
+        <p>At a 1:6 ratio, predicting "safe" everywhere scores 86%. On the real grid it scores 99.998%. The number is not merely uninformative — it actively hides failure, and it is the first thing an audience asks for.</p>
+        <p>What is reported instead: PR-AUC with a bootstrap interval, recall at a fixed alert budget, Brier score and a calibration curve.</p>
+        <div class="deliv"><span class="lbl">Lead metric</span><span>Recall at 5% budget — what a district catches if it inspects its top 5%</span></div>
+      </div>
+    </article>
+
+    <article class="phase">
+      <div class="phase-num">19</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>Confidence intervals, after being caught out</h3><span class="dur">reversed a claim</span></div>
+        <p>Retraining as coverage grew gave 0.302, then 0.326, then 0.294. The middle number was reported as evidence that more data was helping. It was evidence of nothing: <strong>the test split grows with the backfill</strong>, so each score was measured on different rows.</p>
+        <p>Nothing failed. The pipeline ran, the metric moved in the flattering direction, and the conclusion was wrong. Bootstrap intervals now accompany every PR-AUC, and they overlap almost entirely.</p>
+        <div class="deliv"><span class="lbl">Rule</span><span>No improvement is claimable until the evaluation sample is fixed</span></div>
+      </div>
+    </article>
+
+    <article class="phase">
+      <div class="phase-num">20</div>
+      <div class="phase-body">
+        <div class="phase-top"><h3>Keep the settlement names</h3><span class="dur">the last mile</span></div>
+        <p>Exposure counts rank a cell: forty settlements, 56,543 people. They do not tell a team where to go. Joining the risk output back to 75,202 named OSM places turns "forty settlements in Kangra" into <em>Dharamshala, McLeod Ganj, Naddi, Sudher</em>.</p>
+        <p>A related trap, found the same day: OSM stores <code>population=0</code> for villages with no census figure. Read literally that is a settlement with nobody in it, which zeroes its exposure and drops it out of every ranking — hiding exactly the small remote places the system exists to protect.</p>
+        <div class="deliv"><span class="lbl">Fix</span><span>A stored zero is treated as missing, not as zero people</span></div>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <div class="eyebrow">The pattern</div>
+    <h2>What these have in common</h2>
+  </div>
+
+  <div class="prose">
+    <p>Four of the twenty were reversals of an earlier choice. None of the reversals came from something breaking — the pipeline ran cleanly through every one of them.</p>
+    <p>The diacritic filter returned a plausible number. The optimistic billing model produced a plausible schedule. The uncorrected probability produced a plausible percentage. The rising PR-AUC produced a plausible improvement. Each was found by checking a result against something outside the code: a count against a raw file, a schedule against an observed quota, a percentage against a base rate, a metric against its own confidence interval.</p>
+    <p>That is the thread through the whole build, and it is why the verification script exists as a first-class stage rather than a final tidy-up. The failure mode of this kind of system is not a crash. It is a warning that is quietly wrong.</p>
+  </div>
+
+  <div class="call acc">
+    <span class="hd">Where it stands</span>
+    <p>Twenty-four automated checks, twenty-three passing. Weather backfill at 21% of the sample and completing in roughly 2.7 days, after which the evaluation sample is fixed and model movement becomes meaningful for the first time. Everything else — warehouse, exposure, admin boundaries, model, scoring, dashboards, field app — is built and running.</p>
+  </div>
+</section>
+
+<footer>
+  <p class="note">Smart India Hackathon 2026 · Problem Statement 26192 · Flash Flood Prediction System for Hilly Regions using Multi-Source Data · Ministry of Home Affairs.</p>
+  <p class="note">Data: NASA Global Landslide Catalog, Open-Meteo ERA5-Land and Flood, Copernicus DEM GLO-30, Geofabrik OpenStreetMap, geoBoundaries ADM1/ADM2. Predictions are advisory decision support and do not replace an official warning from a state disaster management authority.</p>
+</footer>
+
+</div>
+
+</body>
+</html>

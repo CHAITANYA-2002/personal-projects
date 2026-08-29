@@ -1,0 +1,7 @@
+question,answer,value
+Does antecedent rainfall separate events from controls?,7-day median is 124 mm before an event against 56 mm for controls — 2.2x,2.22
+Where on the slope curve do landslides concentrate?,"density peaks at 39-42 degrees, at 211.5 events per 1,000 cells",39.0
+Is the monsoon the trigger everywhere?,"no — Kashmir is only 47.1% monsoon against 93.6% at the top, because it is driven by western disturbances and snowmelt",47.1
+Which elevations carry the events?,"1000-2000m holds the most, at 424 events",424.0
+Do events sit on a recognisable intensity-duration relationship?,"yes — median intensity falls from 18 mm/day at 3 days to 16 at 15, the decreasing power-law shape the literature reports",18.4
+Are any features redundant?,"rain_7d and water_balance_7d correlate at 1.00 — the rolling rainfall windows overlap by construction, which is why the regularised models are preferred over an unpenalised fit",0.998
