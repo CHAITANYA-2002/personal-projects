@@ -38,6 +38,12 @@ log = logging.getLogger(__name__)
 
 RANDOM_STATE = 42
 
+# Events per variable below which tree capacity stays tightened. Standard
+# guidance for a flexible model is 20-50 events per predictor; 50 is chosen
+# because the failure mode here is silent — an overfit tree still produces a
+# ranking, it is just a ranking of rows it has already seen.
+EVENTS_PER_VARIABLE_FOR_CAPACITY = 50.0
+
 
 @dataclass
 class TrainedModel:
@@ -53,6 +59,7 @@ class TrainedModel:
 def build_estimators(
     scale_pos_weight: float,
     n_positives: int = 1000,
+    n_features: int | None = None,
 ) -> dict[str, object]:
     """Three models: an interpretable floor, a check, and the production one.
 
@@ -71,7 +78,22 @@ def build_estimators(
         )),
     ])
 
-    small = n_positives < 500
+    # Capacity is gated on events-per-variable, not on a raw positive count.
+    # The gate used to be `n_positives < 500`, and crossing it did precisely
+    # what the docstring above warns about. At 941 positives the forest jumped
+    # to depth 12 and scored 0.934 on train against 0.241 on validation;
+    # XGBoost scored 0.991 against 0.214. Those are lookup tables.
+    #
+    # 941 positives sounds comfortable until it is divided by 41 features —
+    # 23 events per variable, which is thin for anything that can memorise a
+    # row. What constrains the fit is the ratio, not the count, so that is what
+    # is measured. The threshold is deliberately conservative: this sample has
+    # to reach roughly 2,000 positives across 41 features before the flexible
+    # branch opens, and the full backfill tops out near 1,655.
+    events_per_variable = (
+        n_positives / n_features if n_features else n_positives / 40
+    )
+    small = events_per_variable < EVENTS_PER_VARIABLE_FOR_CAPACITY
     forest_depth = 5 if small else 12
     leaf_size = max(10, n_positives // 25) if small else 5
 
@@ -138,7 +160,9 @@ def train_all(
 
     trained: dict[str, TrainedModel] = {}
 
-    for name, estimator in build_estimators(scale_pos_weight, positives).items():
+    for name, estimator in build_estimators(
+        scale_pos_weight, positives, len(features)
+    ).items():
         log.info("training %s on %d rows (%d positives)",
                  name, len(train), positives)
         estimator.fit(train[features], train["label"])
@@ -222,7 +246,7 @@ def spatial_cv(
 
         positives = int(rest["label"].sum())
         estimators = build_estimators(
-            (len(rest) - positives) / positives, positives
+            (len(rest) - positives) / positives, positives, len(features)
         )
         estimator = estimators.get(model_name)
         if estimator is None:
