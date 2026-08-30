@@ -234,6 +234,7 @@ svg.dgm{display:block; width:100%; height:auto; color:var(--ink); min-width:30re
     <li><a href="#s17"><span class="num">17</span><span>How much data is enough</span></a></li>
     <li><a href="#s18"><span class="num">18</span><span>Where it stands</span></a></li>
     <li><a href="#s19"><span class="num">19</span><span>Limitations</span></a></li>
+    <li><a href="#s20"><span class="num">20</span><span>Open items</span></a></li>
     <li class="gap"></li>
     <li><a href="#sA"><span class="num">A</span><span>Constants</span></a></li>
     <li><a href="#sB"><span class="num">B</span><span>Files and commands</span></a></li>
@@ -1320,7 +1321,7 @@ leakage audit passed</code></pre>
 <tbody>
 <tr><td><code>v_weather_rolling</code></td><td>rain over 3/7/15/30 days, soil-moisture lags, per-cell rainfall percentile</td><td>two passes — MySQL refuses to rank over a window function directly</td></tr>
 <tr><td><code>v_event_detail</code></td><td>events joined to terrain and elevation band</td><td>5 bands: &lt;500, &lt;1000, &lt;2000, &lt;3000, 3000+</td></tr>
-<tr><td><code>v_intensity_duration</code></td><td>mean mm/day against duration, the classic landslide-hydrology diagnostic</td><td>a validation gate on the input data, <em>not</em> a model feature</td></tr>
+<tr><td><code>v_intensity_duration</code></td><td>mean mm/day against duration, the classic landslide-hydrology diagnostic</td><td>a validation gate on the input data, <em>not</em> a model feature — <span class="pass">it passes</span>, see §19</td></tr>
 <tr><td><code>v_cell_neighbours</code></td><td>the 3×3 block around each hill cell</td><td>derived from grid index arithmetic, not spatial joins</td></tr>
 <tr><td><code>v_alert_precision</code></td><td>yesterday's high/critical alerts against what actually happened</td><td>4-day verification window for reporting lag</td></tr>
 <tr><td><code>v_settlements_at_risk</code></td><td>named places in at-risk cells, largest first</td><td>"forty settlements" ranks a cell; it does not tell a team where to go</td></tr>
@@ -1593,6 +1594,8 @@ passed with 1 warnings — read them before presenting</code></pre>
 <p><code>fact_risk_pred</code> still holds output from the model that had the elevation leak. Streamlit and Power BI both read it. Stage 08 must run against the current model before either interface is shown to anyone — it is the one artefact in the repository that would actively misrepresent the work.</p>
 </div>
 
+<p>Every outstanding item, with its blocker and what would close it, is tabulated in <a href="#s20">§20</a>.</p>
+
 <h4>The sequence when the backfill lands</h4>
 <pre><code>05_fetch_weather.py --load-only
 06_build_features.py
@@ -1609,6 +1612,8 @@ passed with 1 warnings — read them before presenting</code></pre>
 <h3>Daily sums cannot see the trigger</h3>
 <p>This is the largest cap on performance and it is a data limit, not a model limit. Landslides respond to sub-daily rainfall <em>intensity</em> — millimetres per hour. The model sees <code>precipitation_sum</code>, a 24-hour total. A three-hour cloudburst and a day of steady drizzle can be the same number here and are completely different on a hillside. No model class fixes this; only hourly data would.</p>
 
+<p><strong>Be precise about which axis is missing.</strong> The intensity-duration gate in §13 was run against the 8,837-row matrix and it <em>passes</em>: median intensity falls from 16 mm/day at 3 days to 15 mm/day at 15 days — the decreasing power-law shape the landslide literature reports. Antecedent rainfall separates cleanly too, a 7-day median of <strong>108 mm before an event against 66 mm for controls</strong>. So the data does resolve the <em>duration</em> axis and the antecedent build-up. What it cannot resolve is the sub-daily burst that tips an already-saturated slope. That is a narrower and more defensible claim than "the weather data is too coarse", and it is the one the evidence supports.</p>
+
 <h3>11 km cells against 1–2 km orographic rainfall</h3>
 <p>The grid matches ERA5-Land's native resolution, so there is no false precision — but in Himalayan terrain rainfall varies sharply over one or two kilometres, and the predictor frequently does not see the rain that caused the slide.</p>
 
@@ -1620,6 +1625,69 @@ passed with 1 warnings — read them before presenting</code></pre>
 
 <h3>Not an operational warning system</h3>
 <p>No hourly nowcast. No validation against IMD or GSI bulletins. No human in the loop. It is a screening aid that ranks cells for inspection, and the model card states the out-of-scope uses explicitly.</p>
+
+<hr>
+
+<!-- ══════════════════════════════ 20 ══════════════════════════════ -->
+<h2 id="s20"><span class="h-num">20</span>Open items</h2>
+
+<p class="lede">Everything still outstanding, why, and what would close it. Recorded rather than left implicit, because a project that does not list its own gaps is claiming it has none.</p>
+
+<h3>Blocked on the API quota</h3>
+
+<p>Open-Meteo's allowance refills on a rolling window. Today's spend is <strong>10,010 call units against a 9,500 guideline</strong>, so both rows below are waiting on the same clock and nothing else.</p>
+
+<div class="tw">
+<table>
+<thead><tr><th>Item</th><th>State</th><th>What closes it</th></tr></thead>
+<tbody>
+<tr><td>Weather backfill</td><td class="warn">71% — 3,471 windows pending</td><td>~4 more hours of refilled quota. The daemon is running and resumes on its own.</td></tr>
+<tr><td><code>fact_risk_pred</code></td><td class="fail">two models stale</td><td><code>08_score.py</code>, which needs forecast quota from the same allowance. Until then the risk map serves output from the model that still had the elevation leak.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>Declared in the schema, never populated</h3>
+
+<p>Three warehouse objects exist in <code>sql/01_schema.sql</code>, carry explanatory comments, and are written by nothing. None of them breaks anything downstream — which is precisely why they survived unnoticed.</p>
+
+<div class="tw">
+<table>
+<thead><tr><th>Object</th><th>Rows</th><th>What the schema claims</th><th>What actually happens</th></tr></thead>
+<tbody>
+<tr><td><code>dim_road</code></td><td class="n">0</td><td>"so the exposure precompute can be traced back to named features"</td><td><code>09_build_exposure.py</code> writes <code>dim_settlement</code> (75,202 rows) and <code>fact_exposure</code>, but computes road length straight from the shapefiles without persisting the individual roads. Settlements are traceable; roads are not.</td></tr>
+<tr><td><code>fact_exposure.exposure_score</code></td><td class="n">7,627 NULL</td><td>"normalised 0-1, used in prioritisation"</td><td>Computed in memory at scoring time by <code>scoring.exposure_score()</code> and folded straight into <code>priority_score</code>. The column is a leftover from an earlier design and is read by nothing.</td></tr>
+<tr><td><code>etl_run_log</code></td><td class="n">0</td><td>per-step status, row counts and timings for operational observability</td><td>Created by <code>00_init_db.py</code> and referenced nowhere else. Stage timing goes to the log files instead.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The honest options are to populate them or to drop them. Leaving a commented column that nothing fills is the worst of the three, because the comment reads as a description of behaviour that does not exist.</p>
+
+<h3>Scoped out, deliberately</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th>Item</th><th>Why not now</th><th>What it would take</th></tr></thead>
+<tbody>
+<tr><td>Hourly rainfall intensity</td><td>The only lever left on the score ceiling — see §19 — but it competes for the same quota the backfill is still consuming, and it cannot be evaluated without a stable daily baseline to compare against.</td><td><code>hourly=precipitation</code> from the same archive endpoint, collapsed to max-1h and max-6h plus intensity-duration position. Roughly a day of work plus a fresh quota budget, run as a v2 with the daily model as control.</td></tr>
+<tr><td>Ground-truth validation</td><td>No access to IMD or GSI bulletins for the study period.</td><td>A second label source, which would also let the reporting bias in §05 be measured rather than only stated.</td></tr>
+<tr><td>Sub-cell resolution</td><td>An 11 km cell is set by ERA5-Land and by the catalogue's 5–25 km positional error. Going finer would produce confident predictions the labels cannot support.</td><td>Higher-resolution reanalysis and a better-located event catalogue. Neither is available free.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>Waiting on a person, not a machine</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th>Item</th><th>State</th></tr></thead>
+<tbody>
+<tr><td>Push to <code>origin/main</code></td><td>Six commits sit local-only. The remote exists. This is a one-command decision that has not been asked for.</td></tr>
+<tr><td>Demo the risk map</td><td>Should not happen until <code>08_score.py</code> has run. It is the one artefact that would actively misrepresent the work.</td></tr>
+</tbody>
+</table>
+</div>
 
 <hr>
 
