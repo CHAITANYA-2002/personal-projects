@@ -26,6 +26,7 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 
 import pandas as pd
+import pydeck as pdk
 import streamlit as st
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -35,13 +36,33 @@ from src import db                               # noqa: E402
 from src.model.scoring import RISK_BANDS         # noqa: E402
 
 BAND_COLOURS = {
-    "critical": "#9C332B",
-    "high": "#C4622D",
-    "elevated": "#B4762A",
-    "moderate": "#6E7B4F",
-    "low": "#2F6B57",
+    "critical": "#8F2222",
+    "high": "#B45309",
+    "elevated": "#A16207",
+    "moderate": "#4D7C0F",
+    "low": "#64748B",
+}
+
+# Same five colours as RGB, because deck.gl wants channels not hex. Alpha rises
+# with severity so a quiet day reads as quiet instead of as a solid wash.
+BAND_RGBA = {
+    "critical": [143, 34, 34, 235],
+    "high": [180, 83, 9, 220],
+    "elevated": [161, 98, 7, 200],
+    "moderate": [77, 124, 15, 175],
+    "low": [100, 116, 139, 110],
 }
 BAND_ORDER = [name for _, name in RISK_BANDS]
+
+# What an officer is actually told when they see a band. Sitting next to the
+# colour, this is the difference between a legend and a decision aid.
+BAND_MEANING = {
+    "critical": "5x the background rate — inspect today",
+    "high": "3-5x — inspect today if a team is free",
+    "elevated": "2-3x — worth a look this week",
+    "moderate": "1.2-2x — top of the distribution on a quiet day",
+    "low": "at or below the background rate",
+}
 
 QUEUE_PATH = settings.DATA_DIR / "field_reports_queue.jsonl"
 FIGURES = settings.PROJECT_ROOT / "reports" / "figures"
@@ -111,8 +132,10 @@ def load_risk(target_date: int | None = None) -> pd.DataFrame:
         SELECT  r.cell_id, r.date_id, r.full_date, r.probability,
                 r.absolute_probability, r.risk_band,
                 r.priority_score, r.driver_1, r.driver_2, r.driver_3,
-                r.lat_c, r.lon_c, r.state_name, r.elev_mean, r.slope_mean,
-                r.road_km_total, r.settlements, r.est_population
+                r.lat_c, r.lon_c, r.state_name, r.district_name,
+                r.elev_mean, r.slope_mean,
+                r.road_km_total, r.settlements, r.est_population,
+                r.schools, r.health_facilities
         FROM    mart_cell_daily_risk r
         {where}
         """,
@@ -441,10 +464,18 @@ def risk_map_page() -> None:
         st.info("No cells in the selected bands.")
         return
 
-    plot = shown.rename(columns={"lat_c": "latitude", "lon_c": "longitude"})
-    plot["colour"] = plot["risk_band"].map(BAND_COLOURS)
-    st.map(plot, latitude="latitude", longitude="longitude",
-           color="colour", size=4000)
+    colour_by = st.radio(
+        "Colour by",
+        ["Risk band", "Priority (risk x exposure)"],
+        horizontal=True,
+        help=(
+            "Risk ranks slopes by how likely they are to fail. Priority ranks "
+            "them by what is downhill. They are different questions and they "
+            "produce different maps."
+        ),
+    )
+    _render_map(shown, colour_by)
+    _render_legend(shown, colour_by)
 
     st.subheader("Highest priority")
     st.caption(
@@ -466,6 +497,162 @@ def risk_map_page() -> None:
         })
     )
     st.dataframe(table, width="stretch", hide_index=True)
+
+
+def _cell_polygon(lat: float, lon: float) -> list[list[float]]:
+    """The cell's real footprint, not a dot.
+
+    A scatter dot says "something is here" and hides the one thing a reader
+    most needs to calibrate against: an 11 km cell is not a hillside. Drawing
+    the actual 0.1-degree square makes the resolution of the claim visible on
+    the map itself.
+    """
+    half = settings.GRID_DEG / 2
+    return [
+        [lon - half, lat - half],
+        [lon + half, lat - half],
+        [lon + half, lat + half],
+        [lon - half, lat + half],
+    ]
+
+
+def _render_map(frame: pd.DataFrame, colour_by: str) -> None:
+    plot = frame.copy()
+    plot["polygon"] = [
+        _cell_polygon(row.lat_c, row.lon_c)
+        for row in plot.itertuples(index=False)
+    ]
+
+    if colour_by.startswith("Priority"):
+        # Priority is unbounded and heavily skewed, so shade by rank within the
+        # day rather than by raw value — an absolute ramp would render every
+        # cell the same colour on a quiet day.
+        rank = plot["priority_score"].rank(pct=True)
+        plot["fill"] = [
+            [143, 34, 34, int(60 + 175 * r)] for r in rank
+        ]
+    else:
+        plot["fill"] = plot["risk_band"].map(BAND_RGBA)
+
+    plot["line"] = [[255, 255, 255, 90]] * len(plot)
+
+    # Tooltip fields have to be plain columns; deck.gl cannot format inside the
+    # template, so anything that needs rounding is prepared here.
+    plot["tip_band"] = plot["risk_band"].str.title()
+    plot["tip_score"] = plot["probability"].map(lambda v: f"{v:.3f}")
+    plot["tip_odds"] = plot["absolute_probability"].map(
+        lambda v: f"1 in {int(round(1 / max(float(v), 1e-12))):,}"
+        if pd.notna(v) else "unknown"
+    )
+    plot["tip_people"] = plot["est_population"].map(
+        lambda v: f"{int(v):,}" if pd.notna(v) else "0"
+    )
+    plot["tip_road"] = plot["road_km_total"].map(
+        lambda v: f"{float(v):.0f} km" if pd.notna(v) else "0 km"
+    )
+    plot["tip_where"] = (
+        plot["district_name"].fillna("unknown district")
+        + ", " + plot["state_name"].fillna("unknown state")
+    )
+    plot["tip_terrain"] = (
+        plot["elev_mean"].map(lambda v: f"{float(v):,.0f} m" if pd.notna(v) else "?")
+        + " · " + plot["slope_mean"].map(
+            lambda v: f"{float(v):.1f}\u00b0 mean slope" if pd.notna(v) else "?")
+    )
+
+    layer = pdk.Layer(
+        "PolygonLayer",
+        data=plot[[
+            "polygon", "fill", "line", "tip_band", "tip_score", "tip_odds",
+            "tip_people", "tip_road", "tip_where", "tip_terrain", "driver_1",
+        ]],
+        get_polygon="polygon",
+        get_fill_color="fill",
+        get_line_color="line",
+        line_width_min_pixels=1,
+        stroked=True,
+        filled=True,
+        pickable=True,
+        auto_highlight=True,
+    )
+
+    view = pdk.ViewState(
+        latitude=float(plot["lat_c"].mean()),
+        longitude=float(plot["lon_c"].mean()),
+        zoom=4.2,
+        bearing=0,
+        pitch=0,
+    )
+
+    st.pydeck_chart(
+        pdk.Deck(
+            layers=[layer],
+            initial_view_state=view,
+            map_style="road",
+            tooltip={
+                "html": (
+                    "<b>{tip_where}</b><hr style='margin:4px 0'>"
+                    "<b>{tip_band}</b> &nbsp; score {tip_score}<br>"
+                    "Chance of failure today: <b>{tip_odds}</b><br>"
+                    "Main driver: {driver_1}<hr style='margin:4px 0'>"
+                    "{tip_terrain}<br>"
+                    "{tip_people} people &nbsp;·&nbsp; {tip_road} of road"
+                ),
+                "style": {
+                    "backgroundColor": "#151F1C",
+                    "color": "#E3E9E5",
+                    "fontSize": "12px",
+                    "borderRadius": "3px",
+                },
+            },
+        ),
+        height=520,
+    )
+    st.caption(
+        "Each square is one 0.1-degree cell — about 11 km on a side. That is "
+        "the resolution of the claim: the model scores a cell, not a hillside. "
+        "Hover a cell for its district, its real chance of failure, and what "
+        "is downhill."
+    )
+
+
+def _render_legend(frame: pd.DataFrame, colour_by: str) -> None:
+    if colour_by.startswith("Priority"):
+        st.markdown(
+            '<div class="sw-note"><span class="sw-k">Shaded by priority rank'
+            "</span>Darker means a higher combination of risk and what is "
+            "downhill, ranked within this day. Priority is deliberately not "
+            "comparable across days — it answers "
+            "<i>where do I send the one team I have today</i>, not "
+            "<i>is today worse than yesterday</i>.</div>",
+            unsafe_allow_html=True,
+        )
+        return
+
+    counts = frame["risk_band"].value_counts()
+    rows = []
+    for band in reversed(BAND_ORDER):
+        if band not in counts:
+            continue
+        rows.append(
+            f'<div style="display:flex;align-items:center;gap:.6rem;'
+            f'padding:.28rem 0;">'
+            f'<span style="width:1.1rem;height:1.1rem;border-radius:2px;'
+            f'background:{BAND_COLOURS[band]};flex:0 0 auto;"></span>'
+            f'<span style="font-weight:600;min-width:5.5rem;">'
+            f"{band.title()}</span>"
+            f'<span style="font-variant-numeric:tabular-nums;min-width:3rem;">'
+            f"{int(counts[band])}</span>"
+            f'<span style="color:#4C5955;font-size:.88rem;">'
+            f"{BAND_MEANING[band]}</span></div>"
+        )
+    st.markdown(
+        '<div style="border:1px solid #C6CEC9;background:#FFFFFF;'
+        'padding:.7rem .9rem;margin:.4rem 0 .8rem;">'
+        + "".join(rows)
+        + "</div>",
+        unsafe_allow_html=True,
+    )
 
 
 def cell_detail_page() -> None:
