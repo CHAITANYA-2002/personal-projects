@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" class="dgm" viewBox="0 0 770 316" role="img" aria-label="Feature families: dynamic weather features from rolling windows, static terrain features constant per cell, and contextual calendar and history features.">
+<style>
+  svg { color: #151F1C; background: #F8F9F8;
+        --surface:#FFFFFF; --sunk:#E9EDEA; --ink-2:#4C5955;
+        --accent:#9A5615; --accent-wash:#F3E6D8; --water:#20666E;
+        --water-wash:#DDEAEB; --crit:#8F2222; --high:#A2510A;
+        --elev:#8A6208; --mod:#456F13; --low:#5A6B72; }
+  @media (prefers-color-scheme: dark) {
+    svg { color: #E3E9E5; background: #101714;
+          --surface:#182220; --sunk:#202C28; --ink-2:#9DABA5;
+          --accent:#DA9451; --accent-wash:#31241A; --water:#66B4BC;
+          --water-wash:#16292C; --crit:#E07A7A; --high:#DFA05A;
+          --elev:#CFB055; --mod:#9BC46A; --low:#93A5AC; }
+  }
+  .n      { fill: var(--surface); stroke: currentColor; stroke-width: 1.4; }
+  .n-sunk { fill: var(--sunk);    stroke: currentColor; stroke-width: 1.4; }
+  .n-acc  { fill: var(--accent-wash); stroke: var(--accent); stroke-width: 1.8; }
+  .n-wat  { fill: var(--water-wash);  stroke: var(--water);  stroke-width: 1.4; }
+  .n-ghost{ fill: none; stroke: currentColor; stroke-width: 1;
+            stroke-dasharray: 3 3; opacity: .55; }
+  .e      { stroke: currentColor; stroke-width: 1.3; fill: none; }
+  .e-acc  { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .e-dash { stroke: currentColor; stroke-width: 1.2; fill: none;
+            stroke-dasharray: 4 3; opacity: .7; }
+  .t      { font: 500 12.5px system-ui, -apple-system, "Segoe UI", sans-serif;
+            fill: currentColor; }
+  .t-b    { font: 700 12.5px system-ui, -apple-system, "Segoe UI", sans-serif;
+            fill: currentColor; }
+  .t-s    { font: 400 10.5px system-ui, -apple-system, "Segoe UI", sans-serif;
+            fill: var(--ink-2); }
+  .t-m    { font: 400 10.5px ui-monospace, "Cascadia Mono", Consolas, monospace;
+            fill: var(--ink-2); }
+  .t-acc  { fill: var(--accent); font-weight: 600; }
+  .t-wat  { fill: var(--water); }
+  .ar     { fill: currentColor; }
+  .ar-acc { fill: var(--accent); }
+</style>
+<defs><marker id="ar11" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ar"/></marker></defs>
+
+<rect x="286" y="10" width="190" height="40" class="n-acc"/>
+<text x="381" y="28" class="t-b t-acc" text-anchor="middle">41 model features</text>
+<text x="381" y="43" class="t-s" text-anchor="middle">identical at train and score time</text>
+
+<path d="M330 54 C 260 66 160 62 130 78" class="e" marker-end="url(#ar11)"/>
+<path d="M381 54 L 381 78" class="e" marker-end="url(#ar11)"/>
+<path d="M432 54 C 500 66 600 62 632 78" class="e" marker-end="url(#ar11)"/>
+
+<rect x="10" y="82" width="240" height="196" class="n"/>
+<text x="130" y="102" class="t-b" text-anchor="middle">DYNAMIC · 24</text>
+<text x="130" y="118" class="t-s" text-anchor="middle">what the sky and soil have done</text>
+<line x1="24" y1="126" x2="236" y2="126" class="e-dash"/>
+<text x="24" y="144" class="t-m">rain_{1,3,7,15,30}d</text>
+<text x="24" y="160" class="t-m">rain_max_1d_in_{7,30}</text>
+<text x="24" y="176" class="t-m">wet_days_{7,30}</text>
+<text x="24" y="192" class="t-m t-acc">api</text><text x="70" y="192" class="t-s">exp. decay, k = 0.92</text>
+<text x="24" y="208" class="t-m">sm_{0_7,7_28,28_100}</text>
+<text x="34" y="222" class="t-s">+ delta_1d, delta_7d, mean_7d</text>
+<text x="24" y="240" class="t-m">et0_7d · wetness_ratio_7d</text>
+<text x="24" y="256" class="t-m">temp_mean_7d</text>
+<text x="24" y="272" class="t-m">rain_{7,30}d_anomaly</text>
+
+<rect x="262" y="82" width="234" height="140" class="n"/>
+<text x="379" y="102" class="t-b" text-anchor="middle">STATIC · 8</text>
+<text x="379" y="118" class="t-s" text-anchor="middle">which cells can fail at all</text>
+<line x1="276" y1="126" x2="482" y2="126" class="e-dash"/>
+<text x="276" y="144" class="t-m">elev_mean · elev_range</text>
+<text x="276" y="160" class="t-m">slope_mean · slope_max · slope_std</text>
+<text x="276" y="176" class="t-m">aspect_sin · aspect_cos</text>
+<text x="276" y="192" class="t-m">tri</text>
+<text x="276" y="212" class="t-s">Constant per cell — carries no temporal</text>
+<text x="276" y="226" class="t-s">information, so it cannot leak.</text>
+
+<rect x="508" y="82" width="252" height="140" class="n"/>
+<text x="634" y="102" class="t-b" text-anchor="middle">CONTEXTUAL · 9</text>
+<text x="634" y="118" class="t-s" text-anchor="middle">calendar and the cell's own past</text>
+<line x1="522" y1="126" x2="746" y2="126" class="e-dash"/>
+<text x="522" y="144" class="t-m">month · doy_sin · doy_cos</text>
+<text x="522" y="160" class="t-m">is_monsoon</text>
+<text x="522" y="176" class="t-m">hist_events_before</text>
+<text x="522" y="192" class="t-m">has_prior_event</text>
+<text x="522" y="212" class="t-s" style="fill:var(--crit)">Counted strictly BEFORE each sample date —</text>
+<text x="522" y="226" class="t-s" style="fill:var(--crit)">a catalogue total would hand over the answer.</text>
+
+<rect x="262" y="234" width="498" height="72" class="n-ghost"/>
+<text x="276" y="252" class="t-s"><tspan class="t-b">Deliberately excluded:</tspan> <tspan class="t-m">discharge</tspan> and <tspan class="t-m">discharge_ratio</tspan>.</text>
+<text x="276" y="270" class="t-s">GloFAS models river reaches; most landslide cells are headwater</text>
+<text x="276" y="286" class="t-s">slopes reading near zero. It also doubles API cost — and a feature</text>
+<text x="276" y="302" class="t-s">whose presence correlates with fetch order is a leak, not a feature.</text>
+</svg>

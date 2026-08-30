@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" class="dgm" viewBox="0 0 700 300" role="img" aria-label="Learning curve re-measured at 74% coverage: test PR-AUC rises from 0.260 at 1,567 training rows to 0.292 at 5,329 and then goes flat, ending at 0.291 with 6,269 rows.">
+<style>
+  svg { color: #151F1C; background: #F8F9F8;
+        --surface:#FFFFFF; --sunk:#E9EDEA; --ink-2:#4C5955;
+        --accent:#9A5615; --accent-wash:#F3E6D8; --water:#20666E;
+        --water-wash:#DDEAEB; --crit:#8F2222; --high:#A2510A;
+        --elev:#8A6208; --mod:#456F13; --low:#5A6B72; }
+  @media (prefers-color-scheme: dark) {
+    svg { color: #E3E9E5; background: #101714;
+          --surface:#182220; --sunk:#202C28; --ink-2:#9DABA5;
+          --accent:#DA9451; --accent-wash:#31241A; --water:#66B4BC;
+          --water-wash:#16292C; --crit:#E07A7A; --high:#DFA05A;
+          --elev:#CFB055; --mod:#9BC46A; --low:#93A5AC; }
+  }
+  .n      { fill: var(--surface); stroke: currentColor; stroke-width: 1.4; }
+  .n-sunk { fill: var(--sunk);    stroke: currentColor; stroke-width: 1.4; }
+  .n-acc  { fill: var(--accent-wash); stroke: var(--accent); stroke-width: 1.8; }
+  .n-wat  { fill: var(--water-wash);  stroke: var(--water);  stroke-width: 1.4; }
+  .n-ghost{ fill: none; stroke: currentColor; stroke-width: 1;
+            stroke-dasharray: 3 3; opacity: .55; }
+  .e      { stroke: currentColor; stroke-width: 1.3; fill: none; }
+  .e-acc  { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .e-dash { stroke: currentColor; stroke-width: 1.2; fill: none;
+            stroke-dasharray: 4 3; opacity: .7; }
+  .t      { font: 500 12.5px system-ui, -apple-system, "Segoe UI", sans-serif;
+            fill: currentColor; }
+  .t-b    { font: 700 12.5px system-ui, -apple-system, "Segoe UI", sans-serif;
+            fill: currentColor; }
+  .t-s    { font: 400 10.5px system-ui, -apple-system, "Segoe UI", sans-serif;
+            fill: var(--ink-2); }
+  .t-m    { font: 400 10.5px ui-monospace, "Cascadia Mono", Consolas, monospace;
+            fill: var(--ink-2); }
+  .t-acc  { fill: var(--accent); font-weight: 600; }
+  .t-wat  { fill: var(--water); }
+  .ar     { fill: currentColor; }
+  .ar-acc { fill: var(--accent); }
+</style>
+<line x1="70" y1="240" x2="660" y2="240" class="e"/>
+<line x1="70" y1="240" x2="70" y2="40" class="e"/>
+<text x="365" y="272" class="t-s" text-anchor="middle">training rows</text>
+<text x="32" y="140" class="t-s" text-anchor="middle" transform="rotate(-90 32 140)">test PR-AUC</text>
+
+<line x1="70" y1="196" x2="660" y2="196" class="e-dash" style="opacity:.3"/>
+<text x="62" y="200" class="t-m" text-anchor="end">0.26</text>
+<line x1="70" y1="162" x2="660" y2="162" class="e-dash" style="opacity:.3"/>
+<text x="62" y="166" class="t-m" text-anchor="end">0.27</text>
+<line x1="70" y1="128" x2="660" y2="128" class="e-dash" style="opacity:.3"/>
+<text x="62" y="132" class="t-m" text-anchor="end">0.28</text>
+<line x1="70" y1="94" x2="660" y2="94" class="e-dash" style="opacity:.3"/>
+<text x="62" y="98" class="t-m" text-anchor="end">0.29</text>
+
+<polyline points="118,195 202,159 285,120 368,100 452,87 536,91" class="e-acc" style="stroke-width:2.4"/>
+<circle cx="118" cy="195" r="4.5" style="fill:var(--accent)"/>
+<circle cx="202" cy="159" r="4.5" style="fill:var(--accent)"/>
+<circle cx="285" cy="120" r="4.5" style="fill:var(--accent)"/>
+<circle cx="368" cy="100" r="4.5" style="fill:var(--accent)"/>
+<circle cx="452" cy="87" r="4.5" style="fill:var(--accent)"/>
+<circle cx="536" cy="91" r="4.5" style="fill:var(--accent)"/>
+
+<text x="118" y="185" class="t-m" text-anchor="middle">0.260</text>
+<text x="202" y="149" class="t-m" text-anchor="middle">0.271</text>
+<text x="285" y="110" class="t-m" text-anchor="middle">0.282</text>
+<text x="368" y="90" class="t-m" text-anchor="middle">0.288</text>
+<text x="452" y="77" class="t-m" text-anchor="middle">0.292</text>
+<text x="580" y="95" class="t-m" text-anchor="middle">0.291</text>
+
+<text x="118" y="256" class="t-m" text-anchor="middle">1567</text>
+<text x="202" y="256" class="t-m" text-anchor="middle">2507</text>
+<text x="285" y="256" class="t-m" text-anchor="middle">3448</text>
+<text x="368" y="256" class="t-m" text-anchor="middle">4389</text>
+<text x="452" y="256" class="t-m" text-anchor="middle">5329</text>
+<text x="536" y="256" class="t-m" text-anchor="middle">6269</text>
+
+<line x1="118" y1="215" x2="202" y2="215" class="e" style="stroke:var(--mod)"/>
+<text x="160" y="211" class="t-m" text-anchor="middle" style="fill:var(--mod)">+0.010</text>
+<line x1="452" y1="112" x2="536" y2="112" class="e" style="stroke:var(--crit)"/>
+<text x="494" y="126" class="t-m" text-anchor="middle" style="fill:var(--crit)">−0.001</text>
+
+<rect x="500" y="34" width="192" height="60" class="n-ghost"/>
+<text x="512" y="52" class="t-s">EPV at 100%: <tspan class="t-m">941 / 41 = 23.0</tspan></text>
+<text x="512" y="70" class="t-s">Test base rate 0.168 —</text>
+<text x="512" y="86" class="t-s">the whole curve is a 1.5× lift.</text>
+</svg>

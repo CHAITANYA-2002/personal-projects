@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" class="dgm" viewBox="0 0 780 400" role="img" aria-label="Weather fetcher control flow, showing the coverage check, budget guard, and the three distinct outcomes of an HTTP call: success writes a Parquet file, 429 ends the run cleanly, and any other 4xx skips the batch permanently.">
+<style>
+  svg { color: #151F1C; background: #F8F9F8;
+        --surface:#FFFFFF; --sunk:#E9EDEA; --ink-2:#4C5955;
+        --accent:#9A5615; --accent-wash:#F3E6D8; --water:#20666E;
+        --water-wash:#DDEAEB; --crit:#8F2222; --high:#A2510A;
+        --elev:#8A6208; --mod:#456F13; --low:#5A6B72; }
+  @media (prefers-color-scheme: dark) {
+    svg { color: #E3E9E5; background: #101714;
+          --surface:#182220; --sunk:#202C28; --ink-2:#9DABA5;
+          --accent:#DA9451; --accent-wash:#31241A; --water:#66B4BC;
+          --water-wash:#16292C; --crit:#E07A7A; --high:#DFA05A;
+          --elev:#CFB055; --mod:#9BC46A; --low:#93A5AC; }
+  }
+  .n      { fill: var(--surface); stroke: currentColor; stroke-width: 1.4; }
+  .n-sunk { fill: var(--sunk);    stroke: currentColor; stroke-width: 1.4; }
+  .n-acc  { fill: var(--accent-wash); stroke: var(--accent); stroke-width: 1.8; }
+  .n-wat  { fill: var(--water-wash);  stroke: var(--water);  stroke-width: 1.4; }
+  .n-ghost{ fill: none; stroke: currentColor; stroke-width: 1;
+            stroke-dasharray: 3 3; opacity: .55; }
+  .e      { stroke: currentColor; stroke-width: 1.3; fill: none; }
+  .e-acc  { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .e-dash { stroke: currentColor; stroke-width: 1.2; fill: none;
+            stroke-dasharray: 4 3; opacity: .7; }
+  .t      { font: 500 12.5px system-ui, -apple-system, "Segoe UI", sans-serif;
+            fill: currentColor; }
+  .t-b    { font: 700 12.5px system-ui, -apple-system, "Segoe UI", sans-serif;
+            fill: currentColor; }
+  .t-s    { font: 400 10.5px system-ui, -apple-system, "Segoe UI", sans-serif;
+            fill: var(--ink-2); }
+  .t-m    { font: 400 10.5px ui-monospace, "Cascadia Mono", Consolas, monospace;
+            fill: var(--ink-2); }
+  .t-acc  { fill: var(--accent); font-weight: 600; }
+  .t-wat  { fill: var(--water); }
+  .ar     { fill: currentColor; }
+  .ar-acc { fill: var(--accent); }
+</style>
+<defs><marker id="ar10" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ar"/></marker>
+<marker id="ar10a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ar-acc"/></marker></defs>
+
+<rect x="16" y="16" width="150" height="42" class="n"/>
+<text x="91" y="34" class="t" text-anchor="middle">fact_sample</text>
+<text x="91" y="49" class="t-s" text-anchor="middle">11,955 cell-dates</text>
+<line x1="91" y1="62" x2="91" y2="82" class="e" marker-end="url(#ar10)"/>
+
+<rect x="16" y="86" width="150" height="52" class="n"/>
+<text x="91" y="104" class="t" text-anchor="middle">plan one window</text>
+<text x="91" y="119" class="t-s" text-anchor="middle">per sample, anchored</text>
+<text x="91" y="132" class="t-s" text-anchor="middle">to its own date</text>
+<line x1="91" y1="142" x2="91" y2="162" class="e" marker-end="url(#ar10)"/>
+
+<polygon points="91,166 178,200 91,234 4,200" class="n-sunk"/>
+<text x="91" y="196" class="t-s" text-anchor="middle">all 45 days</text>
+<text x="91" y="210" class="t-s" text-anchor="middle">already cached?</text>
+<text x="91" y="252" class="t-m" text-anchor="middle">no</text>
+<line x1="91" y1="238" x2="91" y2="266" class="e" marker-end="url(#ar10)"/>
+<line x1="182" y1="200" x2="222" y2="200" class="e-dash" marker-end="url(#ar10)"/>
+<text x="202" y="192" class="t-m" text-anchor="middle">yes</text>
+<text x="228" y="204" class="t-s">skip</text>
+
+<rect x="16" y="270" width="150" height="46" class="n"/>
+<text x="91" y="288" class="t" text-anchor="middle">batch × 8 coords</text>
+<text x="91" y="304" class="t-s" text-anchor="middle">grouped by window</text>
+<line x1="170" y1="293" x2="204" y2="293" class="e" marker-end="url(#ar10)"/>
+
+<rect x="208" y="270" width="140" height="46" class="n"/>
+<text x="278" y="288" class="t" text-anchor="middle">budget check</text>
+<text x="278" y="304" class="t-s" text-anchor="middle">warns; hard stop at 3×</text>
+<line x1="278" y1="266" x2="278" y2="240" class="e" marker-end="url(#ar10)"/>
+
+<rect x="208" y="194" width="140" height="46" class="n-acc"/>
+<text x="278" y="212" class="t-b t-acc" text-anchor="middle">GET archive</text>
+<text x="278" y="228" class="t-s" text-anchor="middle">timeout 120 s</text>
+
+<line x1="352" y1="204" x2="392" y2="140" class="e" marker-end="url(#ar10)"/>
+<line x1="352" y1="216" x2="392" y2="216" class="e" marker-end="url(#ar10)"/>
+<line x1="352" y1="228" x2="392" y2="292" class="e" marker-end="url(#ar10)"/>
+
+<rect x="396" y="104" width="180" height="62" class="n"/>
+<text x="486" y="124" class="t-b" text-anchor="middle" style="fill:var(--mod)">200 OK</text>
+<text x="486" y="142" class="t-s" text-anchor="middle">write one Parquet per</text>
+<text x="486" y="157" class="t-s" text-anchor="middle">(cell, window); charge budget</text>
+
+<rect x="396" y="188" width="180" height="62" class="n"/>
+<text x="486" y="208" class="t-b" text-anchor="middle" style="fill:var(--elev)">429 rate limited</text>
+<text x="486" y="226" class="t-s" text-anchor="middle">1 backoff; a second 429</text>
+<text x="486" y="241" class="t-s" text-anchor="middle">ends the run, cache intact</text>
+
+<rect x="396" y="272" width="180" height="62" class="n-acc"/>
+<text x="486" y="292" class="t-b" text-anchor="middle" style="fill:var(--crit)">any other 4xx</text>
+<text x="486" y="310" class="t-s" text-anchor="middle">PermanentRequestError —</text>
+<text x="486" y="325" class="t-s" text-anchor="middle">skip batch, log, never retry</text>
+
+<line x1="580" y1="135" x2="616" y2="135" class="e" marker-end="url(#ar10)"/>
+<rect x="620" y="112" width="146" height="46" class="n-wat"/>
+<text x="693" y="130" class="t" text-anchor="middle">Parquet cache</text>
+<text x="693" y="146" class="t-s" text-anchor="middle">9,970 files today</text>
+
+<line x1="580" y1="219" x2="616" y2="219" class="e" marker-end="url(#ar10)"/>
+<rect x="620" y="196" width="146" height="46" class="n"/>
+<text x="693" y="214" class="t" text-anchor="middle">daemon sleeps</text>
+<text x="693" y="230" class="t-s" text-anchor="middle">20 min, then retries</text>
+<path d="M693 246 C 693 268 300 268 278 262" class="e-dash" marker-end="url(#ar10)"/>
+
+<line x1="580" y1="303" x2="616" y2="303" class="e-acc" marker-end="url(#ar10a)"/>
+<rect x="620" y="280" width="146" height="46" class="n-acc"/>
+<text x="693" y="298" class="t-s t-acc" text-anchor="middle">added to _refused</text>
+<text x="693" y="314" class="t-s" text-anchor="middle">not re-asked this run</text>
+
+<rect x="16" y="344" width="750" height="46" class="n-ghost"/>
+<text x="30" y="364" class="t-s"><tspan class="t-b">Why 429 and 400 must be handled differently:</tspan> a 429 is a statement about the <tspan style="font-style:italic">moment</tspan> and waiting fixes it. A 400 is a statement</text>
+<text x="30" y="380" class="t-s">about the <tspan style="font-style:italic">request</tspan> — a window ERA5 has not reanalysed yet — and no amount of backoff will ever change the answer.</text>
+</svg>

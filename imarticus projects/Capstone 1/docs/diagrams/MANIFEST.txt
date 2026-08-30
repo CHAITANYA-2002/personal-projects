@@ -1,0 +1,21 @@
+# Extracted from docs/slopewatch-walkthrough.html — do not edit by hand.
+# Regenerate with: scripts/15_extract_diagrams.py
+
+01-a-full-space-time-panel.svg	A full space-time panel of 82 million cell-days is reduced by case-control sampling to 11,955 rows, keeping all 1,719 events and drawing designed controls around them.
+02-architecture-four-external-sources-feed.svg	Architecture: four external sources feed pipeline stages that write to a MySQL warehouse, whose views and marts are read by the Streamlit application.
+03-pipeline-dependency-graph-showing-that.svg	Pipeline dependency graph showing that stages 11 and 09 must precede stage 04, and that stage 05 gates stages 06 through 08.
+04-cell-identifier-encoding-latitude-and.svg	Cell identifier encoding: latitude and longitude are floored into indices, packed as lat_idx times 1000 plus lon_idx, and recovered by divmod.
+05-terrain-pipeline-each-dem-tile.svg	Terrain pipeline: each DEM tile is masked for voids, converted to slope and ruggedness rasters, sliced into 100 cells, reduced to ten statistics, then thresholded into the hill mask.
+06-catalogue-funnel-11-033-raw.svg	Catalogue funnel: 11,033 raw rows reduce to 2,037 inside the bounding box, 1,781 inside the date window, and 1,719 after the country filter.
+07-the-three-control-strata-temporal.svg	The three control strata: temporal holds the cell constant and varies the date, spatial holds the date and varies the cell within an elevation-matched annulus, background samples freely from the case elevation distribution.
+08-space-time-exclusion-buffer-around.svg	Space-time exclusion buffer around each event: candidates inside 15 kilometres and two days are discarded rather than labelled negative; spatial controls are drawn from an annulus starting at 25 kilometres.
+09-validation-design-a-chronological-train.svg	Validation design: a chronological train, validation and test split, with leave-one-region-out cross-validation layered on top across four region blocks.
+10-before-and-after-elevation-band.svg	Before and after elevation band matching: uniform sampling from the hill mask drew controls from the Tibetan plateau at 4,479 metres against 1,433 for cases; band matching draws controls from the case's own 500 metre band, closing the gap to 17 metres.
+11-weather-fetcher-control-flow-showing.svg	Weather fetcher control flow, showing the coverage check, budget guard, and the three distinct outcomes of an HTTP call: success writes a Parquet file, 429 ends the run cleanly, and any other 4xx skips the batch permanently.
+12-feature-families-dynamic-weather-features.svg	Feature families: dynamic weather features from rolling windows, static terrain features constant per cell, and contextual calendar and history features.
+13-training-flow-three-estimators-are.svg	Training flow: three estimators are fitted on the training split, calibrated on validation, scored on all three splits, compared by PR-AUC, then explained with SHAP and cross-validated across regions.
+14-scoring-flow-a-forecast-pull.svg	Scoring flow: a forecast pull with sixty past days and sixteen forecast days feeds the same feature module, then the model score splits into a prior-corrected absolute probability, a relative-risk band, and an exposure-weighted priority.
+15-star-schema-dim-cell-and.svg	Star schema: dim_cell and dim_date are the conformed dimensions joined by every fact table on cell_id and date_id.
+16-before-merged-windows-per-cell.svg	Before: merged windows per cell shift their boundaries when a sample is added, invalidating the cache. After: one window anchored to each sample date never moves.
+17-causal-chain-stage-08-appends.svg	Causal chain: stage 08 appends forecast days to dim_date, an unbounded read by the sampler admits them into the control pool, planned windows end in the present, and ERA5 answers with HTTP 400 which then kills the whole run.
+18-learning-curve-re-measured-at.svg	Learning curve re-measured at 74% coverage: test PR-AUC rises from 0.260 at 1,567 training rows to 0.292 at 5,329 and then goes flat, ending at 0.291 with 6,269 rows.
