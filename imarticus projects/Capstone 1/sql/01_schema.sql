@@ -3,8 +3,8 @@
 -- Design notes
 --   * Star schema. Facts are narrow and keyed on (cell_id, date_id); every
 --     rolling window, ranking and cohort in the analysis is a window function
---     over these tables rather than pandas code, so the model and the Power BI
---     report consume exactly the same definitions.
+--     over these tables rather than pandas code, so the model and the
+--     application consume exactly the same definitions.
 --   * No geometry columns. Distance work (roads within N km of a cell, nearest
 --     stream) is a one-time precompute done in GeoPandas and landed in
 --     fact_exposure. Keeping MySQL free of spatial types avoids the SRID 4326

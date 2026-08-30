@@ -9,8 +9,8 @@ Then runs leave-one-region-out, which is the harder and more informative test:
 a model that scores well in-region but collapses when a whole region is held out
 has learned where landslides happen rather than why.
 
-Artefacts land in models/ and the metrics also go to the warehouse so Power BI
-can report on model quality alongside the risk itself.
+Artefacts land in models/ and the metrics also go to the warehouse so the
+application can report on model quality alongside the risk itself.
 """
 
 from __future__ import annotations

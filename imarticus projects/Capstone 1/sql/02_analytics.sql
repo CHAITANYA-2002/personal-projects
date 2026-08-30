@@ -3,7 +3,7 @@
 -- These views are not a syllabus exercise bolted onto a Python project. The
 -- rolling windows defined here are the same aggregates the dashboard reports,
 -- so a rainfall accumulation is defined exactly once and both the analysis and
--- Power BI read the same definition. Where a calculation exists in both places
+-- the application read the same definition. Where a calculation exists in both
 -- it eventually disagrees in one of them.
 --
 -- Run after the warehouse is loaded:
@@ -145,7 +145,7 @@ JOIN        v_weather_rolling r
 -- ==========================================================================
 -- mart_event_history
 -- Historical page. Events by state, year, month and elevation band, with the
--- year-over-year movement Power BI would otherwise recompute in DAX.
+-- year-over-year movement the application would otherwise recompute on read.
 -- ==========================================================================
 DROP TABLE IF EXISTS mart_event_history;
 CREATE TABLE mart_event_history AS
