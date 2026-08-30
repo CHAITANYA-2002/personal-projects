@@ -47,7 +47,7 @@ def main(run_spatial_cv: bool) -> int:
     })
     log.info("--- model comparison (test split) ---\n%s", comparison.to_string())
 
-    best_name = comparison.index[0]
+    best_name = _select(comparison, models)
     best = models[best_name]
     log.info("selected %s", best_name)
 
@@ -95,6 +95,67 @@ def _load() -> tuple[pd.DataFrame, list[str]]:
 
 def _base_name(name: str) -> str:
     return name
+
+
+def _select(comparison: pd.DataFrame, models: dict) -> str:
+    """Pick a model by PR-AUC, breaking a statistical tie on recall at budget.
+
+    Sorting on PR-AUC alone treats a 0.004 difference as a decision. It is not:
+    at 74% weather coverage the three models scored 0.264, 0.260 and 0.244 with
+    bootstrap intervals that overlap almost completely, and the winner on that
+    ordering caught 5.3% of events inside a 5% inspection budget against 13.0%
+    for the model ranked last. Choosing the first is choosing noise over the
+    only number a district can act on — and metrics.py already says which one
+    that is: "recall_at_budget ... This is the number to lead with."
+
+    So: every model whose PR-AUC interval overlaps the leader's is treated as
+    tied, and the tie is broken on recall at a 5% budget. When one model is
+    genuinely ahead — no overlap — PR-AUC still decides and this does nothing.
+
+    The tie-break is validated before it is applied. If the validation split
+    disagrees with the test split about which tied model has the best recall,
+    the leader is kept, because a tie-break that only holds on the split it was
+    measured on is not a tie-break, it is tuning.
+    """
+    leader = comparison.index[0]
+    if "pr_auc_lo" not in comparison.columns or len(comparison) < 2:
+        return leader
+
+    leader_lo = float(comparison.loc[leader, "pr_auc_lo"])
+    tied = [
+        name for name in comparison.index
+        if float(comparison.loc[name, "pr_auc_hi"]) >= leader_lo
+    ]
+    if len(tied) < 2:
+        return leader
+
+    def recall_on(split: str, name: str) -> float:
+        return float(models[name].scores.get(split, {}).get("recall_at_5pct", 0.0))
+
+    by_test = max(tied, key=lambda name: recall_on("test", name))
+    by_val = max(tied, key=lambda name: recall_on("val", name))
+
+    log.info(
+        "PR-AUC tie across %s (intervals overlap the leader's %.3f lower bound)",
+        ", ".join(tied), leader_lo,
+    )
+    for name in tied:
+        log.info("  %-14s pr_auc %.3f  recall@5%% val %.3f  test %.3f",
+                 name, float(comparison.loc[name, "pr_auc"]),
+                 recall_on("val", name), recall_on("test", name))
+
+    if by_test != by_val:
+        log.info(
+            "validation and test disagree on the tie-break (%s vs %s) — "
+            "keeping the PR-AUC leader %s rather than tuning on one split",
+            by_val, by_test, leader,
+        )
+        return leader
+
+    if by_test != leader:
+        log.info("tie broken on recall at 5%% budget: %s over %s",
+                 by_test, leader)
+    return by_test
 
 
 def _report_spatial(cv: pd.DataFrame, best: train.TrainedModel) -> None:
