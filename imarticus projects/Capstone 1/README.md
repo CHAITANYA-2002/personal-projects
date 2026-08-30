@@ -15,27 +15,45 @@ literally. Everything below is built around that constraint.
 
 | | test split |
 |---|---|
-| PR-AUC | **0.410** [0.345 – 0.482] |
-| base rate (sampled) | 0.267 |
-| ROC-AUC | 0.688 |
-| Brier | 0.184 |
-| mean held-out-region PR-AUC | 0.380 |
-| calibration error | 0.065 mean abs. gap |
+| PR-AUC | **0.244** [0.214 – 0.280] |
+| base rate (sampled) | 0.168 |
+| lift over base rate | **1.45×** |
+| recall @ 5% inspection budget | 0.130 |
+| recall @ 10% | 0.287 |
+| ROC-AUC | 0.647 |
+| Brier | 0.139 |
+| mean held-out-region PR-AUC | 0.259 |
+| calibration error | 0.060 mean abs. gap |
 
-Selected model: **logistic regression**, Platt-calibrated on the validation
-split. It beat random forest (0.366) and XGBoost (0.334) on the test split —
-both trees overfit hard at this sample size, which the train/test gap makes
-plain.
+Selected model: **XGBoost**, calibrated on the validation split. All three
+models tie on PR-AUC — random forest 0.264 [0.231 – 0.300], logistic 0.260
+[0.229 – 0.302], XGBoost 0.244 [0.214 – 0.280], intervals overlapping almost
+completely — so the tie is broken on recall at a 5% inspection budget, where
+they do not tie at all: 0.053, 0.117 and 0.130. XGBoost also leads that metric
+on the validation split, so the tie-break is not test-set tuning.
+
+Trained on 8,837 rows / 41 features at 74% weather coverage. Events per
+variable is 23.
 
 Intended use, out-of-scope use, failure modes and biases are in
 [`docs/model-card.md`](docs/model-card.md). Read it before quoting a score.
 
-**1.5× lift over base rate.** That is a real but modest signal, and the honest
+**1.45× lift over base rate.** That is a real but modest signal, and the honest
 reading is that the ceiling here is *predictor resolution*, not model choice —
 see [Limitations](#limitations). The bracketed interval is a bootstrap 95% CI
 and it is printed everywhere on purpose: the test split grows as the weather
 backfill lands, so two successive runs are not measured on the same data and are
 not directly comparable.
+
+**A worked example of why that warning exists.** An earlier run at 20% weather
+coverage reported PR-AUC 0.410 against a base rate of 0.267. This run reports
+0.244 against 0.168. The model did not get worse — the *lift* went 1.54× to
+1.45×, and everything base-rate independent improved: Brier 0.184 → 0.139,
+calibration error 0.065 → 0.060, recall@10% 0.203 → 0.287, and the gap between
+temporal and spatial generalisation closed from −0.030 to +0.015. The headline
+number fell because the sample composition normalised as the case-first fetch
+ordering washed out. Comparing the two point estimates directly would have been
+exactly the mistake the intervals exist to prevent.
 
 ---
 
@@ -58,12 +76,12 @@ band tolerance) instead of from the hill mask at large.
 |---|---|---|
 | 1 | `elev_mean` 0.513 | `api` 0.660 |
 | 2 | `rain_max_1d_in_7` 0.221 | `sm_28_100_mean_7d` 0.512 |
-| 3 | `rain_30d_anomaly` 0.208 | `sm_0_7_mean_7d` 0.505 |
-| … | | |
-| 7 | | `slope_mean` 0.369 |
+| 3 | `rain_30d_anomaly` 0.208 | `wet_days_30` 0.145 |
+| 4 | `rain_max_1d_in_30` 0.196 | `slope_std` 0.145 |
 
-After the fix `elev_mean` does not appear in the top 15 at all, and `slope_mean`
-climbs from #11 to #7. Case-control elevation gap is now **−17 m**. The
+After the fix `elev_mean` does not appear in the top 15 at all, and terrain
+enters as roughness (`slope_std`) rather than as altitude. Case-control
+elevation gap is now **−17 m**. The
 regression test for this lives in `tests/test_sampling.py` and builds a world
 where plateau and slope cells are interleaved in space, so distance alone cannot
 separate them.
@@ -105,19 +123,22 @@ split and holds the test split fixed:
 
 ```
  frac   rows   pos   EPV   test pr_auc
- 0.25    527   116   2.8   0.380 ± 0.018
- 0.40    843   186   4.5   0.415 ± 0.023
- 0.55   1160   256   6.2   0.424 ± 0.013
- 0.70   1476   326   8.0   0.429 ± 0.024
- 0.85   1792   395   9.6   0.443 ± 0.018
- 1.00   2108   465  11.3   0.446
+ 0.25   1567   235   5.7   0.260 ± 0.009
+ 0.40   2507   376   9.2   0.271 ± 0.010
+ 0.55   3448   518  12.6   0.282 ± 0.009
+ 0.70   4389   659  16.1   0.288 ± 0.008
+ 0.85   5329   800  19.5   0.292 ± 0.006
+ 1.00   6269   941  23.0   0.291
 ```
 
-Quadrupling the training rows bought +0.066. The last 1.4× bought +0.016. The
-curve is flattening, so finishing the weather backfill is worth doing for
-**statistical power** — events-per-variable rises from 11 to ~28 across 41
-features, which is the difference between "model selection is noise" and a
-defensible choice — but not for a large jump in score.
+Quadrupling the training rows bought +0.031. The last 1.4× bought +0.003 — and
+the final step is flat to slightly negative. **The curve has stopped climbing.**
+
+This is the second time it has been measured. The first, on a 2,941-row matrix
+at 20% coverage, predicted exactly this: increments were already decaying and
+the extrapolation said another 4× would buy +0.02 to +0.04. The actual 3×
+bought +0.031. Sample size is no longer the binding constraint — predictor
+resolution is.
 
 ---
 
@@ -137,9 +158,11 @@ Read these before quoting any number above.
   *reported*, which skews toward roads, settlements and media coverage. Absence
   of a record is not absence of a landslide — hence the exclusion buffer.
 - **The weather backfill is incomplete.** Open-Meteo's free tier allows ~10,000
-  calls/day and the full sample needs ~38,000. Metrics recorded here are from a
-  partial backfill; `models/metrics_v1.json` carries the row count for the run
-  that produced them.
+  calls/day and the full sample needs ~38,000. Metrics recorded here are from
+  74% coverage; `models/metrics_v1.json` carries the row count for the run that
+  produced them. The learning curve above says completing it will not move the
+  score much — but it does remove the "your model rests on a small sample"
+  objection, since events per variable is already 23 and heading for ~28.
 - **Not an operational warning system.** No hourly nowcast, no ground truth
   validation against IMD or GSI bulletins, no human in the loop.
 

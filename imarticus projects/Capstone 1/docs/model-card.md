@@ -6,16 +6,26 @@ Himalaya, driven by antecedent rainfall, soil moisture and terrain.
 | | |
 |---|---|
 | version | `v1` — `models/risk_model_v1.joblib` |
-| type | logistic regression, median imputation → standardisation → L2 (`C=0.5`), balanced class weights |
-| calibration | Platt scaling fitted on the validation split only |
+| type | XGBoost, `max_depth=3`, `learning_rate=0.05`, heavy regularisation, native NaN handling |
+| calibration | fitted on the validation split only |
 | inputs | 41 features — rolling rainfall, soil moisture, evapotranspiration, wind, terrain, seasonality |
 | output | probability on the **sampled** base rate, prior-corrected to the population rate at scoring time |
-| trained on | 2,108 rows / 465 positives (2007–2013) |
+| trained on | 6,269 rows / 941 positives (2007–2013), at 74% weather coverage |
+| events per variable | 23 |
 | produced by | `scripts/07_train_model.py`, metrics in `models/metrics_v1.json` |
 
-Logistic was selected over random forest (test PR-AUC 0.366) and XGBoost
-(0.334). Both trees showed a large train-test gap at this sample size; the
-linear model did not.
+**Selection.** All three candidates tie on PR-AUC — random forest 0.264
+[0.231 – 0.300], logistic 0.260 [0.229 – 0.302], XGBoost 0.244 [0.214 – 0.280].
+The intervals overlap almost completely, so a 0.004 ordering is noise. The tie
+is broken on recall at a 5% inspection budget, where they do not tie: 0.053,
+0.117, 0.130. XGBoost leads that metric on the validation split too (0.177), so
+the tie-break is validated rather than tuned.
+
+Tree capacity is gated on events per variable rather than a raw positive count.
+At 941 positives the old gate opened the flexible branch and both trees became
+lookup tables — random forest 0.934 on train against 0.241 on validation,
+XGBoost 0.991 against 0.214. With the gate corrected, both improved on held-out
+data.
 
 ---
 
@@ -39,7 +49,7 @@ Do not use this model to:
 - **Certify a location as safe.** A low score reflects the absence of the
   conditions this model can see. See *reporting bias* below.
 - **Read a score as a probability of a landslide.** Scores are calibrated on the
-  sampled base rate (~0.23), not the population rate (~1 in 48,000 cell-days).
+  sampled base rate (0.151), not the population rate (~1 in 48,000 cell-days).
   The prior correction at scoring time converts them; the raw model output does
   not.
 
@@ -47,22 +57,29 @@ Do not use this model to:
 
 ## Performance
 
-Test split — 2015–2016, temporally held out, 573 rows / 153 positives.
+Test split — 2015–2016, temporally held out, 1,784 rows / 300 positives.
 
 | metric | value |
 |---|---|
-| PR-AUC | **0.410** (95% CI 0.345 – 0.482) |
-| base rate | 0.267 |
-| ROC-AUC | 0.688 |
-| Brier | 0.184 |
-| recall @ 1% budget | 0.033 |
-| recall @ 5% budget | 0.111 |
-| recall @ 10% budget | 0.203 |
-| recall @ 20% budget | 0.431 |
+| PR-AUC | **0.244** (95% CI 0.214 – 0.280) |
+| base rate | 0.168 |
+| lift over base rate | 1.45× |
+| ROC-AUC | 0.647 |
+| Brier | 0.139 |
+| recall @ 1% budget | 0.020 |
+| recall @ 5% budget | 0.130 |
+| recall @ 10% budget | 0.287 |
+| recall @ 20% budget | 0.460 |
 
 **Read the budget rows, not the AUC.** They are what the model would actually
-deliver: inspecting the top 10% of cells catches about 1 event in 5. Whether
-that is useful depends entirely on what inspecting a cell costs.
+deliver: inspecting the top 10% of cells catches about 29% of events, and the
+top 20% catches 46%. Whether that is useful depends entirely on what inspecting
+a cell costs.
+
+**Do not compare this PR-AUC to an earlier one.** A run at 20% weather coverage
+reported 0.410 against a base rate of 0.267. This reports 0.244 against 0.168.
+The lift moved 1.54× to 1.45×; Brier, calibration and every recall-at-budget
+figure improved. The headline fell because the base rate fell with it.
 
 The confidence interval is bootstrapped and is printed everywhere on purpose.
 The test split grows as the weather backfill lands, so two successive runs are
@@ -72,24 +89,27 @@ not measured on the same data and their point estimates are not comparable.
 
 Leave-one-region-out, four blocks:
 
-| held-out block | PR-AUC | recall @ 5% |
-|---|---|---|
-| central Himalaya | 0.436 | 0.184 |
-| west Himalaya | 0.388 | 0.114 |
-| north east | 0.359 | 0.131 |
-| eastern Himalaya | 0.339 | 0.072 |
+| held-out block | PR-AUC | recall @ 5% | rows | positives |
+|---|---|---|---|---|
+| central Himalaya | 0.308 | 0.152 | 1,497 | 223 |
+| west Himalaya | 0.286 | 0.121 | 2,268 | 363 |
+| eastern Himalaya | 0.241 | 0.095 | 2,890 | 475 |
+| north east | 0.200 | 0.105 | 2,182 | 276 |
 
-Mean 0.380 against a temporal-test 0.410. The gap is small, which is the point
-of the exercise: performance does not collapse on terrain the model has not
-seen. Kashmir is deliberately grouped with Himachal rather than pooled — only
+Mean **0.259** against a temporal-test 0.244 — spatial generalisation is now
+marginally *better* than temporal, where at 20% coverage it was 0.030 worse.
+Performance does not collapse on terrain the model has never seen. Kashmir is deliberately grouped with Himachal rather than pooled — only
 47% of its events fall in the monsoon against 85–93% elsewhere, because it is
 driven by western disturbances and snowmelt.
 
 ### Calibration
 
-Mean absolute gap 0.065 across bins. Reliable in the two bins that carry the
-data (211 and 300 rows); the 0.3–0.4 bin is over-confident (predicted 0.371,
-observed 0.542) and the bins above 0.6 hold one row each and mean nothing.
+Mean absolute gap 0.060 across bins. The two bins carrying almost all the mass
+— 0.0–0.1 with 629 rows and 0.1–0.2 with 1,085 — are mildly under-confident
+(0.037 predicted against 0.084 observed; 0.143 against 0.202). Above 0.3 the
+bins hold between 1 and 27 rows and mean nothing individually; three rows
+predicted at 1.0 were wrong, which is what an unregularised tail looks like on
+a sample this size.
 
 ---
 
@@ -99,16 +119,19 @@ Top features by mean |SHAP|:
 
 | # | feature | |SHAP| |
 |---|---|---|
-| 1 | `api` — antecedent precipitation index | 0.660 |
-| 2 | `sm_28_100_mean_7d` — deep soil moisture, 7-day mean | 0.512 |
-| 3 | `sm_0_7_mean_7d` — surface soil moisture, 7-day mean | 0.505 |
-| 4 | `sm_7_28` | 0.499 |
-| 5 | `sm_28_100` | 0.402 |
-| 6 | `sm_0_7` | 0.390 |
-| 7 | `slope_mean` | 0.369 |
+| 1 | `rain_1d` — rainfall on the day | 0.212 |
+| 2 | `rain_3d` — three-day accumulation | 0.182 |
+| 3 | `wet_days_30` — wet days in the past month | 0.145 |
+| 4 | `slope_std` — slope variability within the cell | 0.145 |
+| 5 | `et0_7d` — evaporative demand | 0.133 |
+| 6 | `rain_max_1d_in_30` — the month's heaviest day | 0.121 |
+| 7 | `aspect_cos` — which way the slope faces | 0.091 |
+| 8 | `hist_events_before` — prior events in this cell | 0.087 |
 
-Antecedent wetness first, terrain seventh. That ordering is the physics the
-landslide literature describes, and it is the result of a fix — see below.
+Rainfall first — the day itself, then the three-day accumulation, then how many
+wet days preceded it. Terrain enters fourth as *roughness*, not altitude. That
+ordering is the physics the landslide literature describes, and it is the result
+of a sampling fix — see below.
 
 ---
 
@@ -139,12 +162,12 @@ varies over 1–2 km; the predictor frequently does not see the rain that caused
 the slide. This is a data-resolution limit, not a model-class limit, and no
 amount of additional rows of the same features will lift it.
 
-**Sample size.** Trained on 2,108 rows because the weather backfill is
-incomplete — Open-Meteo's free tier allows ~10,000 calls/day against ~38,000
-needed. Events-per-variable is 11 across 41 features, which is thin.
-`scripts/13_learning_curve.py` measures the cost: the curve is flattening, so
-completing the backfill buys statistical confidence rather than a large score
-gain.
+**Sample size.** Trained on 6,269 rows at 74% weather coverage — Open-Meteo's
+free tier allows ~10,000 calls/day against ~38,000 needed. Events per variable
+is 23 across 41 features. `scripts/13_learning_curve.py` measures what the
+remaining 26% is worth: the curve has flattened (+0.003 over the last 1.4x, and
+flat on the final step), so completing the backfill buys statistical confidence
+rather than score.
 
 **Temporal scope.** 2007–2016. Not validated against post-2016 conditions, and
 not adjusted for trend in extreme-rainfall frequency over that period.

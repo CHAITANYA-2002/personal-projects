@@ -760,7 +760,7 @@ svg.dgm{display:block; width:100%; height:auto; color:var(--ink); min-width:30re
 
 <figure class="bleed">
 <div class="fig-box">
-<svg class="dgm" viewBox="0 0 760 350" role="img" aria-label="Before and after elevation band matching: uniform sampling from the hill mask drew controls from the Tibetan plateau at 4,479 metres against 1,433 for cases; band matching draws controls from the case's own 500 metre band, closing the gap to 17 metres.">
+<svg class="dgm" viewBox="0 0 760 364" role="img" aria-label="Before and after elevation band matching: uniform sampling from the hill mask drew controls from the Tibetan plateau at 4,479 metres against 1,433 for cases; band matching draws controls from the case's own 500 metre band, closing the gap to 17 metres.">
 <defs><marker id="ar09" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ar"/></marker></defs>
 
 <text x="16" y="20" class="t-b" style="fill:var(--crit)">BEFORE — uniform draw over the hill mask</text>
@@ -807,17 +807,21 @@ svg.dgm{display:block; width:100%; height:auto; color:var(--ink); min-width:30re
 <text x="418" y="202" class="t-s">Top SHAP feature:</text>
 <text x="418" y="222" class="t-m t-acc">api (antecedent precipitation) · 0.660</text>
 <text x="418" y="240" class="t-s">elev_mean no longer appears in the top 15 at all</text>
+<text x="404" y="272" class="t-s" style="opacity:.8">Both columns are the same model class on the same run —</text>
+<text x="404" y="286" class="t-s" style="opacity:.8">only the sampler changed between them.</text>
 
-<rect x="16" y="278" width="732" height="56" class="n-acc"/>
-<text x="32" y="298" class="t-b t-acc">The mechanism</text>
-<text x="32" y="318" class="t-s">Bands are 500 m wide with ±1 band tolerance. Background draws anchor on a case cell <tspan class="t-b">first</tspan>, then pick a cell in that anchor's band;</text>
-<text x="32" y="332" class="t-s">spatial draws intersect the 25–300 km annulus with the band, falling back to the plain annulus rather than dropping the case.</text>
+<rect x="16" y="292" width="732" height="56" class="n-acc"/>
+<text x="32" y="312" class="t-b t-acc">The mechanism</text>
+<text x="32" y="332" class="t-s">Bands are 500 m wide with ±1 band tolerance. Background draws anchor on a case cell <tspan class="t-b">first</tspan>, then pick a cell in that anchor's band;</text>
+<text x="32" y="346" class="t-s">spatial draws intersect the 25–300 km annulus with the band, falling back to the plain annulus rather than dropping the case.</text>
 </svg>
 </div>
 <figcaption><b>The fix is in the sampler, not the mask.</b> <code>dim_cell.is_hill</code> still flags the plateau — that is correct, it <em>is</em> steep. What changed is that controls are now matched to the elevation band of the case they were drawn around, so the comparison being learned is slope-versus-slope.</figcaption>
 </figure>
 
 <h3>What moved, and what a reader should not conclude</h3>
+
+<p>Both columns below are logistic regression on the same run. Only the sampler changed between them, which is what makes it a controlled comparison rather than two unrelated models.</p>
 
 <div class="tw">
 <table>
@@ -835,6 +839,8 @@ svg.dgm{display:block; width:100%; height:auto; color:var(--ink); min-width:30re
 </div>
 
 <p>Antecedent wetness first, soil moisture through the profile next, terrain seventh. That ordering is what the landslide literature describes, and it emerged from a sampling fix rather than from any change to the model.</p>
+
+<p>The finding has since survived a change of model and a tripling of the data. The shipped XGBoost model at 74% coverage leads with <code>rain_1d</code> 0.212, <code>rain_3d</code> 0.182, <code>wet_days_30</code> 0.145 and <code>slope_std</code> 0.145 — rainfall first, terrain entering fourth as <em>roughness</em>. <code>elev_mean</code> appears in neither post-fix ranking.</p>
 
 <div class="callout trap">
 <span class="k">What this comparison does not show</span>
@@ -912,7 +918,7 @@ svg.dgm{display:block; width:100%; height:auto; color:var(--ink); min-width:30re
 <line x1="580" y1="135" x2="616" y2="135" class="e" marker-end="url(#ar10)"/>
 <rect x="620" y="112" width="146" height="46" class="n-wat"/>
 <text x="693" y="130" class="t" text-anchor="middle">Parquet cache</text>
-<text x="693" y="146" class="t-s" text-anchor="middle">8,920 files today</text>
+<text x="693" y="146" class="t-s" text-anchor="middle">9,970 files today</text>
 
 <line x1="580" y1="219" x2="616" y2="219" class="e" marker-end="url(#ar10)"/>
 <rect x="620" y="196" width="146" height="46" class="n"/>
@@ -944,7 +950,7 @@ svg.dgm{display:block; width:100%; height:auto; color:var(--ink); min-width:30re
   <div class="stat"><span class="v">3.21</span><span class="l">call units each</span></div>
   <div class="stat"><span class="v">8</span><span class="l">coords per request</span></div>
   <div class="stat"><span class="v">~38k</span><span class="l">total call units</span></div>
-  <div class="stat hl"><span class="v">8,920</span><span class="l">windows cached</span></div>
+  <div class="stat hl"><span class="v">9,970</span><span class="l">windows cached</span></div>
 </div>
 
 <!-- ══════════════════════════════ 09 ══════════════════════════════ -->
@@ -1008,7 +1014,7 @@ svg.dgm{display:block; width:100%; height:auto; color:var(--ink); min-width:30re
 <text x="276" y="302" class="t-s">whose presence correlates with fetch order is a leak, not a feature.</text>
 </svg>
 </div>
-<figcaption><b>Three families, one module.</b> The antecedent precipitation index — <code>API_t = precip_t + 0.92 × API_(t−1)</code> — is a single number standing in for "how wet is this slope right now", weighting recent rain more heavily without the hard cutoff a fixed window imposes. It is the top feature by SHAP.</figcaption>
+<figcaption><b>Three families, one module.</b> The antecedent precipitation index — <code>API_t = precip_t + 0.92 × API_(t−1)</code> — is a single number standing in for "how wet is this slope right now", weighting recent rain more heavily without the hard cutoff a fixed window imposes. It was the top feature by SHAP under the logistic model; the shipped gradient booster leads with raw accumulation instead, which is the same physics read a different way.</figcaption>
 </figure>
 
 <h3>Two features that had to be redesigned</h3>
@@ -1089,20 +1095,25 @@ leakage audit passed</code></pre>
 <figcaption><b>Calibration is fitted on validation and nowhere else.</b> An uncalibrated gradient booster ranks well but its raw scores are not probabilities — and a district officer acting on "80%" needs that to mean eight times in ten.</figcaption>
 </figure>
 
-<h3>Results — recorded run, 2,941-row matrix</h3>
+<h3>Results — 8,837-row matrix at 74% weather coverage</h3>
 
 <div class="tw">
 <table>
 <thead><tr><th>Model</th><th class="n">PR-AUC (test)</th><th class="n">95% CI</th><th class="n">ROC-AUC</th><th class="n">Brier</th><th class="n">Recall @5%</th></tr></thead>
 <tbody>
-<tr><td><strong>logistic</strong> ← selected</td><td class="n"><strong>0.4105</strong></td><td class="n">0.345 – 0.482</td><td class="n">0.688</td><td class="n">0.184</td><td class="n">0.111</td></tr>
-<tr><td>random forest</td><td class="n">0.3658</td><td class="n">0.305 – 0.431</td><td class="n">0.656</td><td class="n">0.190</td><td class="n">0.052</td></tr>
-<tr><td>XGBoost</td><td class="n">0.3342</td><td class="n">0.280 – 0.388</td><td class="n">0.625</td><td class="n">0.194</td><td class="n">0.078</td></tr>
+<tr><td>random forest</td><td class="n">0.2639</td><td class="n">0.231 – 0.300</td><td class="n">0.664</td><td class="n">0.136</td><td class="n">0.053</td></tr>
+<tr><td>logistic</td><td class="n">0.2604</td><td class="n">0.229 – 0.302</td><td class="n">0.650</td><td class="n">0.137</td><td class="n">0.117</td></tr>
+<tr><td><strong>XGBoost</strong> ← selected</td><td class="n"><strong>0.2444</strong></td><td class="n">0.214 – 0.280</td><td class="n">0.647</td><td class="n">0.139</td><td class="n"><strong>0.130</strong></td></tr>
 </tbody>
 </table>
 </div>
 
-<p>Test base rate is 0.267, so the selected model delivers a <strong>1.5× lift</strong>. Both tree models showed a large train-test gap; the linear one did not. At 465 training positives against 41 features, that is the expected outcome — and it is why capacity is scaled to the positive count rather than fixed.</p>
+<p>Test base rate is 0.168, so the selected model delivers a <strong>1.45× lift</strong>. Read the table by column, not by row: the three PR-AUC intervals overlap almost completely, so the 0.004 separating first from second is noise. Recall at a 5% inspection budget is not noise — 0.053 against 0.130 is a factor of 2.4 — so that is what breaks the tie, and XGBoost leads it on the validation split too (0.177). The rule and its self-check live in <code>_select()</code>: if validation and test disagreed about the tie-break, the PR-AUC leader would be kept instead.</p>
+
+<div class="callout trap">
+<span class="k">Capacity had to be re-gated first</span>
+<p>Reaching 74% coverage took the training split from 465 positives to 941, which crossed the old <code>n_positives &lt; 500</code> gate — and both tree models immediately became what <code>build_estimators</code>' own docstring warns about. Random forest scored <strong>0.934 on train against 0.241 on validation</strong>; XGBoost <strong>0.991 against 0.214</strong>. 941 positives sounds comfortable until it is divided by 41 features. The gate now measures events per variable, with the flexible branch closed below 50; both trees improved on held-out data once tightened.</p>
+</div>
 
 <h4>Leave-one-region-out</h4>
 
@@ -1110,16 +1121,16 @@ leakage audit passed</code></pre>
 <table>
 <thead><tr><th>Held-out block</th><th class="n">PR-AUC</th><th class="n">Recall @5%</th><th class="n">Rows</th><th class="n">Positives</th></tr></thead>
 <tbody>
-<tr><td>central_himalaya</td><td class="n">0.436</td><td class="n">0.184</td><td class="n">484</td><td class="n">98</td></tr>
-<tr><td>west_himalaya</td><td class="n">0.388</td><td class="n">0.114</td><td class="n">675</td><td class="n">167</td></tr>
-<tr><td>north_east</td><td class="n">0.359</td><td class="n">0.131</td><td class="n">652</td><td class="n">130</td></tr>
-<tr><td>eastern_himalaya</td><td class="n">0.339</td><td class="n">0.072</td><td class="n">1,130</td><td class="n">276</td></tr>
-<tr><td><strong>mean</strong></td><td class="n"><strong>0.380</strong></td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr>
+<tr><td>central_himalaya</td><td class="n">0.308</td><td class="n">0.152</td><td class="n">1,497</td><td class="n">223</td></tr>
+<tr><td>west_himalaya</td><td class="n">0.286</td><td class="n">0.121</td><td class="n">2,268</td><td class="n">363</td></tr>
+<tr><td>eastern_himalaya</td><td class="n">0.241</td><td class="n">0.095</td><td class="n">2,890</td><td class="n">475</td></tr>
+<tr><td>north_east</td><td class="n">0.200</td><td class="n">0.105</td><td class="n">2,182</td><td class="n">276</td></tr>
+<tr><td><strong>mean</strong></td><td class="n"><strong>0.259</strong></td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr>
 </tbody>
 </table>
 </div>
 
-<p>Mean held-out-region 0.380 against a temporal-test 0.410. The gap is small, which is the point: performance does not collapse on terrain the model has never seen.</p>
+<p>Mean held-out-region <strong>0.259</strong> against a temporal-test 0.244 — spatial generalisation is now marginally <em>better</em> than temporal, where at 20% coverage it was 0.030 worse. Performance does not collapse on terrain the model has never seen.</p>
 
 <!-- ══════════════════════════════ 11 ══════════════════════════════ -->
 <h2 id="s11"><span class="h-num">11</span>Honesty instrumentation</h2>
@@ -1135,11 +1146,11 @@ leakage audit passed</code></pre>
 <div class="tw">
 <table>
 <thead><tr><th>Inspection budget</th><th class="n">1%</th><th class="n">5%</th><th class="n">10%</th><th class="n">20%</th></tr></thead>
-<tbody><tr><td>Share of real events caught</td><td class="n">3.3%</td><td class="n">11.1%</td><td class="n">20.3%</td><td class="n">43.1%</td></tr></tbody>
+<tbody><tr><td>Share of real events caught</td><td class="n">2.0%</td><td class="n">13.0%</td><td class="n">28.7%</td><td class="n">46.0%</td></tr></tbody>
 </table>
 </div>
 
-<p>Inspecting the top 10% of cells catches about one event in five. Whether that is useful depends entirely on what inspecting a cell costs — which is a question for the district, not the model.</p>
+<p>Inspecting the top 10% of cells catches nearly three events in ten; the top 20% catches almost half. Whether that is useful depends entirely on what inspecting a cell costs — which is a question for the district, not the model. This is also the metric that decides which model ships, because the PR-AUCs tie and these do not.</p>
 
 <h3>Every PR-AUC carries a bootstrap interval</h3>
 <p>Because the test split grows as the weather backfill lands, two successive runs are <em>not</em> measured on the same data. Two scores of 0.29 and 0.33 look like an improvement and are usually the same model on a slightly different test set. The interval makes that visible instead of leaving it to be discovered.</p>
@@ -1153,15 +1164,15 @@ leakage audit passed</code></pre>
 <table>
 <thead><tr><th>Predicted bin</th><th class="n">Mean predicted</th><th class="n">Observed</th><th class="n">Rows</th><th>Reading</th></tr></thead>
 <tbody>
-<tr><td>0.0 – 0.1</td><td class="n">0.083</td><td class="n">0.118</td><td class="n">211</td><td>slightly under-confident</td></tr>
-<tr><td>0.2 – 0.3</td><td class="n">0.255</td><td class="n">0.317</td><td class="n">300</td><td>good</td></tr>
-<tr><td>0.3 – 0.4</td><td class="n">0.371</td><td class="n">0.542</td><td class="n">59</td><td class="warn">over-confident</td></tr>
-<tr><td>above 0.6</td><td class="n">—</td><td class="n">—</td><td class="n">1 each</td><td>meaningless, too few rows</td></tr>
+<tr><td>0.0 – 0.1</td><td class="n">0.037</td><td class="n">0.084</td><td class="n">629</td><td>mildly under-confident</td></tr>
+<tr><td>0.1 – 0.2</td><td class="n">0.143</td><td class="n">0.202</td><td class="n">1,085</td><td>mildly under-confident</td></tr>
+<tr><td>0.2 – 0.3</td><td class="n">0.222</td><td class="n">0.444</td><td class="n">27</td><td class="warn">thin</td></tr>
+<tr><td>above 0.3</td><td class="n">—</td><td class="n">—</td><td class="n">1–18</td><td>meaningless individually</td></tr>
 </tbody>
 </table>
 </div>
 
-<p>Mean absolute gap 0.065. Reliable in the two bins that carry the data; the sparse bins are reported rather than quietly dropped.</p>
+<p>Mean absolute gap 0.060. The two bins carrying almost all the mass — 1,714 of 1,784 rows between them — track observed frequency closely. The sparse tail is reported rather than quietly dropped: three rows predicted at 1.0 were wrong, which is what an unregularised tail looks like at this sample size.</p>
 
 <!-- ══════════════════════════════ 12 ══════════════════════════════ -->
 <h2 id="s12"><span class="h-num">12</span>Scoring and bands</h2>
@@ -1491,60 +1502,63 @@ passed with 1 warnings — read them before presenting</code></pre>
 
 <figure class="bleed">
 <div class="fig-box">
-<svg class="dgm" viewBox="0 0 700 300" role="img" aria-label="Learning curve: test PR-AUC rises from 0.380 at 527 training rows to 0.446 at 2,108, with increments decaying sharply after the midpoint.">
+<svg class="dgm" viewBox="0 0 700 300" role="img" aria-label="Learning curve re-measured at 74% coverage: test PR-AUC rises from 0.260 at 1,567 training rows to 0.292 at 5,329 and then goes flat, ending at 0.291 with 6,269 rows.">
 <line x1="70" y1="240" x2="660" y2="240" class="e"/>
 <line x1="70" y1="240" x2="70" y2="40" class="e"/>
 <text x="365" y="272" class="t-s" text-anchor="middle">training rows</text>
 <text x="32" y="140" class="t-s" text-anchor="middle" transform="rotate(-90 32 140)">test PR-AUC</text>
 
-<line x1="70" y1="220" x2="660" y2="220" class="e-dash" style="opacity:.3"/>
-<text x="62" y="224" class="t-m" text-anchor="end">0.36</text>
-<line x1="70" y1="150" x2="660" y2="150" class="e-dash" style="opacity:.3"/>
-<text x="62" y="154" class="t-m" text-anchor="end">0.41</text>
-<line x1="70" y1="80" x2="660" y2="80" class="e-dash" style="opacity:.3"/>
-<text x="62" y="84" class="t-m" text-anchor="end">0.46</text>
+<line x1="70" y1="196" x2="660" y2="196" class="e-dash" style="opacity:.3"/>
+<text x="62" y="200" class="t-m" text-anchor="end">0.26</text>
+<line x1="70" y1="162" x2="660" y2="162" class="e-dash" style="opacity:.3"/>
+<text x="62" y="166" class="t-m" text-anchor="end">0.27</text>
+<line x1="70" y1="128" x2="660" y2="128" class="e-dash" style="opacity:.3"/>
+<text x="62" y="132" class="t-m" text-anchor="end">0.28</text>
+<line x1="70" y1="94" x2="660" y2="94" class="e-dash" style="opacity:.3"/>
+<text x="62" y="98" class="t-m" text-anchor="end">0.29</text>
 
-<line x1="70" y1="240" x2="660" y2="240" style="stroke:var(--low);stroke-width:1.5;stroke-dasharray:6 4"/>
-<text x="656" y="256" class="t-m" text-anchor="end" style="fill:var(--low)">base rate 0.267</text>
+<polyline points="118,195 202,159 285,120 368,100 452,87 536,91" class="e-acc" style="stroke-width:2.4"/>
+<circle cx="118" cy="195" r="4.5" style="fill:var(--accent)"/>
+<circle cx="202" cy="159" r="4.5" style="fill:var(--accent)"/>
+<circle cx="285" cy="120" r="4.5" style="fill:var(--accent)"/>
+<circle cx="368" cy="100" r="4.5" style="fill:var(--accent)"/>
+<circle cx="452" cy="87" r="4.5" style="fill:var(--accent)"/>
+<circle cx="536" cy="91" r="4.5" style="fill:var(--accent)"/>
 
-<polyline points="118,192 202,143 285,130 368,123 452,103 536,99" class="e-acc" style="stroke-width:2.4"/>
-<circle cx="118" cy="192" r="4.5" style="fill:var(--accent)"/>
-<circle cx="202" cy="143" r="4.5" style="fill:var(--accent)"/>
-<circle cx="285" cy="130" r="4.5" style="fill:var(--accent)"/>
-<circle cx="368" cy="123" r="4.5" style="fill:var(--accent)"/>
-<circle cx="452" cy="103" r="4.5" style="fill:var(--accent)"/>
-<circle cx="536" cy="99" r="4.5" style="fill:var(--accent)"/>
+<text x="118" y="185" class="t-m" text-anchor="middle">0.260</text>
+<text x="202" y="149" class="t-m" text-anchor="middle">0.271</text>
+<text x="285" y="110" class="t-m" text-anchor="middle">0.282</text>
+<text x="368" y="90" class="t-m" text-anchor="middle">0.288</text>
+<text x="452" y="77" class="t-m" text-anchor="middle">0.292</text>
+<text x="580" y="95" class="t-m" text-anchor="middle">0.291</text>
 
-<text x="118" y="182" class="t-m" text-anchor="middle">0.380</text>
-<text x="202" y="133" class="t-m" text-anchor="middle">0.415</text>
-<text x="285" y="120" class="t-m" text-anchor="middle">0.424</text>
-<text x="368" y="113" class="t-m" text-anchor="middle">0.429</text>
-<text x="452" y="93" class="t-m" text-anchor="middle">0.443</text>
-<text x="536" y="89" class="t-m" text-anchor="middle">0.446</text>
+<text x="118" y="256" class="t-m" text-anchor="middle">1567</text>
+<text x="202" y="256" class="t-m" text-anchor="middle">2507</text>
+<text x="285" y="256" class="t-m" text-anchor="middle">3448</text>
+<text x="368" y="256" class="t-m" text-anchor="middle">4389</text>
+<text x="452" y="256" class="t-m" text-anchor="middle">5329</text>
+<text x="536" y="256" class="t-m" text-anchor="middle">6269</text>
 
-<text x="118" y="256" class="t-m" text-anchor="middle">527</text>
-<text x="202" y="256" class="t-m" text-anchor="middle">843</text>
-<text x="285" y="256" class="t-m" text-anchor="middle">1160</text>
-<text x="368" y="256" class="t-m" text-anchor="middle">1476</text>
-<text x="452" y="256" class="t-m" text-anchor="middle">1792</text>
-<text x="536" y="256" class="t-m" text-anchor="middle">2108</text>
+<line x1="118" y1="215" x2="202" y2="215" class="e" style="stroke:var(--mod)"/>
+<text x="160" y="211" class="t-m" text-anchor="middle" style="fill:var(--mod)">+0.010</text>
+<line x1="452" y1="112" x2="536" y2="112" class="e" style="stroke:var(--crit)"/>
+<text x="494" y="126" class="t-m" text-anchor="middle" style="fill:var(--crit)">−0.001</text>
 
-<line x1="118" y1="210" x2="202" y2="210" class="e" style="stroke:var(--mod)"/>
-<text x="160" y="206" class="t-m" text-anchor="middle" style="fill:var(--mod)">+0.035</text>
-<line x1="452" y1="120" x2="536" y2="120" class="e" style="stroke:var(--crit)"/>
-<text x="494" y="134" class="t-m" text-anchor="middle" style="fill:var(--crit)">+0.003</text>
-
-<rect x="560" y="40" width="132" height="90" class="n-ghost"/>
-<text x="572" y="60" class="t-s">EPV at 100%:</text>
-<text x="572" y="78" class="t-m">465 / 41 = 11.3</text>
-<text x="572" y="100" class="t-s">Full backfill takes</text>
-<text x="572" y="116" class="t-s">this to about 28.</text>
+<rect x="500" y="34" width="192" height="60" class="n-ghost"/>
+<text x="512" y="52" class="t-s">EPV at 100%: <tspan class="t-m">941 / 41 = 23.0</tspan></text>
+<text x="512" y="70" class="t-s">Test base rate 0.168 —</text>
+<text x="512" y="86" class="t-s">the whole curve is a 1.5× lift.</text>
 </svg>
 </div>
-<figcaption><b>The curve is flattening.</b> Quadrupling the training rows bought +0.066; the last 1.4× bought +0.016, and the final step +0.003. Finishing the weather backfill is worth doing for <em>statistical power</em> — events-per-variable rises from 11 to about 28, which is the difference between "model selection is noise" and a defensible choice — but it will not produce a large jump in score.</figcaption>
+<figcaption><b>The curve has stopped climbing.</b> Quadrupling the training rows bought +0.031; the last 1.4× bought +0.003, and the final step is <em>negative</em>. Finishing the weather backfill is still worth doing for <em>statistical power</em> — events per variable rises from 23 to about 28 — but sample size is no longer what limits the score.</figcaption>
 </figure>
 
-<p>These numbers are deliberately uncalibrated, so they sit slightly above what stage 07 reports. Including the Platt step would mix two effects in one line. Only the trend is being read.</p>
+<p>These numbers are deliberately uncalibrated, so they sit slightly above what stage 07 reports. Including the calibration step would mix two effects in one line. Only the trend is being read.</p>
+
+<div class="callout">
+<span class="k">The curve predicted itself</span>
+<p>This is the second measurement. The first ran on a 2,941-row matrix at 20% coverage and extrapolated that another four-fold increase would buy <strong>+0.02 to +0.04</strong>. The actual three-fold increase bought <strong>+0.031</strong>. An extrapolation that survives its own test is worth more than the point estimate it was made from.</p>
+</div>
 
 <!-- ══════════════════════════════ 18 ══════════════════════════════ -->
 <h2 id="s18"><span class="h-num">18</span>Where it stands</h2>
@@ -1564,8 +1578,8 @@ passed with 1 warnings — read them before presenting</code></pre>
 <thead><tr><th>Component</th><th>State</th><th>Detail</th></tr></thead>
 <tbody>
 <tr><td>Warehouse</td><td class="pass">loaded</td><td>40,800 cells · 22,594 hill · 1,719 events · 11,955 samples · 7,627 exposure rows</td></tr>
-<tr><td>Weather backfill</td><td class="warn">62% · running</td><td>8,920 cached windows, 4,538 pending, ~900/hour under the rolling quota</td></tr>
-<tr><td>Model</td><td class="pass">clean</td><td>logistic, elevation leak removed, trained on the 20%-coverage matrix</td></tr>
+<tr><td>Weather backfill</td><td class="warn">74% · running</td><td>9,970 cached windows, ~2,000 pending under the rolling quota</td></tr>
+<tr><td>Model</td><td class="pass">clean</td><td>XGBoost, elevation leak removed, 8,837-row matrix, EPV 23</td></tr>
 <tr><td>Verification</td><td class="pass">23 / 1 / 0</td><td>the single warning is recall at 5% budget</td></tr>
 <tr><td>Tests</td><td class="pass">18 passing</td><td>sampling, fetcher, warehouse invariants</td></tr>
 <tr><td>Version control</td><td class="pass">2 commits</td><td>63 files tracked, local only, not pushed</td></tr>
@@ -1602,7 +1616,7 @@ passed with 1 warnings — read them before presenting</code></pre>
 <p>The catalogue records <em>reported</em> landslides. Absence of a record is not absence of a landslide. The exclusion buffer mitigates this; nothing removes it.</p>
 
 <h3>An incomplete backfill</h3>
-<p>The recorded metrics come from a 2,941-row matrix built at about 20% weather coverage. Events-per-variable is 11 across 41 features, which is thin. The learning curve in §17 quantifies exactly what completing it is worth.</p>
+<p>Metrics come from an 8,837-row matrix at 74% weather coverage. Events per variable is 23 across 41 features — workable, and heading for about 28 when the backfill lands. The learning curve in §17 quantifies exactly what that last stretch is worth, and the answer is: not much score, but a closed objection.</p>
 
 <h3>Not an operational warning system</h3>
 <p>No hourly nowcast. No validation against IMD or GSI bulletins. No human in the loop. It is a screening aid that ranks cells for inspection, and the model card states the out-of-scope uses explicitly.</p>
