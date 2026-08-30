@@ -1,0 +1,15 @@
+# Matches the palette used by the walkthrough document and reports/figures,
+# so the app, the report and the figures read as one system rather than three.
+[theme]
+base = "light"
+primaryColor = "#9A5615"
+backgroundColor = "#F4F6F4"
+secondaryBackgroundColor = "#FFFFFF"
+textColor = "#151F1C"
+font = "serif"
+
+[server]
+headless = true
+
+[browser]
+gatherUsageStats = false
