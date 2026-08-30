@@ -249,7 +249,7 @@ svg.dgm{display:block; width:100%; height:auto; color:var(--ink); min-width:30re
   <p class="standfirst">Daily landslide risk for the Indian Himalaya on an 11&nbsp;km grid, built from rainfall, soil moisture and terrain — and an account of everything that had to go right, plus the four things that went wrong.</p>
   <div class="stamp">
     <span>SIH 2026 · PS 26192</span>
-    <span>13 scripts · 12 modules · 11 tables · 8 views and marts</span>
+    <span>14 scripts · 12 modules · 11 tables · 8 views and marts · 6 app views</span>
     <span>Last verified 2026-08-30</span>
   </div>
 </header>
@@ -325,7 +325,7 @@ svg.dgm{display:block; width:100%; height:auto; color:var(--ink); min-width:30re
 
 <figure class="bleed">
 <div class="fig-box">
-<svg class="dgm" viewBox="0 0 780 400" role="img" aria-label="Architecture: four external sources feed pipeline stages that write to a MySQL warehouse, whose views and marts are read by Streamlit and Power BI.">
+<svg class="dgm" viewBox="0 0 780 400" role="img" aria-label="Architecture: four external sources feed pipeline stages that write to a MySQL warehouse, whose views and marts are read by the Streamlit application.">
 <defs><marker id="ar02" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ar"/></marker></defs>
 
 <text x="82" y="20" class="t-b" text-anchor="middle">Sources</text>
@@ -363,14 +363,17 @@ svg.dgm{display:block; width:100%; height:auto; color:var(--ink); min-width:30re
 <line x1="406" y1="158" x2="420" y2="158" class="e" marker-end="url(#ar02)"/>
 
 <text x="700" y="20" class="t-b" text-anchor="middle">Read</text>
-<rect x="620" y="46" width="150" height="52" class="n"/><text x="695" y="66" class="t" text-anchor="middle">Streamlit</text><text x="695" y="82" class="t-s" text-anchor="middle">4 pages</text>
-<rect x="620" y="112" width="150" height="52" class="n"/><text x="695" y="132" class="t" text-anchor="middle">Power BI</text><text x="695" y="148" class="t-s" text-anchor="middle">36 DAX measures</text>
-<line x1="600" y1="130" x2="616" y2="80" class="e" marker-end="url(#ar02)"/>
-<line x1="600" y1="150" x2="616" y2="140" class="e" marker-end="url(#ar02)"/>
+<rect x="620" y="46" width="150" height="118" class="n"/>
+<text x="695" y="70" class="t-b" text-anchor="middle">Streamlit</text>
+<text x="695" y="90" class="t-s" text-anchor="middle">risk map · districts</text>
+<text x="695" y="106" class="t-s" text-anchor="middle">cell detail · model</text>
+<text x="695" y="122" class="t-s" text-anchor="middle">field report · history</text>
+<text x="695" y="146" class="t-m" text-anchor="middle">6 views</text>
+<line x1="600" y1="130" x2="616" y2="105" class="e" marker-end="url(#ar02)"/>
 
 <line x1="380" y1="300" x2="380" y2="330" class="e-dash"/>
 <rect x="196" y="330" width="380" height="52" class="n-ghost"/>
-<text x="386" y="352" class="t-s" text-anchor="middle">Both interfaces read <tspan class="t-m">fact_risk_pred</tspan> through the marts.</text>
+<text x="386" y="352" class="t-s" text-anchor="middle">The application reads <tspan class="t-m">fact_risk_pred</tspan> through the marts.</text>
 <text x="386" y="370" class="t-s" text-anchor="middle">Nothing downstream ever touches the model file directly.</text>
 </svg>
 </div>
@@ -1250,7 +1253,7 @@ leakage audit passed</code></pre>
 <!-- ══════════════════════════════ 13 ══════════════════════════════ -->
 <h2 id="s13"><span class="h-num">13</span>The warehouse</h2>
 
-<p>A MySQL star schema: <strong>4 dimensions, 5 facts, 1 operational log</strong>, plus <strong>5 views and 3 marts</strong>. Every rolling window, ranking and cohort in the analysis is a SQL window function over these tables rather than pandas code — so the model and the Power BI report consume exactly the same definitions.</p>
+<p>A MySQL star schema: <strong>4 dimensions, 5 facts, 1 operational log</strong>, plus <strong>5 views and 3 marts</strong>. Every rolling window, ranking and cohort in the analysis is a SQL window function over these tables rather than pandas code — so the model and the application consume exactly the same definitions rather than each carrying its own copy of a rolling window.</p>
 
 <figure class="bleed">
 <div class="fig-box">
@@ -1337,15 +1340,34 @@ leakage audit passed</code></pre>
 <!-- ══════════════════════════════ 14 ══════════════════════════════ -->
 <h2 id="s14"><span class="h-num">14</span>Interfaces</h2>
 
-<p><strong>Streamlit</strong> serves four pages: <em>Risk map</em> (the operational view), <em>Cell detail</em> (one cell, its drivers and its exposed settlements), <em>Field report</em> (an observation form for ground truth), and <em>History</em> (the recorded record).</p>
+<p>One application, six views, covering both sides of the problem statement: the district officer deciding where to send a team this morning, and the field officer standing on a severed road with one bar of signal.</p>
 
-<p><strong>Power BI</strong> consumes 36 DAX measures across six groups — command-centre header, risk shape, movement over the forecast window, historical page, model page, and narrative. Two of them carry reasoning worth repeating:</p>
+<div class="tw">
+<table>
+<thead><tr><th>View</th><th>Answers</th><th>Reads</th></tr></thead>
+<tbody>
+<tr><td><strong>Risk map</strong></td><td>Where is risk elevated today, and which cells top the priority list?</td><td><code>mart_cell_daily_risk</code></td></tr>
+<tr><td><strong>Districts</strong></td><td>The command centre — which districts need a team, with the named places inside their flagged cells.</td><td><code>mart_district_daily_risk</code> · <code>v_settlements_at_risk</code></td></tr>
+<tr><td><strong>Cell detail</strong></td><td>One cell explained: score, band, real 1-in-N frequency, terrain, exposure, SHAP drivers in plain language, and the day-by-day track.</td><td><code>mart_cell_daily_risk</code></td></tr>
+<tr><td><strong>Model</strong></td><td>How well does it work? Headline metrics with the base rate beside them, all six figures, and what the model is not.</td><td><code>models/metrics_v1.json</code> · <code>reports/figures</code></td></tr>
+<tr><td><strong>Field report</strong></td><td>Geo-tagged cracks, slope movement and blocked roads, filed with no connection at all.</td><td>local queue file</td></tr>
+<tr><td><strong>History</strong></td><td>What actually happened, 2007–2016 — the labels the model learned from.</td><td><code>mart_event_history</code></td></tr>
+</tbody>
+</table>
+</div>
 
-<div class="quote">Exposure is only counted where risk is actually elevated. Summing population across every scored cell would report the population of the Himalaya, which is true and useless.</div>
+<p>Two rules carried by the district view are worth stating, because both are easy to get wrong and neither is obvious:</p>
 
-<div class="quote">Sum, not average. A district with one critical cell and forty quiet ones needs a team; its average would hide that entirely.</div>
+<div class="quote">Exposure is counted only where risk is actually elevated. Summing population across every scored cell would report the population of the Himalaya, which is true and useless.</div>
 
-<p>Both interfaces read <code>fact_risk_pred</code> through the marts and never touch the model file. Connection details are M parameters rather than literals, so moving to a managed MySQL is a parameter change and not a rebind of every query.</p>
+<div class="quote">Districts are ranked by the <em>sum</em> of their qualifying cells' priority, not the mean. A district with one critical cell and forty quiet ones needs a team; its average would hide that entirely.</div>
+
+<p>Every view reads <code>fact_risk_pred</code> through the marts and none touches the model file. The figures on the model page are generated by <code>scripts/14_report_figures.py</code>, which verifies each one reproduces the metric it illustrates before drawing it — so the application cannot show a number the rest of the project disagrees with.</p>
+
+<div class="callout trap">
+<span class="k">One promise the interface used to make and could not keep</span>
+<p>The field report form said a saved report <em>"will sync when the network is available"</em>. Nothing synced it — reports were written to a local JSONL file and stayed there. The copy now says exactly what happens, and the queue can be downloaded off the device. An interface that overstates what it did with a safety report is worse than one that admits it is a prototype.</p>
+</div>
 
 <!-- ══════════════════════════════ 15 ══════════════════════════════ -->
 <h2 id="s15"><span class="h-num">15</span>Verification</h2>
@@ -1591,7 +1613,9 @@ passed with 1 warnings — read them before presenting</code></pre>
 
 <div class="callout trap">
 <span class="k">Do not demo the risk map yet</span>
-<p><code>fact_risk_pred</code> still holds output from the model that had the elevation leak. Streamlit and Power BI both read it. Stage 08 must run against the current model before either interface is shown to anyone — it is the one artefact in the repository that would actively misrepresent the work.</p>
+<p><code>fact_risk_pred</code> still holds output from the model that had the elevation leak, and every view reads it. Stage 08 must run against the current model before the application is shown to anyone — it is the one artefact in the repository that would actively misrepresent the work.</p>
+
+<p>Worse, until now those rows were labelled <code>v1</code> and so is the current model, so the warehouse could not say which of the two it was serving. <code>08_score.py</code> now stamps the estimator into the version string — <code>v1-xgboost</code> — and clears the whole family before writing, because the marts do not filter on version and two coexisting versions would make every district count twice.</p>
 </div>
 
 <p>Every outstanding item, with its blocker and what would close it, is tabulated in <a href="#s20">§20</a>.</p>
@@ -1734,8 +1758,7 @@ src/
   model/     estimators · metrics with bootstrap intervals · SHAP · scoring
 scripts/     00–13, one stage each, all runnable standalone
 sql/         01_schema.sql · 02_analytics.sql
-app/         Streamlit — risk map, cell detail, field report, history
-powerbi/     36 DAX measures
+app/         Streamlit — risk map, districts, cell detail, model, field report, history
 tests/       regression cover for the real failures
 docs/        plan · handover · decisions · model card · this walkthrough
 reports/     EDA figures and the learning curve</code></pre>

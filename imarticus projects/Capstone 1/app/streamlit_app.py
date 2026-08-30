@@ -1,12 +1,19 @@
-"""Slopewatch field application.
+"""Slopewatch — the whole interface.
 
-Power BI serves the authority-facing command centre. This covers what it cannot:
-the field officer and citizen side of the problem statement — an interactive
-risk map, a per-cell explanation in plain language, and geo-tagged reporting of
-cracks and blocked roads from places with poor connectivity.
+Six views covering both sides of the problem statement: the district officer
+deciding where to send a team this morning, and the field officer standing on a
+severed road with one bar of signal.
 
-Reports are queued locally first and pushed when the database is reachable, so
-an officer standing on a severed road can still file one.
+    risk map        every scored cell, filtered by band, ranked by priority
+    districts       the command centre — who needs a team today, and why
+    cell detail     one cell explained, with the drivers in plain language
+    model           how well it works, stated before anyone has to ask
+    field report    geo-tagged observations, filed offline
+    history         the catalogue the model learned from
+
+Field reports are written to a local queue file first so one can be filed
+without a connection. There is no automatic upload — see the note on that page,
+which says so plainly rather than implying a sync that does not exist.
 
     .venv/Scripts/streamlit run app/streamlit_app.py
 """
@@ -152,6 +159,37 @@ def queued_reports() -> list[dict]:
 
 
 @st.cache_data(ttl=900)
+def load_districts(target_date: int | None = None) -> pd.DataFrame:
+    where = "WHERE date_id = :target" if target_date else ""
+    return db.read_sql(
+        f"""
+        SELECT  date_id, full_date, state_name, district_name, cells_scored,
+                critical_cells, high_cells, max_probability, mean_probability,
+                total_priority, road_km_at_risk, settlements_at_risk,
+                population_at_risk, priority_rank
+        FROM    mart_district_daily_risk
+        {where}
+        ORDER BY priority_rank
+        """,
+        {"target": target_date} if target_date else None,
+    )
+
+
+@st.cache_data(ttl=900)
+def load_settlements(target_date: int) -> pd.DataFrame:
+    return db.read_sql(
+        """
+        SELECT  place_name, place_type, est_population, district_name,
+                state_name, risk_band, probability, latitude, longitude
+        FROM    v_settlements_at_risk
+        WHERE   date_id = :target
+        ORDER BY est_population DESC
+        """,
+        {"target": target_date},
+    )
+
+
+@st.cache_data(ttl=900)
 def load_metrics() -> dict:
     path = MODELS_DIR / "metrics_v1.json"
     if not path.exists():
@@ -255,6 +293,97 @@ def model_page() -> None:
          "certify a location as safe, and an 11 km cell is not a hillside. "
          "Landslides trigger on sub-daily rainfall intensity; this sees 24-hour "
          "totals, which is the single largest cap on what it can achieve.")
+
+
+def district_page() -> None:
+    """The command centre: which districts need a team, ranked by exposure.
+
+    Districts are ranked by the summed priority of their qualifying cells, not
+    by an average. A district with one critical cell and forty quiet ones needs
+    a team; its mean would hide that entirely.
+    """
+    st.title("Districts")
+    st.caption(
+        "Where to send a team today. Ranked by risk weighted by what is "
+        "downhill, summed across the district's qualifying cells."
+    )
+
+    dates = load_available_dates()
+    if not dates:
+        st.warning(
+            "No predictions stored yet. Run `scripts/08_score.py` to populate "
+            "the forecast."
+        )
+        return
+
+    selected = st.select_slider(
+        "Forecast day", options=dates, value=dates[0],
+        format_func=lambda value: str(pd.to_datetime(str(value)).date()),
+        key="district_day",
+    )
+
+    frame = load_districts(selected)
+    if frame.empty:
+        st.info(
+            "No district reached the reporting threshold on this day. That is "
+            "good news, not a broken report."
+        )
+        return
+
+    columns = st.columns(4)
+    columns[0].metric("Districts flagged", len(frame))
+    columns[1].metric("People in flagged cells",
+                      f"{int(frame['population_at_risk'].sum()):,}")
+    columns[2].metric("Road km at risk",
+                      f"{frame['road_km_at_risk'].sum():,.0f}")
+    columns[3].metric("Settlements", int(frame["settlements_at_risk"].sum()))
+
+    note("note", "Exposure is counted only where risk is elevated",
+         "Summing population across every scored cell would report the "
+         "population of the Himalaya, which is true and useless. These figures "
+         "cover the cells that actually reached a reportable band.")
+
+    table = frame[[
+        "priority_rank", "district_name", "state_name", "cells_scored",
+        "max_probability", "total_priority", "settlements_at_risk",
+        "population_at_risk", "road_km_at_risk",
+    ]].rename(columns={
+        "priority_rank": "#", "district_name": "District",
+        "state_name": "State", "cells_scored": "Cells",
+        "max_probability": "Peak risk", "total_priority": "Priority",
+        "settlements_at_risk": "Villages", "population_at_risk": "People",
+        "road_km_at_risk": "Road km",
+    })
+    st.dataframe(table, width="stretch", hide_index=True)
+
+    st.subheader("Named places in the flagged cells")
+    st.caption(
+        "\"Forty settlements\" ranks a cell; it does not tell a team where to "
+        "go. Largest first."
+    )
+    places = load_settlements(selected)
+    if places.empty:
+        st.caption("No settlement records join to today's flagged cells.")
+        return
+
+    named = places[places["place_name"].notna()]
+    shown = named if not named.empty else places
+    st.dataframe(
+        shown.head(40)[[
+            "place_name", "place_type", "est_population", "district_name",
+            "state_name", "risk_band",
+        ]].rename(columns={
+            "place_name": "Place", "place_type": "Type",
+            "est_population": "People", "district_name": "District",
+            "state_name": "State", "risk_band": "Band",
+        }),
+        width="stretch", hide_index=True,
+    )
+    if named.empty:
+        st.caption(
+            "None of these settlements carries a name in OpenStreetMap. The "
+            "coordinates are still usable for dispatch."
+        )
 
 
 def _figure(name: str, caption: str | None) -> None:
@@ -370,7 +499,28 @@ def cell_detail_page() -> None:
         st.info("No data for that cell.")
         return
 
-    latest = cell.iloc[0]
+    # Which day is being described has to be explicit. This read cell.iloc[0]
+    # after an ascending sort and called it "latest", so every number on the
+    # page came from the earliest day in the window while the label claimed
+    # otherwise. The day is now chosen, shown, and the window's worst day is
+    # called out separately — which is the one a team would actually plan for.
+    day_options = cell["date_id"].tolist()
+    chosen_day = st.select_slider(
+        "Day", options=day_options, value=day_options[0],
+        format_func=lambda value: str(pd.to_datetime(str(value)).date()),
+        key="cell_day",
+    )
+    current = cell[cell["date_id"] == chosen_day].iloc[0]
+
+    peak = cell.loc[cell["probability"].idxmax()]
+    if int(peak["date_id"]) != int(chosen_day):
+        st.caption(
+            f"Highest risk in this window is "
+            f"**{pd.to_datetime(str(int(peak['date_id']))).date()}** at "
+            f"{peak['probability']:.3f} ({str(peak['risk_band']).title()})."
+        )
+
+    latest = current
     left, right = st.columns([1, 2])
 
     with left:
@@ -415,10 +565,14 @@ def cell_detail_page() -> None:
 def field_report_page() -> None:
     st.title("Report from the field")
     st.caption(
-        "Cracks, slope movement, blocked roads. Reports are saved on this "
-        "device first, so one can be filed without a connection and pushed "
-        "when the network returns."
+        "Cracks, slope movement, blocked roads. Reports are written to a local "
+        "file on this device, so one can be filed with no connection at all."
     )
+    note("warn", "There is no automatic upload yet",
+         "A report is saved to <code>data/field_reports_queue.jsonl</code> on "
+         "this device and stays there. Nothing sends it anywhere. Use the "
+         "download button below the queue to carry reports off the device "
+         "until a collection endpoint exists.")
 
     with st.form("field_report"):
         columns = st.columns(2)
@@ -462,12 +616,21 @@ def field_report_page() -> None:
             "photo_name": photo.name if photo else None,
         }
         queue_report(record)
-        st.success("Report saved. It will sync when the network is available.")
+        st.success(
+            f"Report saved to this device ({QUEUE_PATH.name}). "
+            "It has not been sent anywhere — download the queue to move it."
+        )
 
     pending = queued_reports()
     if pending:
-        st.subheader(f"Queued reports ({len(pending)})")
+        st.subheader(f"Held on this device ({len(pending)})")
         st.dataframe(pd.DataFrame(pending), width="stretch", hide_index=True)
+        st.download_button(
+            "Download the queue",
+            data=QUEUE_PATH.read_text(encoding="utf-8"),
+            file_name="field_reports_queue.jsonl",
+            mime="application/x-ndjson",
+        )
 
 
 def history_page() -> None:
@@ -502,6 +665,7 @@ def history_page() -> None:
 
 PAGES = {
     "Risk map": risk_map_page,
+    "Districts": district_page,
     "Cell detail": cell_detail_page,
     "Model": model_page,
     "Field report": field_report_page,

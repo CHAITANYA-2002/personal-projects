@@ -4,7 +4,7 @@
 
 `SIH 2026 · PS 26192` — flash flood and landslide early warning
 
-13 scripts · 12 modules · 11 warehouse tables · 8 views and marts · 41 features · 18 tests · 24 verification checks
+14 scripts · 12 modules · 11 warehouse tables · 8 views and marts · 41 features · 6 app views · 18 tests · 24 verification checks
 
 ---
 
@@ -113,8 +113,7 @@ flowchart LR
     P6["08 score forecast"]
     P7["10 verify, 24 checks"]
     W1["MySQL warehouse<br/>4 dims, 5 facts<br/>5 views, 3 marts"]
-    U1["Streamlit<br/>5 pages"]
-    U2["Power BI<br/>36 DAX measures"]
+    U1["Streamlit application<br/>risk map, districts, cell detail<br/>model, field report, history"]
     S1 --> P1
     S2 --> P1
     S4 --> P2
@@ -124,7 +123,6 @@ flowchart LR
     P3 --> P4 --> P5 --> P6 --> P7
     P5 --> W1
     W1 --> U1
-    W1 --> U2
 ```
 
 ### Stage order is not arbitrary
@@ -163,6 +161,41 @@ Cell identity is a positional encoding — `cell_id = lat_idx * 1000 + lon_idx` 
 The study area is a **bounding box, not a list of state names**, and the reason is a data defect: the catalogue stores `Nagaland` and `Nāgāland` as separate values. Matching by name undercounts that state by 82%.
 
 ![Slope density](reports/figures/02_slope_density.png)
+
+---
+
+## Terrain and the hill mask
+
+442 Copernicus DEM GLO-30 tiles — about 17.5 GB — are downloaded and reduced, one tile at a time, into ten terrain statistics per cell.
+
+The tile-at-a-time discipline is deliberate: a single tile is 3601x3601 float32, roughly 50 MB in memory, and contains exactly 100 of the 0.1° cells. Processing the arc as a mosaic would mean a 5.7-billion-pixel array. This way memory stays bounded and the run checkpoints every 20 tiles.
+
+```mermaid
+flowchart TB
+    A["442 tiles, 6 parallel workers"] --> B{"more than 2%<br/>missing?"}
+    B -->|yes| X["exit 1 — the mask would reflect<br/>download failures, not terrain"]
+    B -->|no| C["mask voids<br/>-32767, -9999, below -500 m"]
+    C --> D["slope + aspect, spacing_x scaled by cos(lat)<br/>18% error at 35N if skipped"]
+    C --> E["terrain ruggedness index"]
+    D --> F["slice 10x10 cells via affine transform"]
+    E --> F
+    F --> G{"at least 50% of<br/>pixels finite?"}
+    G -->|no| Y["drop the cell"]
+    G -->|yes| H["ten statistics per cell"]
+    H --> I{"slope_mean >= 5.0 degrees?"}
+    I -->|yes| J["is_hill = 1<br/>22,594 of 40,800 cells"]
+```
+
+**The hill mask is a single threshold — `slope_mean >= 5.0°` — and nothing else.** That is defensible: a landslide needs a slope, and keeping floodplain cells only dilutes the negative pool.
+
+It is also the origin of this project's most serious analytical defect, because **a high plateau is steep too**. The mask has no elevation term, so Ladakh and the Tibetan plateau — high, cold, arid, outside the monsoon — pass it comfortably. That is the confounder above.
+
+A few details that are easy to get wrong and were not:
+
+- **Longitude pixel spacing is scaled by `cos(latitude)`** before slope is computed. A degree of longitude shrinks with latitude; at 35°N that is an 18% error. Getting it wrong tilts every slope estimate in the western Himalaya relative to the north-east.
+- **Aspect is reduced as a slope-weighted circular mean**, stored as `sin`/`cos`. Averaging the angle itself would make 359° and 1° average to 180°.
+- **A cell more than half void produces no row at all** rather than a plausible-looking average.
+- **The run aborts above 2% missing tiles**, because past that the mask reflects download failures rather than terrain.
 
 ---
 
@@ -364,7 +397,7 @@ erDiagram
     }
 ```
 
-**4 dimensions, 5 facts, 1 run log**, plus **5 views and 3 marts**. Every rolling window, ranking and cohort is a SQL window function rather than pandas code — so the model and the Power BI report consume exactly the same definitions.
+**4 dimensions, 5 facts, 1 run log**, plus **5 views and 3 marts**. Every rolling window, ranking and cohort is a SQL window function rather than pandas code — so the model and the application consume exactly the same definitions rather than each carrying its own copy of a rolling window.
 
 **No geometry columns anywhere.** Distance work is a one-time GeoPandas precompute landed in `fact_exposure`, which avoids the SRID 4326 axis-order trap and keeps the schema portable.
 
@@ -376,21 +409,24 @@ erDiagram
 .venv/Scripts/streamlit run app/streamlit_app.py
 ```
 
-Power BI serves the authority-facing command centre; Streamlit covers what it cannot — the field officer and citizen side.
+One application, six views, covering both sides of the problem statement: the district officer deciding where to send a team this morning, and the field officer standing on a severed road with one bar of signal.
 
-| page | what it shows |
-|---|---|
-| **Risk map** | Scored cells on a map, filtered by band, with the highest-priority list ranked by risk x exposure |
-| **Cell detail** | One cell: score, band, real 1-in-N frequency, terrain, exposed settlements, SHAP drivers in plain language, and the score across the forecast window |
-| **Model** | Headline metrics, all six figures from this README, model comparison, and an explicit statement of what the model is not |
-| **Field report** | Geo-tagged reporting of cracks, slope movement and blocked roads — **queued locally first**, so an officer standing on a severed road can still file one |
-| **History** | Events, deaths and seasonality from the catalogue the model learned from |
+| view | answers | reads |
+|---|---|---|
+| **Risk map** | Where is risk elevated today, and which cells top the priority list? | `mart_cell_daily_risk` |
+| **Districts** | The command centre — which districts need a team, with the named places inside their flagged cells | `mart_district_daily_risk`, `v_settlements_at_risk` |
+| **Cell detail** | One cell explained: score, band, real 1-in-N frequency, terrain, exposure, SHAP drivers in plain language, day-by-day track | `mart_cell_daily_risk` |
+| **Model** | How well does it work? Headline metrics with the base rate beside them, all six figures, and what the model is not | `models/metrics_v1.json`, `reports/figures` |
+| **Field report** | Geo-tagged cracks, slope movement and blocked roads, filed with **no connection at all** | local queue file |
+| **History** | What actually happened, 2007–2016 — the labels the model learned from | `mart_event_history` |
 
-Power BI measures live in `powerbi/measures.dax` — 36 measures across six groups. Two carry reasoning worth repeating:
+Two rules carried by the district view are worth stating, because both are easy to get wrong:
 
-> *Exposure is only counted where risk is actually elevated. Summing population across every scored cell would report the population of the Himalaya, which is true and useless.*
+> *Exposure is counted only where risk is actually elevated. Summing population across every scored cell would report the population of the Himalaya, which is true and useless.*
 
-> *Sum, not average. A district with one critical cell and forty quiet ones needs a team; its average would hide that entirely.*
+> *Districts are ranked by the **sum** of their qualifying cells' priority, not the mean. A district with one critical cell and forty quiet ones needs a team; its average would hide that entirely.*
+
+> **One promise the interface used to make and could not keep.** The field report form said a saved report *"will sync when the network is available"*. Nothing synced it — reports were written to a local JSONL file and stayed there. The copy now says exactly what happens, and the queue can be downloaded off the device. An interface that overstates what it did with a safety report is worse than one that admits it is a prototype.
 
 ---
 
@@ -422,7 +458,7 @@ The warning is honest rather than broken — the verifier states the limitation 
 
 ---
 
-## Five real failures
+## Six real failures
 
 Every one shipped silently for a while. Recorded because the fixes are only trustworthy if the failures are stated.
 
@@ -433,6 +469,15 @@ Every one shipped silently for a while. Recorded because the fixes are only trus
 | 3 | **Forecast dates leaked into training** — `08_score.py` extends `dim_date`, and unbounded readers inherited it | 18 samples dated 2026; a permanent HTTP 400 killed a run with 10,000 good windows left | both readers bounded to the study window; non-429 4xx skips its batch |
 | 4 | **Excel rewrote the catalogue dates** | 4,083 events would be misdated under either convention | the pipeline reads only the canonical CSV |
 | 5 | **Capacity gate measured the wrong thing** — reaching 941 positives crossed `n_positives < 500` | both trees became lookup tables: random forest 0.934 train / 0.241 val, XGBoost 0.991 / 0.214 | the gate now measures **events per variable**; both improved on held-out data once tightened |
+| 6 | **`model_version` was a bare constant** — every re-score deleted the previous rows and wrote `v1` again | the warehouse could not say whether it was serving the leaked model or the fixed one; both were `v1` | the estimator is stamped into the version (`v1-xgboost`), and the whole family is cleared before writing because the marts do not filter on version |
+
+Three defects were also found in the application itself, by auditing it rather than by it throwing an error:
+
+| Defect | Effect |
+|---|---|
+| `latest = cell.iloc[0]` after an **ascending** sort | Every number on the cell-detail page came from the *earliest* day in the forecast window while the label claimed otherwise. The day is now chosen explicitly, shown, and the window's worst day called out separately. |
+| A sync that did not exist | See the note under [The application](#the-application). |
+| No model page at all | `mart_model_performance` sat unread and nothing in the interface said how well the model works. There is now a Model page. |
 
 ---
 
@@ -473,6 +518,20 @@ Be precise about *which axis* is missing. The intensity-duration gate **passes**
 **Reporting bias in the labels.** The catalogue records *reported* landslides. Absence of a record is not absence of a landslide. The exclusion buffer mitigates this; nothing removes it.
 
 **Not an operational warning system.** No hourly nowcast, no validation against IMD or GSI bulletins, no human in the loop. It ranks cells for inspection. See [`docs/model-card.md`](docs/model-card.md) for intended and out-of-scope use.
+
+---
+
+## Where it stands
+
+| Component | State | Detail |
+|---|---|---|
+| Warehouse | loaded | 40,800 cells · 22,594 hill · 1,719 events · 11,955 samples · 424,528 weather rows · 7,627 exposure rows |
+| Weather backfill | 74% · running | quota-blocked; the daemon resumes on its own |
+| Model | clean | XGBoost, elevation leak removed, 8,837-row matrix, EPV 23 |
+| Verification | 23 pass / 1 warn / 0 fail | the warning is recall at 5% budget |
+| Tests | 18 passing | sampling, fetcher, warehouse invariants |
+| Application | 6 views, 0 exceptions | every page audited against live data |
+| `fact_risk_pred` | **stale** | two models behind; see below |
 
 ---
 
@@ -536,14 +595,43 @@ src/
   model/     estimators, metrics with bootstrap intervals, SHAP, scoring
 scripts/     00-14, one stage each, all runnable standalone
 sql/         01_schema.sql, 02_analytics.sql
-app/         Streamlit — risk map, cell detail, model, field report, history
-powerbi/     36 DAX measures
+app/         Streamlit — risk map, districts, cell detail, model, field report, history
 tests/       regression cover for the failures that actually happened
 docs/        walkthrough, model card, plan, handover, decisions
 reports/     EDA and model figures
 ```
 
 **Further reading:** [`docs/slopewatch-walkthrough.html`](docs/slopewatch-walkthrough.html) is the full 20-section technical walkthrough with 18 diagrams. [`docs/model-card.md`](docs/model-card.md) states intended use, out-of-scope use, and known biases.
+
+---
+
+## Constants
+
+Every value below lives in `config/settings.py` with its reasoning written beside it. Nothing downstream hardcodes a number.
+
+| Constant | Value | Why this and not another |
+|---|---|---|
+| `LAT_MIN, LAT_MAX` | 21.5, 37.5 | a box, not a state list — the catalogue spells `Nagaland` and `Nāgāland` separately and name matching silently drops events |
+| `LON_MIN, LON_MAX` | 72.0, 97.5 | as above |
+| `GRID_DEG` | 0.1 | matches ERA5-Land native resolution and the catalogue's 5–25 km positional error |
+| `LON_INDEX_SPAN` | 1000 | radix keeping `cell_id` collision-free; guarded at import |
+| `MIN_SLOPE_DEG` | 5.0 | a landslide needs a slope; floodplain cells only dilute the negative pool |
+| `DATE_START, DATE_END` | 2007-01-01, 2016-12-31 | the catalogue runs to 2017-09-28 but 2017 is incomplete — August is missing entirely |
+| `NEGATIVES_PER_POSITIVE` | 6 | the binding constraint is the weather API, not statistics; a covered 1:6 beats a hollow 1:15 |
+| `STRATUM_WEIGHTS` | .50 / .30 / .20 | temporal / spatial / background — must sum to 1.0 |
+| `EXCLUSION_RADIUS_KM` | 15.0 | near-miss candidates are discarded, not labelled zero — unreported slides are common in remote terrain |
+| `EXCLUSION_DAYS` | 2 | as above, on the time axis |
+| `FEATURE_WINDOW_DAYS` | 45 | keeps the 30-day antecedent accumulation at a quarter less API cost than 60 |
+| `SPLIT_TRAIN_END` | 2013-12-31 | blocked in time, never random — a random split leaks the future |
+| `SPLIT_VAL_END` | 2014-12-31 | as above |
+| `_ELEVATION_BAND_M` | 500 | the fix for the confounder — a 1,500 m eligibility window centred on the case |
+| `_ELEVATION_BAND_TOLERANCE` | ±1 band | as above |
+| `_SPATIAL_MIN_KM / MAX` | 25 / 300 | inner edge clears the exclusion buffer; outer keeps the control in the same weather system |
+| `_SEASON_WINDOW_DAYS` | 30 | circular, so late December and early January count as adjacent |
+| `API_DECAY` | 0.92 | daily retention of the antecedent precipitation index |
+| `OPENMETEO_DAILY_BUDGET` | 9000 | 1,000 below the free ceiling, so the warning fires before the API does |
+| `EVENTS_PER_VARIABLE_FOR_CAPACITY` | 50 | below this, tree capacity stays tightened — the gate that stopped both trees becoming lookup tables |
+| `FALSE_NEGATIVE_COST` | 20 : 1 | a missed landslide can cost lives; a false alarm costs an inspection vehicle |
 
 ---
 

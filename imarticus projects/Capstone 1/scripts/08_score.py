@@ -19,6 +19,7 @@ set is bounded and the bound is logged rather than hidden.
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from datetime import date
 from pathlib import Path
@@ -39,6 +40,30 @@ from src.logging_setup import configure          # noqa: E402
 log = configure("score")
 
 MODEL_VERSION = "v1"
+
+
+def stored_version() -> str:
+    """The version string written to fact_risk_pred.
+
+    MODEL_VERSION alone is a constant, so every re-score wrote rows that were
+    indistinguishable from the previous model's — and since this script deletes
+    by version before writing, the old rows vanished without trace. That is how
+    the risk map came to serve output from a model with a known sampling leak
+    while claiming to be the same "v1" as the model that had it fixed.
+
+    The family stays "v1" because the marts assume a single version and would
+    double-count two. What is added is the estimator that actually produced the
+    rows, so the warehouse can be asked which model it is showing.
+    """
+    try:
+        metrics = json.loads(
+            (settings.MODELS_DIR / f"metrics_{MODEL_VERSION}.json")
+            .read_text(encoding="utf-8")
+        )
+    except (OSError, ValueError):
+        return MODEL_VERSION
+    selected = metrics.get("selected")
+    return f"{MODEL_VERSION}-{selected}" if selected else MODEL_VERSION
 
 
 def main(n_cells: int, forecast_days: int, dry_run: bool) -> int:
@@ -192,7 +217,7 @@ def _assemble(
     bundle: dict,
 ) -> pd.DataFrame:
     scored = matrix[["cell_id", "date_id"]].copy()
-    scored["model_version"] = MODEL_VERSION
+    scored["model_version"] = stored_version()
     scored["probability"] = np.round(probabilities, 5)
     scored["risk_band"] = scoring.assign_bands(
         scored["probability"], bundle.get("sample_base_rate")
@@ -296,9 +321,12 @@ def _persist(scored: pd.DataFrame) -> None:
 
     with db.get_engine().connect() as conn:
         from sqlalchemy import text
+        # Clear the whole v1 family, not just this estimator's rows. The marts
+        # do not filter on model_version, so two versions coexisting would make
+        # mart_district_daily_risk double-count every district.
         conn.execute(text(
-            "DELETE FROM fact_risk_pred WHERE model_version = :version"
-        ), {"version": MODEL_VERSION})
+            "DELETE FROM fact_risk_pred WHERE model_version LIKE :family"
+        ), {"family": f"{MODEL_VERSION}%"})
         conn.commit()
 
     db.write_frame(scored[columns], "fact_risk_pred", chunksize=5_000)
