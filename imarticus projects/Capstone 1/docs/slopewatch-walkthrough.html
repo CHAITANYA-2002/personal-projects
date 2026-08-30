@@ -1,0 +1,1687 @@
+<title>Slopewatch Walkthrough</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+:root{
+  --sans:"IBM Plex Sans Condensed",-apple-system,"Segoe UI",sans-serif;
+  --serif:"IBM Plex Serif",Georgia,"Times New Roman",serif;
+  --mono:"IBM Plex Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
+
+  --ground:#ECEEEC;
+  --surface:#F8F9F8;
+  --sunk:#E1E5E2;
+  --ink:#151F1C;
+  --ink-2:#4C5955;
+  --ink-3:#74827D;
+  --rule:#C6CEC9;
+  --rule-2:#D8DEDA;
+  --accent:#9A5615;
+  --accent-2:#C98B4B;
+  --accent-wash:#F0E2D2;
+  --water:#20666E;
+  --water-wash:#DCE9EA;
+
+  --crit:#8F2222;
+  --high:#A2510A;
+  --elev:#8A6208;
+  --mod:#456F13;
+  --low:#5A6B72;
+
+  --measure:69ch;
+  --rail:16rem;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0E1412;
+    --surface:#151D1A;
+    --sunk:#1C2622;
+    --ink:#E3E9E5;
+    --ink-2:#9DABA5;
+    --ink-3:#78877F;
+    --rule:#2B3833;
+    --rule-2:#222E2A;
+    --accent:#DA9451;
+    --accent-2:#B87A3E;
+    --accent-wash:#2E2117;
+    --water:#66B4BC;
+    --water-wash:#14282B;
+    --crit:#E07A7A;
+    --high:#DFA05A;
+    --elev:#CFB055;
+    --mod:#9BC46A;
+    --low:#93A5AC;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0E1412; --surface:#151D1A; --sunk:#1C2622;
+  --ink:#E3E9E5; --ink-2:#9DABA5; --ink-3:#78877F;
+  --rule:#2B3833; --rule-2:#222E2A;
+  --accent:#DA9451; --accent-2:#B87A3E; --accent-wash:#2E2117;
+  --water:#66B4BC; --water-wash:#14282B;
+  --crit:#E07A7A; --high:#DFA05A; --elev:#CFB055; --mod:#9BC46A; --low:#93A5AC;
+}
+
+*{box-sizing:border-box;}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:var(--serif); font-size:16.5px; line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ---------- shell ---------- */
+.shell{display:grid; grid-template-columns:var(--rail) minmax(0,1fr); gap:0; max-width:96rem; margin:0 auto;}
+.rail{
+  border-right:1px solid var(--rule); padding:2.2rem 1.1rem 4rem 1.4rem;
+  position:sticky; top:0; align-self:start; max-height:100vh; overflow-y:auto;
+}
+.rail-mark{font-family:var(--sans); font-weight:700; letter-spacing:.09em; text-transform:uppercase; font-size:.72rem; color:var(--accent); margin-bottom:1.4rem;}
+.toc{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:.1rem;}
+.toc a{
+  display:grid; grid-template-columns:1.9rem 1fr; gap:.4rem; align-items:baseline;
+  font-family:var(--sans); font-size:.85rem; line-height:1.3; color:var(--ink-2);
+  text-decoration:none; padding:.34rem .3rem; border-radius:2px;
+}
+.toc a:hover{color:var(--accent); background:var(--sunk);}
+.toc a:focus-visible{outline:2px solid var(--accent); outline-offset:1px;}
+.toc .num{font-family:var(--mono); font-size:.7rem; color:var(--ink-3); font-variant-numeric:tabular-nums;}
+.toc .gap{height:.7rem;}
+
+.main{padding:2.2rem 2.4rem 7rem; min-width:0;}
+.wrap{max-width:var(--measure);}
+
+/* ---------- masthead ---------- */
+.masthead{border-bottom:2px solid var(--ink); padding-bottom:1.6rem; margin-bottom:2.4rem;}
+.eyebrow{font-family:var(--sans); text-transform:uppercase; letter-spacing:.15em; font-size:.7rem; font-weight:600; color:var(--accent);}
+h1{
+  font-family:var(--sans); font-weight:700; font-size:clamp(2.4rem,6vw,3.9rem);
+  line-height:.98; letter-spacing:-.015em; margin:.5rem 0 .6rem; text-wrap:balance;
+}
+.standfirst{font-size:1.16rem; color:var(--ink-2); max-width:52ch; margin:0;}
+.stamp{font-family:var(--mono); font-size:.74rem; color:var(--ink-3); margin-top:1.3rem; display:flex; flex-wrap:wrap; gap:.4rem 1.4rem;}
+
+/* ---------- type ---------- */
+h2{
+  font-family:var(--sans); font-weight:700; font-size:1.92rem; line-height:1.08;
+  letter-spacing:-.01em; margin:4.2rem 0 .3rem; text-wrap:balance; scroll-margin-top:1.5rem;
+}
+h2 .h-num{font-family:var(--mono); font-size:.85rem; color:var(--accent); display:block; font-weight:500; letter-spacing:.05em; margin-bottom:.35rem;}
+h3{font-family:var(--sans); font-weight:600; font-size:1.24rem; margin:2.4rem 0 .5rem; letter-spacing:-.005em;}
+h4{font-family:var(--sans); font-weight:600; font-size:1rem; margin:1.8rem 0 .3rem; color:var(--ink-2); text-transform:uppercase; letter-spacing:.07em;}
+p{margin:0 0 1.05rem;}
+a{color:var(--accent);}
+strong{font-weight:600;}
+em{font-style:italic;}
+code{font-family:var(--mono); font-size:.86em; background:var(--sunk); padding:.1em .34em; border-radius:2px; word-break:break-word;}
+.lede{font-size:1.06rem; color:var(--ink-2);}
+ul,ol{margin:0 0 1.1rem; padding-left:1.15rem;}
+li{margin-bottom:.4rem;}
+hr{border:0; border-top:1px solid var(--rule); margin:3rem 0;}
+
+/* ---------- devices ---------- */
+.callout{
+  border-left:3px solid var(--accent); background:var(--accent-wash);
+  padding:1rem 1.15rem; margin:1.6rem 0; font-size:.95rem;
+}
+.callout .k{font-family:var(--sans); font-weight:700; text-transform:uppercase; letter-spacing:.08em; font-size:.7rem; color:var(--accent); display:block; margin-bottom:.3rem;}
+.callout p:last-child{margin-bottom:0;}
+
+.trap{border-left-color:var(--crit); background:var(--surface);}
+.trap .k{color:var(--crit);}
+
+.quote{
+  font-style:italic; color:var(--ink-2); border-left:2px solid var(--rule);
+  padding-left:1rem; margin:1.3rem 0; font-size:.96rem;
+}
+
+.stat-row{display:flex; flex-wrap:wrap; gap:1px; background:var(--rule); border:1px solid var(--rule); margin:1.7rem 0;}
+.stat{background:var(--surface); padding:.8rem 1rem; flex:1 1 8rem; min-width:7.5rem;}
+.stat .v{font-family:var(--mono); font-size:1.4rem; font-weight:500; display:block; line-height:1.1; font-variant-numeric:tabular-nums;}
+.stat .l{font-family:var(--sans); font-size:.72rem; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-3); display:block; margin-top:.25rem;}
+.stat.hl .v{color:var(--accent);}
+
+.tw{overflow-x:auto; margin:1.6rem 0; border:1px solid var(--rule);}
+table{border-collapse:collapse; width:100%; font-size:.88rem; background:var(--surface);}
+th,td{text-align:left; padding:.5rem .7rem; border-bottom:1px solid var(--rule-2); vertical-align:top;}
+th{font-family:var(--sans); font-weight:600; text-transform:uppercase; letter-spacing:.06em; font-size:.7rem; color:var(--ink-2); background:var(--sunk); white-space:nowrap;}
+tbody tr:last-child td{border-bottom:0;}
+td.n,th.n{font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap;}
+td code{background:transparent; padding:0;}
+
+pre{
+  background:var(--surface); border:1px solid var(--rule); border-left:3px solid var(--water);
+  padding:.85rem 1rem; overflow-x:auto; font-family:var(--mono); font-size:.8rem;
+  line-height:1.5; margin:1.4rem 0;
+}
+pre code{background:transparent; padding:0; font-size:inherit;}
+
+/* ---------- figures ---------- */
+figure{margin:2.2rem 0; max-width:none;}
+figure.bleed{max-width:min(58rem, 100%);}
+.fig-box{border:1px solid var(--rule); background:var(--surface); padding:1.1rem .9rem .6rem; overflow-x:auto;}
+figcaption{
+  font-family:var(--sans); font-size:.81rem; color:var(--ink-2); margin-top:.6rem;
+  line-height:1.4; max-width:64ch;
+}
+figcaption b{font-weight:600; color:var(--ink);}
+
+svg.dgm{display:block; width:100%; height:auto; color:var(--ink); min-width:30rem;}
+.dgm .n{fill:var(--surface); stroke:currentColor; stroke-width:1.4;}
+.dgm .n-sunk{fill:var(--sunk); stroke:currentColor; stroke-width:1.4;}
+.dgm .n-acc{fill:var(--accent-wash); stroke:var(--accent); stroke-width:1.8;}
+.dgm .n-wat{fill:var(--water-wash); stroke:var(--water); stroke-width:1.4;}
+.dgm .n-ghost{fill:none; stroke:currentColor; stroke-width:1; stroke-dasharray:3 3; opacity:.55;}
+.dgm .e{stroke:currentColor; stroke-width:1.3; fill:none;}
+.dgm .e-acc{stroke:var(--accent); stroke-width:2; fill:none;}
+.dgm .e-dash{stroke:currentColor; stroke-width:1.2; fill:none; stroke-dasharray:4 3; opacity:.7;}
+.dgm .t{font-family:var(--sans); font-size:12.5px; fill:currentColor; font-weight:500;}
+.dgm .t-b{font-family:var(--sans); font-size:12.5px; fill:currentColor; font-weight:700;}
+.dgm .t-s{font-family:var(--sans); font-size:10.5px; fill:var(--ink-2);}
+.dgm .t-m{font-family:var(--mono); font-size:10.5px; fill:var(--ink-2);}
+.dgm .t-acc{fill:var(--accent); font-weight:600;}
+.dgm .t-wat{fill:var(--water);}
+.dgm .ar{fill:currentColor;}
+.dgm .ar-acc{fill:var(--accent);}
+
+.band{display:inline-block; font-family:var(--sans); font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; padding:.1rem .4rem; border:1px solid; border-radius:2px;}
+.b-crit{color:var(--crit); border-color:var(--crit);}
+.b-high{color:var(--high); border-color:var(--high);}
+.b-elev{color:var(--elev); border-color:var(--elev);}
+.b-mod{color:var(--mod); border-color:var(--mod);}
+.b-low{color:var(--low); border-color:var(--low);}
+
+.pass{color:var(--mod); font-weight:600;}
+.warn{color:var(--elev); font-weight:600;}
+.fail{color:var(--crit); font-weight:600;}
+
+.foot{margin-top:5rem; padding-top:1.4rem; border-top:2px solid var(--ink); font-family:var(--sans); font-size:.82rem; color:var(--ink-3);}
+
+@media (max-width:1000px){
+  .shell{grid-template-columns:1fr;}
+  .rail{position:static; max-height:none; border-right:0; border-bottom:1px solid var(--rule); padding:1.4rem 1.4rem 1rem;}
+  .toc{display:grid; grid-template-columns:repeat(auto-fill,minmax(13rem,1fr)); gap:0;}
+  .toc .gap{display:none;}
+  .main{padding:1.6rem 1.3rem 5rem;}
+  svg.dgm{min-width:26rem;}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none !important; transition:none !important;}}
+</style>
+
+<div class="shell">
+<nav class="rail" aria-label="Contents">
+  <div class="rail-mark">Slopewatch</div>
+  <ul class="toc">
+    <li><a href="#s01"><span class="num">01</span><span>The problem is the base rate</span></a></li>
+    <li><a href="#s02"><span class="num">02</span><span>The system at a glance</span></a></li>
+    <li class="gap"></li>
+    <li><a href="#s03"><span class="num">03</span><span>The grid</span></a></li>
+    <li><a href="#s04"><span class="num">04</span><span>Terrain and the hill mask</span></a></li>
+    <li><a href="#s05"><span class="num">05</span><span>The catalogue</span></a></li>
+    <li><a href="#s06"><span class="num">06</span><span>The sampling design</span></a></li>
+    <li><a href="#s07"><span class="num">07</span><span>The elevation confounder</span></a></li>
+    <li><a href="#s08"><span class="num">08</span><span>Weather acquisition</span></a></li>
+    <li><a href="#s09"><span class="num">09</span><span>Features</span></a></li>
+    <li><a href="#s10"><span class="num">10</span><span>The model</span></a></li>
+    <li><a href="#s11"><span class="num">11</span><span>Honesty instrumentation</span></a></li>
+    <li><a href="#s12"><span class="num">12</span><span>Scoring and bands</span></a></li>
+    <li class="gap"></li>
+    <li><a href="#s13"><span class="num">13</span><span>The warehouse</span></a></li>
+    <li><a href="#s14"><span class="num">14</span><span>Interfaces</span></a></li>
+    <li><a href="#s15"><span class="num">15</span><span>Verification</span></a></li>
+    <li class="gap"></li>
+    <li><a href="#s16"><span class="num">16</span><span>Four real failures</span></a></li>
+    <li><a href="#s17"><span class="num">17</span><span>How much data is enough</span></a></li>
+    <li><a href="#s18"><span class="num">18</span><span>Where it stands</span></a></li>
+    <li><a href="#s19"><span class="num">19</span><span>Limitations</span></a></li>
+    <li class="gap"></li>
+    <li><a href="#sA"><span class="num">A</span><span>Constants</span></a></li>
+    <li><a href="#sB"><span class="num">B</span><span>Files and commands</span></a></li>
+  </ul>
+</nav>
+
+<main class="main">
+
+<header class="masthead">
+  <div class="eyebrow">Technical walkthrough</div>
+  <h1>Slopewatch</h1>
+  <p class="standfirst">Daily landslide risk for the Indian Himalaya on an 11&nbsp;km grid, built from rainfall, soil moisture and terrain — and an account of everything that had to go right, plus the four things that went wrong.</p>
+  <div class="stamp">
+    <span>SIH 2026 · PS 26192</span>
+    <span>13 scripts · 12 modules · 11 tables · 8 views and marts</span>
+    <span>Last verified 2026-08-30</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+<!-- ══════════════════════════════ 01 ══════════════════════════════ -->
+<h2 id="s01"><span class="h-num">01</span>The problem is the base rate</h2>
+
+<p class="lede">Across the study area there is roughly <strong>one landslide per 48,000 cell-days</strong>. Every design decision in this project follows from that single number.</p>
+
+<p>A landslide is a rare event. Ten years of daily observations across 22,594 mountain cells is about 82 million cell-days, and the catalogue records 1,719 events inside them. Two things follow immediately, and both are traps that a conventional machine-learning approach walks straight into.</p>
+
+<p><strong>Accuracy becomes a lie.</strong> A model that predicts "no landslide" everywhere, every day, is 99.998% accurate. That number is not merely uninformative — it actively conceals total failure. This is why <code>src/model/metrics.py</code> omits accuracy entirely; the module docstring says so in its opening lines.</p>
+
+<p><strong>A gridded panel becomes untrainable.</strong> Materialising every cell-day as a row would mean 82 million rows of which 0.002% are positive, and each one needs a 45-day weather history that has to be fetched over an API allowing ten thousand calls a day. The data acquisition alone would take centuries.</p>
+
+<div class="stat-row">
+  <div class="stat hl"><span class="v">1 in 48,080</span><span class="l">population base rate</span></div>
+  <div class="stat"><span class="v">1,719</span><span class="l">recorded events</span></div>
+  <div class="stat"><span class="v">40,800</span><span class="l">grid cells</span></div>
+  <div class="stat"><span class="v">22,594</span><span class="l">pass the hill mask</span></div>
+  <div class="stat"><span class="v">3,653</span><span class="l">days in window</span></div>
+</div>
+
+<p>The answer adopted here is <strong>case-control sampling</strong>, borrowed from epidemiology: take every case, then draw a designed set of controls around them. That converts an impossible 82-million-row problem into a tractable 11,955-row one — and it introduces its own subtle failure modes, which §06 and §07 are about.</p>
+
+<figure class="bleed">
+<div class="fig-box">
+<svg class="dgm" viewBox="0 0 760 210" role="img" aria-label="A full space-time panel of 82 million cell-days is reduced by case-control sampling to 11,955 rows, keeping all 1,719 events and drawing designed controls around them.">
+<defs><marker id="ar01" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ar"/></marker></defs>
+
+<rect x="10" y="30" width="230" height="150" class="n-sunk"/>
+<text x="125" y="22" class="t-b" text-anchor="middle">Full space-time panel</text>
+<text x="125" y="62" class="t-m" text-anchor="middle">22,594 hill cells</text>
+<text x="125" y="80" class="t-m" text-anchor="middle">× 3,653 days</text>
+<text x="125" y="112" class="t" text-anchor="middle" style="font-size:19px;font-weight:700">82,535,882</text>
+<text x="125" y="130" class="t-s" text-anchor="middle">cell-days</text>
+<text x="125" y="158" class="t-s" text-anchor="middle" style="fill:var(--crit)">0.002% positive</text>
+
+<g>
+  <line x1="248" y1="105" x2="316" y2="105" class="e-acc" marker-end="url(#ar01)"/>
+  <text x="282" y="96" class="t-m t-acc" text-anchor="middle">case-</text>
+  <text x="282" y="84" class="t-m t-acc" text-anchor="middle">control</text>
+</g>
+
+<rect x="326" y="30" width="200" height="150" class="n-acc"/>
+<text x="426" y="22" class="t-b" text-anchor="middle">Sampled frame</text>
+<text x="426" y="62" class="t-m" text-anchor="middle">every case kept</text>
+<text x="426" y="80" class="t-m" text-anchor="middle">6 designed controls each</text>
+<text x="426" y="112" class="t" text-anchor="middle" style="font-size:19px;font-weight:700">11,955</text>
+<text x="426" y="130" class="t-s" text-anchor="middle">rows</text>
+<text x="426" y="158" class="t-s t-acc" text-anchor="middle">13.8% positive</text>
+
+<line x1="534" y1="105" x2="596" y2="105" class="e" marker-end="url(#ar01)"/>
+<text x="565" y="96" class="t-m" text-anchor="middle">score</text>
+
+<rect x="606" y="55" width="144" height="100" class="n-wat"/>
+<text x="678" y="47" class="t-b" text-anchor="middle">Prior correction</text>
+<text x="678" y="82" class="t-s" text-anchor="middle">shifts the intercept</text>
+<text x="678" y="99" class="t-s" text-anchor="middle">back to the</text>
+<text x="678" y="116" class="t-s" text-anchor="middle">population scale</text>
+<text x="678" y="140" class="t-m t-wat" text-anchor="middle">§12</text>
+</svg>
+</div>
+<figcaption><b>The central trade.</b> Case-control sampling buys tractability at the cost of a deliberately wrong base rate. That distortion is exactly recoverable — the prior correction in §12 subtracts a known log-odds offset — but only if it is remembered. Every score this system publishes carries both numbers.</figcaption>
+</figure>
+
+<!-- ══════════════════════════════ 02 ══════════════════════════════ -->
+<h2 id="s02"><span class="h-num">02</span>The system at a glance</h2>
+
+<p>Four external sources feed a twelve-stage pipeline that lands in a MySQL star schema; two interfaces read from marts on top of it. Nothing in the pipeline is interactive and every stage is independently runnable.</p>
+
+<figure class="bleed">
+<div class="fig-box">
+<svg class="dgm" viewBox="0 0 780 400" role="img" aria-label="Architecture: four external sources feed pipeline stages that write to a MySQL warehouse, whose views and marts are read by Streamlit and Power BI.">
+<defs><marker id="ar02" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ar"/></marker></defs>
+
+<text x="82" y="20" class="t-b" text-anchor="middle">Sources</text>
+<rect x="10" y="32" width="144" height="40" class="n"/><text x="82" y="50" class="t" text-anchor="middle">NASA GLC</text><text x="82" y="64" class="t-s" text-anchor="middle">landslide catalogue</text>
+<rect x="10" y="82" width="144" height="40" class="n"/><text x="82" y="100" class="t" text-anchor="middle">Copernicus DEM</text><text x="82" y="114" class="t-s" text-anchor="middle">442 tiles, 17.5 GB</text>
+<rect x="10" y="132" width="144" height="40" class="n"/><text x="82" y="150" class="t" text-anchor="middle">Open-Meteo</text><text x="82" y="164" class="t-s" text-anchor="middle">ERA5-Land + GloFAS</text>
+<rect x="10" y="182" width="144" height="40" class="n"/><text x="82" y="200" class="t" text-anchor="middle">OSM + geoBoundaries</text><text x="82" y="214" class="t-s" text-anchor="middle">exposure, admin</text>
+
+<text x="300" y="20" class="t-b" text-anchor="middle">Pipeline</text>
+<rect x="196" y="32" width="208" height="252" class="n-ghost"/>
+<rect x="210" y="44" width="180" height="26" class="n-sunk"/><text x="300" y="61" class="t-m" text-anchor="middle">00 · 01 · 02 · 03 build the grid</text>
+<rect x="210" y="78" width="180" height="26" class="n-sunk"/><text x="300" y="95" class="t-m" text-anchor="middle">11 · 09 admin and exposure</text>
+<rect x="210" y="112" width="180" height="26" class="n-acc"/><text x="300" y="129" class="t-m t-acc" text-anchor="middle">04 case-control sample</text>
+<rect x="210" y="146" width="180" height="26" class="n-acc"/><text x="300" y="163" class="t-m t-acc" text-anchor="middle">05 weather backfill</text>
+<rect x="210" y="180" width="180" height="26" class="n-sunk"/><text x="300" y="197" class="t-m" text-anchor="middle">06 features · 07 train</text>
+<rect x="210" y="214" width="180" height="26" class="n-sunk"/><text x="300" y="231" class="t-m" text-anchor="middle">08 score forecast</text>
+<rect x="210" y="248" width="180" height="26" class="n-wat"/><text x="300" y="265" class="t-m t-wat" text-anchor="middle">10 verify · 24 checks</text>
+
+<line x1="158" y1="52" x2="206" y2="60" class="e" marker-end="url(#ar02)"/>
+<line x1="158" y1="102" x2="206" y2="86" class="e" marker-end="url(#ar02)"/>
+<line x1="158" y1="152" x2="206" y2="159" class="e" marker-end="url(#ar02)"/>
+<line x1="158" y1="200" x2="206" y2="95" class="e-dash" marker-end="url(#ar02)"/>
+
+<text x="510" y="20" class="t-b" text-anchor="middle">Warehouse</text>
+<rect x="424" y="32" width="172" height="252" class="n-ghost"/>
+<rect x="438" y="46" width="144" height="24" class="n"/><text x="510" y="62" class="t-m" text-anchor="middle">4 dimensions</text>
+<rect x="438" y="78" width="144" height="24" class="n"/><text x="510" y="94" class="t-m" text-anchor="middle">5 fact tables</text>
+<rect x="438" y="110" width="144" height="24" class="n"/><text x="510" y="126" class="t-m" text-anchor="middle">1 run log</text>
+<rect x="438" y="150" width="144" height="24" class="n-wat"/><text x="510" y="166" class="t-m t-wat" text-anchor="middle">5 views</text>
+<rect x="438" y="182" width="144" height="24" class="n-wat"/><text x="510" y="198" class="t-m t-wat" text-anchor="middle">3 marts</text>
+<text x="510" y="232" class="t-s" text-anchor="middle">every window, ranking</text>
+<text x="510" y="248" class="t-s" text-anchor="middle">and cohort is SQL —</text>
+<text x="510" y="264" class="t-s" text-anchor="middle">not pandas</text>
+
+<line x1="406" y1="158" x2="420" y2="158" class="e" marker-end="url(#ar02)"/>
+
+<text x="700" y="20" class="t-b" text-anchor="middle">Read</text>
+<rect x="620" y="46" width="150" height="52" class="n"/><text x="695" y="66" class="t" text-anchor="middle">Streamlit</text><text x="695" y="82" class="t-s" text-anchor="middle">4 pages</text>
+<rect x="620" y="112" width="150" height="52" class="n"/><text x="695" y="132" class="t" text-anchor="middle">Power BI</text><text x="695" y="148" class="t-s" text-anchor="middle">36 DAX measures</text>
+<line x1="600" y1="130" x2="616" y2="80" class="e" marker-end="url(#ar02)"/>
+<line x1="600" y1="150" x2="616" y2="140" class="e" marker-end="url(#ar02)"/>
+
+<line x1="380" y1="300" x2="380" y2="330" class="e-dash"/>
+<rect x="196" y="330" width="380" height="52" class="n-ghost"/>
+<text x="386" y="352" class="t-s" text-anchor="middle">Both interfaces read <tspan class="t-m">fact_risk_pred</tspan> through the marts.</text>
+<text x="386" y="370" class="t-s" text-anchor="middle">Nothing downstream ever touches the model file directly.</text>
+</svg>
+</div>
+<figcaption><b>Data flows left to right and never loops back.</b> The two accented stages are where the analytical judgement lives; everything else is plumbing that either works or fails loudly.</figcaption>
+</figure>
+
+<h3>Stage order is not arbitrary</h3>
+
+<p>The stage list in <code>scripts/run_pipeline.py</code> runs <strong>00 · 01 · 02 · 03 · 11 · 09 · 04 · 05 · 06 · 07 · 08 · 10</strong>. Stages 11 and 09 jump the numeric queue and run <em>before</em> 04, because the sampler needs the hill mask and the admin labels that those stages write. The dependency graph, not the filename, decides.</p>
+
+<figure class="bleed">
+<div class="fig-box">
+<svg class="dgm" viewBox="0 0 790 250" role="img" aria-label="Pipeline dependency graph showing that stages 11 and 09 must precede stage 04, and that stage 05 gates stages 06 through 08.">
+<defs><marker id="ar03" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ar"/></marker>
+<marker id="ar03a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ar-acc"/></marker></defs>
+
+<rect x="8" y="98" width="72" height="44" class="n"/><text x="44" y="118" class="t-b" text-anchor="middle">00</text><text x="44" y="133" class="t-s" text-anchor="middle">schema</text>
+<rect x="102" y="42" width="72" height="44" class="n"/><text x="138" y="62" class="t-b" text-anchor="middle">01</text><text x="138" y="77" class="t-s" text-anchor="middle">catalogue</text>
+<rect x="102" y="154" width="72" height="44" class="n"/><text x="138" y="174" class="t-b" text-anchor="middle">02</text><text x="138" y="189" class="t-s" text-anchor="middle">DEM</text>
+<rect x="196" y="154" width="72" height="44" class="n"/><text x="232" y="174" class="t-b" text-anchor="middle">03</text><text x="232" y="189" class="t-s" text-anchor="middle">terrain</text>
+<rect x="290" y="196" width="72" height="42" class="n"/><text x="326" y="215" class="t-b" text-anchor="middle">11</text><text x="326" y="230" class="t-s" text-anchor="middle">admin</text>
+<rect x="290" y="146" width="72" height="42" class="n"/><text x="326" y="165" class="t-b" text-anchor="middle">09</text><text x="326" y="180" class="t-s" text-anchor="middle">exposure</text>
+
+<rect x="386" y="76" width="82" height="48" class="n-acc"/><text x="427" y="97" class="t-b t-acc" text-anchor="middle">04</text><text x="427" y="113" class="t-s" text-anchor="middle">sample</text>
+<rect x="492" y="76" width="82" height="48" class="n-acc"/><text x="533" y="97" class="t-b t-acc" text-anchor="middle">05</text><text x="533" y="113" class="t-s" text-anchor="middle">weather</text>
+<rect x="598" y="76" width="66" height="48" class="n"/><text x="631" y="97" class="t-b" text-anchor="middle">06</text><text x="631" y="113" class="t-s" text-anchor="middle">features</text>
+<rect x="682" y="26" width="66" height="44" class="n"/><text x="715" y="45" class="t-b" text-anchor="middle">07</text><text x="715" y="60" class="t-s" text-anchor="middle">train</text>
+<rect x="682" y="80" width="66" height="44" class="n"/><text x="715" y="99" class="t-b" text-anchor="middle">08</text><text x="715" y="114" class="t-s" text-anchor="middle">score</text>
+<rect x="682" y="134" width="66" height="44" class="n-wat"/><text x="715" y="153" class="t-b t-wat" text-anchor="middle">10</text><text x="715" y="168" class="t-s" text-anchor="middle">verify</text>
+
+<line x1="82" y1="112" x2="98" y2="72" class="e" marker-end="url(#ar03)"/>
+<line x1="82" y1="128" x2="98" y2="170" class="e" marker-end="url(#ar03)"/>
+<line x1="176" y1="176" x2="192" y2="176" class="e" marker-end="url(#ar03)"/>
+<line x1="270" y1="180" x2="286" y2="172" class="e" marker-end="url(#ar03)"/>
+<line x1="270" y1="184" x2="286" y2="212" class="e" marker-end="url(#ar03)"/>
+<path d="M174 64 C 300 64 320 90 382 96" class="e-acc" marker-end="url(#ar03a)"/>
+<path d="M364 164 C 380 150 372 128 382 112" class="e-acc" marker-end="url(#ar03a)"/>
+<line x1="470" y1="100" x2="488" y2="100" class="e-acc" marker-end="url(#ar03a)"/>
+<line x1="576" y1="100" x2="594" y2="100" class="e-acc" marker-end="url(#ar03a)"/>
+<line x1="666" y1="90" x2="678" y2="58" class="e" marker-end="url(#ar03)"/>
+<path d="M750 52 C 768 60 768 84 750 100" class="e" marker-end="url(#ar03)"/>
+<line x1="666" y1="112" x2="678" y2="150" class="e" marker-end="url(#ar03)"/>
+
+<text x="300" y="30" class="t-s t-acc">11 and 09 run before 04 — the sampler</text>
+<text x="300" y="46" class="t-s t-acc">needs the hill mask and region labels</text>
+</svg>
+</div>
+<figcaption><b>The critical path is 00 → 03 → 04 → 05 → 06 → 07.</b> Stage 05 is the long pole and everything after it waits; <code>run_pipeline.py --from 06</code> resumes past it. Stage 09 is documented as "independent of the weather and model path — safe to run at any time".</figcaption>
+</figure>
+
+<!-- ══════════════════════════════ 03 ══════════════════════════════ -->
+<h2 id="s03"><span class="h-num">03</span>The grid</h2>
+
+<p>Everything is keyed to a 0.1° lattice over 21.5–37.5°N, 72.0–97.5°E — 160 rows by 255 columns, <strong>40,800 cells</strong>, each roughly 11 km on a side.</p>
+
+<p>Two independent arguments converge on 0.1°, and <code>src/data/grid.py</code> states both. The catalogue records most event positions to within <strong>5–25 km</strong>, so a finer lattice "would produce confident predictions the labels cannot support". And 0.1° is ERA5-Land's native resolution, so one grid cell maps to exactly one weather pixel with no resampling. Resolution is set by the worse of the label and the predictor, not by ambition.</p>
+
+<p>The study area is a bounding box rather than a list of state names, and the reason is a data-quality defect, not laziness. The catalogue stores <code>Nagaland</code> and <code>Nāgāland</code> as separate values; matching by name silently drops two-thirds of that state. §05 quantifies this.</p>
+
+<h3>One integer per cell</h3>
+
+<p>Cell identity is a positional encoding: <code>cell_id = lat_idx × 1000 + lon_idx</code>. It is deterministic, so a reload never reshuffles keys, and exactly invertible via <code>divmod</code>.</p>
+
+<figure class="bleed">
+<div class="fig-box">
+<svg class="dgm" viewBox="0 0 720 250" role="img" aria-label="Cell identifier encoding: latitude and longitude are floored into indices, packed as lat_idx times 1000 plus lon_idx, and recovered by divmod.">
+<defs><marker id="ar04" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ar"/></marker></defs>
+
+<rect x="10" y="52" width="130" height="56" class="n"/>
+<text x="75" y="74" class="t" text-anchor="middle">latitude 30.28</text>
+<text x="75" y="94" class="t-m" text-anchor="middle">floor((30.28−21.5)/0.1)</text>
+<rect x="10" y="132" width="130" height="56" class="n"/>
+<text x="75" y="154" class="t" text-anchor="middle">longitude 78.61</text>
+<text x="75" y="174" class="t-m" text-anchor="middle">floor((78.61−72.0)/0.1)</text>
+
+<line x1="144" y1="80" x2="182" y2="104" class="e" marker-end="url(#ar04)"/>
+<line x1="144" y1="160" x2="182" y2="136" class="e" marker-end="url(#ar04)"/>
+
+<rect x="188" y="96" width="118" height="48" class="n-sunk"/>
+<text x="247" y="116" class="t-m" text-anchor="middle">lat_idx = 87</text>
+<text x="247" y="134" class="t-m" text-anchor="middle">lon_idx = 66</text>
+
+<line x1="310" y1="120" x2="352" y2="120" class="e-acc" marker-end="url(#ar04)"/>
+<text x="331" y="110" class="t-m t-acc" text-anchor="middle">×1000 +</text>
+
+<rect x="358" y="92" width="150" height="56" class="n-acc"/>
+<text x="433" y="116" class="t-b" text-anchor="middle" style="font-size:16px">cell_id</text>
+<text x="433" y="136" class="t-m t-acc" text-anchor="middle">87066</text>
+
+<line x1="512" y1="120" x2="552" y2="120" class="e" marker-end="url(#ar04)"/>
+<text x="532" y="110" class="t-m" text-anchor="middle">divmod</text>
+
+<rect x="558" y="92" width="150" height="56" class="n"/>
+<text x="633" y="114" class="t-s" text-anchor="middle">centroid, 3 dp</text>
+<text x="633" y="134" class="t-m" text-anchor="middle">30.250 N · 78.650 E</text>
+
+<rect x="188" y="182" width="520" height="52" class="n-ghost"/>
+<text x="200" y="202" class="t-s">Guard, checked at import time:</text>
+<text x="200" y="220" class="t-m">if N_LON_CELLS &gt;= LON_INDEX_SPAN: raise ValueError — 255 used of 1000, 745 spare</text>
+</svg>
+</div>
+<figcaption><b>The radix is load-bearing.</b> The packing is only invertible while <code>lon_idx</code> stays below 1000. Widening the box or shrinking the cell below ~0.0255° would alias two distinct cells onto one id, so <code>config/settings.py</code> raises at import rather than letting it happen quietly.</figcaption>
+</figure>
+
+<div class="callout trap">
+<span class="k">Trap</span>
+<p><code>N_LON_CELLS</code> is computed with <code>round()</code>, not integer division. <code>(97.5 − 72.0) / 0.1</code> evaluates to <strong>254.99999999999997</strong> in IEEE-754 floating point. Refactoring that <code>round()</code> to <code>int()</code> or <code>//</code> would silently drop an entire column of cells from the grid — 160 cells, no error, no warning.</p>
+</div>
+
+<!-- ══════════════════════════════ 04 ══════════════════════════════ -->
+<h2 id="s04"><span class="h-num">04</span>Terrain and the hill mask</h2>
+
+<p>442 Copernicus DEM GLO-30 tiles — about 17.5 GB — are downloaded and reduced, one tile at a time, into ten terrain statistics per cell.</p>
+
+<p>The tile-at-a-time discipline is deliberate: a single tile is 3601×3601 float32, roughly 50 MB in memory, and contains exactly 100 of the 0.1° cells. Processing the whole arc as a mosaic would mean a 5.7-billion-pixel array. This way memory stays bounded and the run is checkpointed every 20 tiles.</p>
+
+<figure class="bleed">
+<div class="fig-box">
+<svg class="dgm" viewBox="0 0 770 320" role="img" aria-label="Terrain pipeline: each DEM tile is masked for voids, converted to slope and ruggedness rasters, sliced into 100 cells, reduced to ten statistics, then thresholded into the hill mask.">
+<defs><marker id="ar05" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ar"/></marker>
+<marker id="ar05a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ar-acc"/></marker></defs>
+
+<rect x="10" y="16" width="128" height="46" class="n"/><text x="74" y="35" class="t" text-anchor="middle">442 tiles</text><text x="74" y="51" class="t-s" text-anchor="middle">6 parallel workers</text>
+<line x1="74" y1="66" x2="74" y2="86" class="e" marker-end="url(#ar05)"/>
+
+<polygon points="74,90 144,120 74,150 4,120" class="n-sunk"/>
+<text x="74" y="116" class="t-s" text-anchor="middle">missing tiles</text>
+<text x="74" y="130" class="t-s" text-anchor="middle">over 2%?</text>
+<text x="158" y="112" class="t-m" style="fill:var(--crit)">yes → exit 1</text>
+<text x="158" y="128" class="t-s">"the mask would reflect</text>
+<text x="158" y="142" class="t-s">download failures, not terrain"</text>
+
+<line x1="74" y1="154" x2="74" y2="176" class="e" marker-end="url(#ar05)"/>
+<text x="84" y="170" class="t-m">no</text>
+
+<rect x="10" y="180" width="128" height="46" class="n"/><text x="74" y="198" class="t" text-anchor="middle">mask voids</text><text x="74" y="214" class="t-s" text-anchor="middle">−32767, −9999, &lt;−500 m</text>
+<line x1="142" y1="203" x2="176" y2="203" class="e" marker-end="url(#ar05)"/>
+
+<rect x="180" y="164" width="140" height="36" class="n"/><text x="250" y="187" class="t" text-anchor="middle">slope + aspect</text>
+<rect x="180" y="208" width="140" height="36" class="n"/><text x="250" y="231" class="t" text-anchor="middle">ruggedness (TRI)</text>
+<text x="250" y="260" class="t-s" text-anchor="middle">spacing_x scaled by cos(lat)</text>
+<text x="250" y="275" class="t-s" text-anchor="middle">— 18% error at 35°N if skipped</text>
+
+<line x1="324" y1="203" x2="358" y2="203" class="e" marker-end="url(#ar05)"/>
+<rect x="362" y="180" width="128" height="46" class="n"/><text x="426" y="198" class="t" text-anchor="middle">slice 10×10 cells</text><text x="426" y="214" class="t-s" text-anchor="middle">via affine transform</text>
+
+<line x1="426" y1="176" x2="426" y2="150" class="e" marker-end="url(#ar05)"/>
+<polygon points="426,146 512,120 426,94 340,120" class="n-sunk"/>
+<text x="426" y="116" class="t-s" text-anchor="middle">≥50% pixels</text>
+<text x="426" y="130" class="t-s" text-anchor="middle">finite?</text>
+<text x="526" y="124" class="t-m" style="fill:var(--crit)">no → drop cell</text>
+
+<line x1="426" y1="90" x2="426" y2="66" class="e" marker-end="url(#ar05)"/>
+<rect x="352" y="16" width="148" height="46" class="n"/><text x="426" y="35" class="t" text-anchor="middle">10 statistics</text><text x="426" y="51" class="t-s" text-anchor="middle">elev · slope · aspect · tri</text>
+
+<line x1="504" y1="39" x2="540" y2="39" class="e-acc" marker-end="url(#ar05a)"/>
+<polygon points="612,39 700,72 612,105 524,72" class="n-acc" transform="translate(0,-33)"/>
+<text x="612" y="34" class="t-s t-acc" text-anchor="middle">slope_mean</text>
+<text x="612" y="48" class="t-s t-acc" text-anchor="middle">≥ 5.0°?</text>
+
+<line x1="612" y1="76" x2="612" y2="104" class="e-acc" marker-end="url(#ar05a)"/>
+<rect x="528" y="108" width="168" height="46" class="n-acc"/>
+<text x="612" y="127" class="t-b t-acc" text-anchor="middle">is_hill = 1</text>
+<text x="612" y="143" class="t-s" text-anchor="middle">22,594 of 40,800 cells</text>
+
+<rect x="528" y="176" width="230" height="86" class="n-ghost"/>
+<text x="540" y="196" class="t-s" style="fill:var(--crit)">The mask has NO elevation term.</text>
+<text x="540" y="214" class="t-s">Ladakh and the Tibetan plateau are</text>
+<text x="540" y="230" class="t-s">high, cold, outside the monsoon —</text>
+<text x="540" y="246" class="t-s">and comfortably above 5°. They pass.</text>
+</svg>
+</div>
+<figcaption><b>The hill mask is a single threshold: <code>slope_mean ≥ 5.0°</code>, and nothing else.</b> That is a defensible filter — a landslide needs a slope, and keeping floodplain cells only dilutes the negative pool. It is also the origin of the project's most serious analytical defect, because a high plateau is steep too. §07 is the consequence.</figcaption>
+</figure>
+
+<!-- ══════════════════════════════ 05 ══════════════════════════════ -->
+<h2 id="s05"><span class="h-num">05</span>The catalogue</h2>
+
+<p>Labels come from the NASA Global Landslide Catalog. 11,033 raw rows are reduced to <strong>1,719 usable events</strong> through four filters, each of which is logged so the funnel can be audited.</p>
+
+<figure class="bleed">
+<div class="fig-box">
+<svg class="dgm" viewBox="0 0 740 240" role="img" aria-label="Catalogue funnel: 11,033 raw rows reduce to 2,037 inside the bounding box, 1,781 inside the date window, and 1,719 after the country filter.">
+<defs><marker id="ar06" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ar"/></marker></defs>
+
+<rect x="20" y="40" width="130" height="66" class="n"/>
+<text x="85" y="66" class="t-b" text-anchor="middle" style="font-size:16px">11,033</text>
+<text x="85" y="84" class="t-s" text-anchor="middle">raw CSV rows</text>
+<text x="85" y="99" class="t-s" text-anchor="middle">14 of 31 columns read</text>
+
+<line x1="154" y1="73" x2="190" y2="73" class="e" marker-end="url(#ar06)"/>
+<text x="172" y="62" class="t-m" text-anchor="middle">bbox</text>
+<text x="172" y="128" class="t-s" text-anchor="middle" style="fill:var(--crit)">−8,996</text>
+
+<rect x="194" y="40" width="130" height="66" class="n"/>
+<text x="259" y="66" class="t-b" text-anchor="middle" style="font-size:16px">2,037</text>
+<text x="259" y="84" class="t-s" text-anchor="middle">inside 21.5–37.5 N</text>
+<text x="259" y="99" class="t-s" text-anchor="middle">72.0–97.5 E</text>
+
+<line x1="328" y1="73" x2="364" y2="73" class="e" marker-end="url(#ar06)"/>
+<text x="346" y="62" class="t-m" text-anchor="middle">dates</text>
+<text x="346" y="128" class="t-s" text-anchor="middle" style="fill:var(--crit)">−256</text>
+
+<rect x="368" y="40" width="130" height="66" class="n"/>
+<text x="433" y="66" class="t-b" text-anchor="middle" style="font-size:16px">1,781</text>
+<text x="433" y="84" class="t-s" text-anchor="middle">2007-01-01 to</text>
+<text x="433" y="99" class="t-s" text-anchor="middle">2016-12-31</text>
+
+<line x1="502" y1="73" x2="538" y2="73" class="e" marker-end="url(#ar06)"/>
+<text x="520" y="62" class="t-m" text-anchor="middle">country</text>
+<text x="520" y="128" class="t-s" text-anchor="middle" style="fill:var(--crit)">−62</text>
+
+<rect x="542" y="40" width="150" height="66" class="n-acc"/>
+<text x="617" y="66" class="t-b t-acc" text-anchor="middle" style="font-size:16px">1,719</text>
+<text x="617" y="84" class="t-s" text-anchor="middle">7 arc countries</text>
+<text x="617" y="99" class="t-s" text-anchor="middle">fact_landslide</text>
+
+<rect x="20" y="152" width="672" height="72" class="n-ghost"/>
+<text x="34" y="172" class="t-b">Composition of the 1,719</text>
+<text x="34" y="194" class="t-m">India 1,017 · Nepal 481 · Pakistan 118 · Bangladesh 42 · Myanmar 23 · Bhutan 20 · China 18</text>
+<text x="34" y="214" class="t-s">973 distinct cells · 89.4% rainfall-triggered · median location error 10 km · actual range 2007-01-05 to 2016-10-15</text>
+</svg>
+</div>
+<figcaption><b>Training spans the whole Himalayan orogen; evaluation is India only.</b> Full-arc training nearly doubles the sample — 1,781 against 1,017 — and the added events share the same geology and monsoon regime, so the physics transfers. Reporting on India alone makes leave-one-country-out a genuine test of spatial generalisation.</figcaption>
+</figure>
+
+<h3>Two data-quality landmines, both found and both defused</h3>
+
+<p><strong>Diacritics split states in half.</strong> The catalogue stores <code>Nagaland</code> (14 events) and <code>Nāgāland</code> (64) as separate values — grouping on the raw column undercounts that state by 82%. The same defect hits Arunachal Pradesh (20 + 25) and Meghalaya (18 + 11). The loader stores <em>both</em> the raw name and a normalised one, and only the normalised column is indexed.</p>
+
+<p><strong>Excel silently rewrote the dates.</strong> A duplicate of the catalogue sits in the repo at <code>dataset/</code>. Opening it in Excel and saving converted the 4,395 rows whose day component is ≤12 into <code>DD-MM-YYYY</code> while leaving the other 6,638 as <code>MM/DD/YYYY</code>. Parsing that file under either convention misdates <strong>4,083 events</strong>. The pipeline reads only <code>data/raw/global_landslide_catalog.csv</code> and never touches the mangled copy.</p>
+
+<div class="callout">
+<span class="k">Reporting bias — the one that cannot be fixed</span>
+<p>The catalogue records landslides that were <em>reported</em>, which skews toward roads, settlements and media attention. Absence of a record is not absence of a landslide. This is why the sampler discards near-miss negatives rather than labelling them zero — see §06.</p>
+</div>
+
+<!-- ══════════════════════════════ 06 ══════════════════════════════ -->
+<h2 id="s06"><span class="h-num">06</span>The sampling design</h2>
+
+<p class="lede">This is the analytical heart of the project. Every event becomes a case; six controls are drawn around each one, in three strata that each neutralise a specific confound.</p>
+
+<p>A single undifferentiated pool of random negatives would let the model win on the wrong question. Draw a random cell-day from the whole grid and it is probably flat, probably dry, probably in January. A model separating those from monsoon landslides in the Himalaya has learned "mountain in July versus plain in winter" — true, and useless.</p>
+
+<figure class="bleed">
+<div class="fig-box">
+<svg class="dgm" viewBox="0 0 760 300" role="img" aria-label="The three control strata: temporal holds the cell constant and varies the date, spatial holds the date and varies the cell within an elevation-matched annulus, background samples freely from the case elevation distribution.">
+<defs><marker id="ar07" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ar"/></marker></defs>
+
+<rect x="300" y="12" width="150" height="46" class="n-acc"/>
+<text x="375" y="32" class="t-b t-acc" text-anchor="middle">1,655 cases</text>
+<text x="375" y="48" class="t-s" text-anchor="middle">label = 1</text>
+
+<path d="M330 62 C 300 76 200 78 152 92" class="e" marker-end="url(#ar07)"/>
+<path d="M375 62 L 375 92" class="e" marker-end="url(#ar07)"/>
+<path d="M420 62 C 450 76 550 78 598 92" class="e" marker-end="url(#ar07)"/>
+
+<rect x="20" y="96" width="230" height="132" class="n"/>
+<text x="135" y="118" class="t-b" text-anchor="middle">Temporal · 50%</text>
+<text x="135" y="136" class="t-m" text-anchor="middle">3.0 per case → 5,157 rows</text>
+<line x1="36" y1="146" x2="234" y2="146" class="e-dash"/>
+<text x="135" y="166" class="t-s" text-anchor="middle"><tspan class="t-acc">same</tspan> cell · <tspan class="t-acc">different</tspan> date</text>
+<text x="135" y="184" class="t-s" text-anchor="middle">within ±30 days of the event's</text>
+<text x="135" y="199" class="t-s" text-anchor="middle">day-of-year, compared circularly</text>
+<text x="135" y="219" class="t-s" text-anchor="middle" style="font-style:italic">"why did THIS monsoon day fail</text>
+<text x="135" y="234" class="t-s" text-anchor="middle" style="font-style:italic">when hundreds of others did not?"</text>
+
+<rect x="262" y="96" width="226" height="132" class="n"/>
+<text x="375" y="118" class="t-b" text-anchor="middle">Spatial · 30%</text>
+<text x="375" y="136" class="t-m" text-anchor="middle">1.8 per case → 3,098 rows</text>
+<line x1="278" y1="146" x2="472" y2="146" class="e-dash"/>
+<text x="375" y="166" class="t-s" text-anchor="middle"><tspan class="t-acc">same</tspan> date · <tspan class="t-acc">different</tspan> cell</text>
+<text x="375" y="184" class="t-s" text-anchor="middle">25–300 km annulus, intersected</text>
+<text x="375" y="199" class="t-s" text-anchor="middle">with the case's elevation band</text>
+<text x="375" y="219" class="t-s" text-anchor="middle" style="font-style:italic">"the storm hit both — why did</text>
+<text x="375" y="234" class="t-s" text-anchor="middle" style="font-style:italic">only one slope go?"</text>
+
+<rect x="500" y="96" width="240" height="132" class="n"/>
+<text x="620" y="118" class="t-b" text-anchor="middle">Background · 20%</text>
+<text x="620" y="136" class="t-m" text-anchor="middle">1.2 per case → 2,063 rows</text>
+<line x1="516" y1="146" x2="724" y2="146" class="e-dash"/>
+<text x="620" y="166" class="t-s" text-anchor="middle">random cell and date, drawn</text>
+<text x="620" y="184" class="t-s" text-anchor="middle">from the <tspan class="t-acc">case elevation distribution</tspan></text>
+<text x="620" y="199" class="t-s" text-anchor="middle">by anchoring on a case first</text>
+<text x="620" y="219" class="t-s" text-anchor="middle" style="font-style:italic">"what does an ordinary day on</text>
+<text x="620" y="234" class="t-s" text-anchor="middle" style="font-style:italic">this kind of slope look like?"</text>
+
+<rect x="20" y="248" width="720" height="42" class="n-ghost"/>
+<text x="34" y="268" class="t-s"><tspan class="t-b">Admission gate, applied to every candidate:</tspan> reject if the pair is already taken, or if it lies within</text>
+<text x="34" y="284" class="t-s">15 km and ±2 days of any recorded event. 46,234 cell-date pairs sit inside that exclusion buffer.</text>
+</svg>
+</div>
+<figcaption><b>Each stratum removes one confound by holding it constant.</b> Weights are 50 / 30 / 20 and must sum to 1.0. Fractional per-case targets — 1.8 spatial controls — are resolved by stochastic rounding, so a target of 1.8 becomes 2 with probability 0.8 and the expected total stays exact.</figcaption>
+</figure>
+
+<h3>The exclusion buffer</h3>
+
+<p>The single guard rail that matters as much as the strata: a candidate negative within <strong>15 km and ±2 days</strong> of a recorded event is <em>discarded</em>, never labelled zero.</p>
+
+<figure class="bleed">
+<div class="fig-box">
+<svg class="dgm" viewBox="0 0 700 250" role="img" aria-label="Space-time exclusion buffer around each event: candidates inside 15 kilometres and two days are discarded rather than labelled negative; spatial controls are drawn from an annulus starting at 25 kilometres.">
+<defs><marker id="ar08" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ar"/></marker></defs>
+
+<line x1="60" y1="200" x2="640" y2="200" class="e" marker-end="url(#ar08)"/>
+<text x="640" y="222" class="t-s" text-anchor="end">distance from event →</text>
+<line x1="60" y1="200" x2="60" y2="30" class="e" marker-end="url(#ar08)"/>
+<text x="70" y="40" class="t-s">days</text>
+
+<circle cx="60" cy="200" r="5" class="ar-acc" style="fill:var(--accent)"/>
+<text x="72" y="196" class="t-m t-acc">event</text>
+
+<rect x="60" y="140" width="120" height="60" style="fill:var(--crit);opacity:.13"/>
+<rect x="60" y="140" width="120" height="60" style="fill:none;stroke:var(--crit);stroke-width:1.5;stroke-dasharray:4 3"/>
+<text x="120" y="166" class="t-s" text-anchor="middle" style="fill:var(--crit);font-weight:600">DISCARD</text>
+<text x="120" y="182" class="t-s" text-anchor="middle" style="fill:var(--crit)">15 km · ±2 d</text>
+<text x="120" y="215" class="t-m" text-anchor="middle">15 km</text>
+
+<rect x="248" y="60" width="292" height="140" class="n-wat" style="opacity:.5"/>
+<text x="394" y="100" class="t-b t-wat" text-anchor="middle">spatial control annulus</text>
+<text x="394" y="120" class="t-m t-wat" text-anchor="middle">25 km – 300 km</text>
+<text x="248" y="215" class="t-m" text-anchor="middle">25 km</text>
+<text x="540" y="215" class="t-m" text-anchor="middle">300 km</text>
+
+<rect x="184" y="140" width="60" height="60" style="fill:none;stroke:currentColor;stroke-width:1;stroke-dasharray:2 3;opacity:.5"/>
+<text x="214" y="128" class="t-s" text-anchor="middle" style="opacity:.7">gap</text>
+
+<text x="394" y="152" class="t-s" text-anchor="middle">inner edge clears the exclusion buffer</text>
+<text x="394" y="170" class="t-s" text-anchor="middle">outer edge keeps the control inside the</text>
+<text x="394" y="186" class="t-s" text-anchor="middle">same weather system</text>
+
+<text x="60" y="24" class="t-s">±2</text>
+</svg>
+</div>
+<figcaption><b>Why discard rather than label zero.</b> The catalogue records reported landslides, and in remote terrain many go unreported. A cell 8 km from a confirmed slide on the same day may well have failed too. Teaching the model that it did not is teaching it a falsehood — and the 25 km inner edge of the spatial annulus exists precisely so the two rules cannot contradict each other.</figcaption>
+</figure>
+
+<h3>Splits are blocked, never random</h3>
+
+<p>A random train/test split would let a 2015 row train while its 2016 neighbour is tested. Weather is autocorrelated over days and terrain is constant per cell, so the model scores beautifully by recognising cells it has already seen. The failure is silent: every metric looks excellent and the system generalises to nothing.</p>
+
+<figure class="bleed">
+<div class="fig-box">
+<svg class="dgm" viewBox="0 0 720 262" role="img" aria-label="Validation design: a chronological train, validation and test split, with leave-one-region-out cross-validation layered on top across four region blocks.">
+<text x="10" y="26" class="t-b">Temporal blocking — assigned from date_id alone</text>
+<rect x="10" y="36" width="420" height="42" class="n-sunk"/>
+<text x="220" y="56" class="t-b" text-anchor="middle">TRAIN</text>
+<text x="220" y="71" class="t-m" text-anchor="middle">2007-01-01 → 2013-12-31</text>
+<rect x="434" y="36" width="90" height="42" class="n"/>
+<text x="479" y="56" class="t-b" text-anchor="middle">VAL</text>
+<text x="479" y="71" class="t-m" text-anchor="middle">2014</text>
+<rect x="528" y="36" width="182" height="42" class="n-acc"/>
+<text x="619" y="56" class="t-b t-acc" text-anchor="middle">TEST</text>
+<text x="619" y="71" class="t-m" text-anchor="middle">2015 → 2016</text>
+<text x="479" y="98" class="t-s" text-anchor="middle">calibration is fitted here, and only here</text>
+
+<line x1="10" y1="118" x2="710" y2="118" class="e-dash"/>
+
+<text x="10" y="144" class="t-b">Spatial blocking — leave one region out, layered on top</text>
+<rect x="10" y="156" width="168" height="56" class="n"/>
+<text x="94" y="178" class="t" text-anchor="middle">west_himalaya</text>
+<text x="94" y="196" class="t-s" text-anchor="middle">Kashmir · Himachal</text>
+<rect x="186" y="156" width="168" height="56" class="n"/>
+<text x="270" y="178" class="t" text-anchor="middle">central_himalaya</text>
+<text x="270" y="196" class="t-s" text-anchor="middle">Uttarakhand · UP</text>
+<rect x="362" y="156" width="168" height="56" class="n"/>
+<text x="446" y="178" class="t" text-anchor="middle">eastern_himalaya</text>
+<text x="446" y="196" class="t-s" text-anchor="middle">Sikkim · Bengal · Arunachal</text>
+<rect x="538" y="156" width="172" height="56" class="n"/>
+<text x="624" y="178" class="t" text-anchor="middle">north_east</text>
+<text x="624" y="196" class="t-s" text-anchor="middle">Assam · Nagaland · +4</text>
+
+<text x="10" y="234" class="t-s">Kashmir is grouped with Himachal rather than pooled east: only <tspan class="t-acc">47%</tspan> of its events fall in the monsoon against 85–93% elsewhere,</text>
+<text x="10" y="248" class="t-s">because it is driven by western disturbances and snowmelt. A model that generalises there has learned conditions, not a calendar.</text>
+</svg>
+</div>
+<figcaption><b>Two independent held-out axes.</b> The temporal split answers "does it work next year"; leave-one-region-out answers "does it work on terrain it has never seen". A model that passes one and fails the other has told you exactly which kind of generalisation it lacks.</figcaption>
+</figure>
+
+<!-- ══════════════════════════════ 07 ══════════════════════════════ -->
+<h2 id="s07"><span class="h-num">07</span>The elevation confounder</h2>
+
+<p class="lede">The most important finding in this project was a defect in its own sampler. It was found by reading a SHAP chart that looked wrong, and it would have shipped silently.</p>
+
+<p>An early model put <code>elev_mean</code> at the top of the SHAP ranking with <strong>2.3× the weight of the runner-up</strong>. Elevation is a plausible landslide predictor, so the ranking was not obviously absurd. But the magnitude was: rainfall should dominate, and it did not.</p>
+
+<p>The cause was §04's hill mask, one stage removed. <code>slope_mean ≥ 5°</code> admits the whole Ladakh and Tibetan plateau — high, cold, arid, outside the monsoon, and comfortably steep. Background controls drawn uniformly from that mask had a median elevation of <strong>4,479 m against 1,433 m for cases</strong>. The model was separating a plateau from a slope. That is a real distinction and an entirely different question from the one being asked.</p>
+
+<figure class="bleed">
+<div class="fig-box">
+<svg class="dgm" viewBox="0 0 760 350" role="img" aria-label="Before and after elevation band matching: uniform sampling from the hill mask drew controls from the Tibetan plateau at 4,479 metres against 1,433 for cases; band matching draws controls from the case's own 500 metre band, closing the gap to 17 metres.">
+<defs><marker id="ar09" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ar"/></marker></defs>
+
+<text x="16" y="20" class="t-b" style="fill:var(--crit)">BEFORE — uniform draw over the hill mask</text>
+<line x1="16" y1="150" x2="360" y2="150" class="e"/>
+<text x="16" y="166" class="t-s">0 m</text>
+<text x="352" y="166" class="t-s" text-anchor="end">6,000 m</text>
+
+<rect x="90" y="118" width="26" height="32" style="fill:var(--accent);opacity:.85"/>
+<text x="103" y="110" class="t-m t-acc" text-anchor="middle">1,433</text>
+<text x="103" y="96" class="t-s t-acc" text-anchor="middle">cases</text>
+
+<rect x="272" y="118" width="26" height="32" style="fill:var(--crit);opacity:.7"/>
+<text x="285" y="110" class="t-m" text-anchor="middle" style="fill:var(--crit)">4,479</text>
+<text x="285" y="96" class="t-s" text-anchor="middle" style="fill:var(--crit)">controls</text>
+
+<line x1="116" y1="134" x2="268" y2="134" class="e-dash" style="stroke:var(--crit)"/>
+<text x="192" y="128" class="t-m" text-anchor="middle" style="fill:var(--crit)">gap +3,046 m</text>
+
+<rect x="16" y="182" width="344" height="76" class="n-ghost" style="stroke:var(--crit)"/>
+<text x="30" y="202" class="t-s">Top SHAP feature:</text>
+<text x="30" y="222" class="t-m" style="fill:var(--crit)">elev_mean · 0.513</text>
+<text x="30" y="240" class="t-s">runner-up rain_max_1d_in_7 · 0.221 — half as much</text>
+
+<line x1="380" y1="30" x2="380" y2="330" class="e-dash"/>
+
+<text x="404" y="20" class="t-b t-acc">AFTER — elevation-band matching</text>
+<line x1="404" y1="150" x2="748" y2="150" class="e"/>
+<text x="404" y="166" class="t-s">0 m</text>
+<text x="740" y="166" class="t-s" text-anchor="end">6,000 m</text>
+
+<rect x="466" y="130" width="60" height="20" style="fill:var(--accent-2);opacity:.3"/>
+<text x="496" y="180" class="t-s" text-anchor="middle" style="opacity:.8">±1 band</text>
+<text x="496" y="194" class="t-s" text-anchor="middle" style="opacity:.8">1,500 m window</text>
+
+<rect x="484" y="118" width="26" height="32" style="fill:var(--accent);opacity:.85"/>
+<text x="497" y="110" class="t-m t-acc" text-anchor="middle">1,433</text>
+<text x="497" y="96" class="t-s t-acc" text-anchor="middle">cases</text>
+<rect x="480" y="118" width="8" height="32" style="fill:var(--water);opacity:.85"/>
+<text x="466" y="110" class="t-m t-wat" text-anchor="middle">1,416</text>
+<text x="466" y="96" class="t-s t-wat" text-anchor="middle">controls</text>
+<text x="600" y="132" class="t-m t-acc">gap −17 m</text>
+
+<rect x="404" y="182" width="344" height="76" class="n-ghost" style="stroke:var(--accent)"/>
+<text x="418" y="202" class="t-s">Top SHAP feature:</text>
+<text x="418" y="222" class="t-m t-acc">api (antecedent precipitation) · 0.660</text>
+<text x="418" y="240" class="t-s">elev_mean no longer appears in the top 15 at all</text>
+
+<rect x="16" y="278" width="732" height="56" class="n-acc"/>
+<text x="32" y="298" class="t-b t-acc">The mechanism</text>
+<text x="32" y="318" class="t-s">Bands are 500 m wide with ±1 band tolerance. Background draws anchor on a case cell <tspan class="t-b">first</tspan>, then pick a cell in that anchor's band;</text>
+<text x="32" y="332" class="t-s">spatial draws intersect the 25–300 km annulus with the band, falling back to the plain annulus rather than dropping the case.</text>
+</svg>
+</div>
+<figcaption><b>The fix is in the sampler, not the mask.</b> <code>dim_cell.is_hill</code> still flags the plateau — that is correct, it <em>is</em> steep. What changed is that controls are now matched to the elevation band of the case they were drawn around, so the comparison being learned is slope-versus-slope.</figcaption>
+</figure>
+
+<h3>What moved, and what a reader should not conclude</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th>Rank</th><th>Before the fix</th><th class="n">|SHAP|</th><th>After the fix</th><th class="n">|SHAP|</th></tr></thead>
+<tbody>
+<tr><td class="n">1</td><td><code>elev_mean</code></td><td class="n">0.513</td><td><code>api</code></td><td class="n">0.660</td></tr>
+<tr><td class="n">2</td><td><code>rain_max_1d_in_7</code></td><td class="n">0.221</td><td><code>sm_28_100_mean_7d</code></td><td class="n">0.512</td></tr>
+<tr><td class="n">3</td><td><code>rain_30d_anomaly</code></td><td class="n">0.208</td><td><code>sm_0_7_mean_7d</code></td><td class="n">0.505</td></tr>
+<tr><td class="n">4</td><td><code>rain_max_1d_in_30</code></td><td class="n">0.196</td><td><code>sm_7_28</code></td><td class="n">0.499</td></tr>
+<tr><td class="n">5</td><td><code>rain_7d_anomaly</code></td><td class="n">0.187</td><td><code>sm_28_100</code></td><td class="n">0.402</td></tr>
+<tr><td class="n">7</td><td><code>rain_1d</code></td><td class="n">0.127</td><td><code>slope_mean</code></td><td class="n">0.369</td></tr>
+<tr><td class="n">11</td><td><code>slope_mean</code></td><td class="n">0.082</td><td>—</td><td class="n">—</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Antecedent wetness first, soil moisture through the profile next, terrain seventh. That ordering is what the landslide literature describes, and it emerged from a sampling fix rather than from any change to the model.</p>
+
+<div class="callout trap">
+<span class="k">What this comparison does not show</span>
+<p>The PR-AUC before and after is <strong>not</strong> comparable. Different sample, different rows, different test split — and the weather backfill was growing throughout, so the two models were never scored on the same data. Only the SHAP <em>ranking</em> is a fair before/after. Claiming a metric improvement here would be exactly the kind of quiet dishonesty the rest of this system is built to prevent.</p>
+</div>
+
+<p>A regression test now pins it. <code>tests/test_sampling.py</code> constructs a synthetic world where plateau cells at 4,500 m and slope cells at 1,400 m are <strong>interleaved in space</strong>, so the 25–300 km annulus cannot separate them by accident. Only band matching can pass. It asserts a median control-case gap under 1,000 m and under 25% plateau share in both the background and spatial strata.</p>
+
+<!-- ══════════════════════════════ 08 ══════════════════════════════ -->
+<h2 id="s08"><span class="h-num">08</span>Weather acquisition</h2>
+
+<p class="lede">The long pole. Each of 11,955 samples needs its own 45-day weather window, and the free API tier allows about 10,000 calls a day against a total need of roughly 38,000.</p>
+
+<p>Open-Meteo bills fractionally — one call covers up to two weeks of data, scaled by variable count. A 45-day window over 10 variables costs <code>max(1, 45/14) × max(1, 10/10) ≈ 3.21</code> units <em>per coordinate</em>. That per-coordinate figure was measured, not assumed: batching eight locations per request, the quota ran out after 1,385 windows, which is 1,385 × 3.2 × 2 ≈ 8,900 units against a 10,000/day allowance. Batching saves round trips and nothing else.</p>
+
+<figure class="bleed">
+<div class="fig-box">
+<svg class="dgm" viewBox="0 0 780 400" role="img" aria-label="Weather fetcher control flow, showing the coverage check, budget guard, and the three distinct outcomes of an HTTP call: success writes a Parquet file, 429 ends the run cleanly, and any other 4xx skips the batch permanently.">
+<defs><marker id="ar10" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ar"/></marker>
+<marker id="ar10a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ar-acc"/></marker></defs>
+
+<rect x="16" y="16" width="150" height="42" class="n"/>
+<text x="91" y="34" class="t" text-anchor="middle">fact_sample</text>
+<text x="91" y="49" class="t-s" text-anchor="middle">11,955 cell-dates</text>
+<line x1="91" y1="62" x2="91" y2="82" class="e" marker-end="url(#ar10)"/>
+
+<rect x="16" y="86" width="150" height="52" class="n"/>
+<text x="91" y="104" class="t" text-anchor="middle">plan one window</text>
+<text x="91" y="119" class="t-s" text-anchor="middle">per sample, anchored</text>
+<text x="91" y="132" class="t-s" text-anchor="middle">to its own date</text>
+<line x1="91" y1="142" x2="91" y2="162" class="e" marker-end="url(#ar10)"/>
+
+<polygon points="91,166 178,200 91,234 4,200" class="n-sunk"/>
+<text x="91" y="196" class="t-s" text-anchor="middle">all 45 days</text>
+<text x="91" y="210" class="t-s" text-anchor="middle">already cached?</text>
+<text x="91" y="252" class="t-m" text-anchor="middle">no</text>
+<line x1="91" y1="238" x2="91" y2="266" class="e" marker-end="url(#ar10)"/>
+<line x1="182" y1="200" x2="222" y2="200" class="e-dash" marker-end="url(#ar10)"/>
+<text x="202" y="192" class="t-m" text-anchor="middle">yes</text>
+<text x="228" y="204" class="t-s">skip</text>
+
+<rect x="16" y="270" width="150" height="46" class="n"/>
+<text x="91" y="288" class="t" text-anchor="middle">batch × 8 coords</text>
+<text x="91" y="304" class="t-s" text-anchor="middle">grouped by window</text>
+<line x1="170" y1="293" x2="204" y2="293" class="e" marker-end="url(#ar10)"/>
+
+<rect x="208" y="270" width="140" height="46" class="n"/>
+<text x="278" y="288" class="t" text-anchor="middle">budget check</text>
+<text x="278" y="304" class="t-s" text-anchor="middle">warns; hard stop at 3×</text>
+<line x1="278" y1="266" x2="278" y2="240" class="e" marker-end="url(#ar10)"/>
+
+<rect x="208" y="194" width="140" height="46" class="n-acc"/>
+<text x="278" y="212" class="t-b t-acc" text-anchor="middle">GET archive</text>
+<text x="278" y="228" class="t-s" text-anchor="middle">timeout 120 s</text>
+
+<line x1="352" y1="204" x2="392" y2="140" class="e" marker-end="url(#ar10)"/>
+<line x1="352" y1="216" x2="392" y2="216" class="e" marker-end="url(#ar10)"/>
+<line x1="352" y1="228" x2="392" y2="292" class="e" marker-end="url(#ar10)"/>
+
+<rect x="396" y="104" width="180" height="62" class="n"/>
+<text x="486" y="124" class="t-b" text-anchor="middle" style="fill:var(--mod)">200 OK</text>
+<text x="486" y="142" class="t-s" text-anchor="middle">write one Parquet per</text>
+<text x="486" y="157" class="t-s" text-anchor="middle">(cell, window); charge budget</text>
+
+<rect x="396" y="188" width="180" height="62" class="n"/>
+<text x="486" y="208" class="t-b" text-anchor="middle" style="fill:var(--elev)">429 rate limited</text>
+<text x="486" y="226" class="t-s" text-anchor="middle">1 backoff; a second 429</text>
+<text x="486" y="241" class="t-s" text-anchor="middle">ends the run, cache intact</text>
+
+<rect x="396" y="272" width="180" height="62" class="n-acc"/>
+<text x="486" y="292" class="t-b" text-anchor="middle" style="fill:var(--crit)">any other 4xx</text>
+<text x="486" y="310" class="t-s" text-anchor="middle">PermanentRequestError —</text>
+<text x="486" y="325" class="t-s" text-anchor="middle">skip batch, log, never retry</text>
+
+<line x1="580" y1="135" x2="616" y2="135" class="e" marker-end="url(#ar10)"/>
+<rect x="620" y="112" width="146" height="46" class="n-wat"/>
+<text x="693" y="130" class="t" text-anchor="middle">Parquet cache</text>
+<text x="693" y="146" class="t-s" text-anchor="middle">8,920 files today</text>
+
+<line x1="580" y1="219" x2="616" y2="219" class="e" marker-end="url(#ar10)"/>
+<rect x="620" y="196" width="146" height="46" class="n"/>
+<text x="693" y="214" class="t" text-anchor="middle">daemon sleeps</text>
+<text x="693" y="230" class="t-s" text-anchor="middle">20 min, then retries</text>
+<path d="M693 246 C 693 268 300 268 278 262" class="e-dash" marker-end="url(#ar10)"/>
+
+<line x1="580" y1="303" x2="616" y2="303" class="e-acc" marker-end="url(#ar10a)"/>
+<rect x="620" y="280" width="146" height="46" class="n-acc"/>
+<text x="693" y="298" class="t-s t-acc" text-anchor="middle">added to _refused</text>
+<text x="693" y="314" class="t-s" text-anchor="middle">not re-asked this run</text>
+
+<rect x="16" y="344" width="750" height="46" class="n-ghost"/>
+<text x="30" y="364" class="t-s"><tspan class="t-b">Why 429 and 400 must be handled differently:</tspan> a 429 is a statement about the <tspan style="font-style:italic">moment</tspan> and waiting fixes it. A 400 is a statement</text>
+<text x="30" y="380" class="t-s">about the <tspan style="font-style:italic">request</tspan> — a window ERA5 has not reanalysed yet — and no amount of backoff will ever change the answer.</text>
+</svg>
+</div>
+<figcaption><b>Three outcomes, three behaviours.</b> Conflating the permanent and transient cases is what killed a backfill: see §16. The daemon runs this loop inside one long-lived process rather than being driven by an external scheduler, because a single pass gets roughly 190–380 windows and the full job is tens of thousands.</figcaption>
+</figure>
+
+<h3>The cache is keyed on coverage, not on filenames</h3>
+
+<p>Cache files are named <code>cell_{id}_{start}_{end}.parquet</code>. The obvious "is this window cached?" test is to check whether that filename exists — and it throws away enormous amounts of work, because when the sampler changes and a window boundary moves, a file holding <em>precisely</em> the needed days no longer matches by name.</p>
+
+<p>Instead, <code>pending()</code> builds an index of <code>cell_id → {date_id}</code> across every file on disk and drops a window only when every day it needs is already present somewhere. The days do not care which file they arrived in.</p>
+
+<div class="stat-row">
+  <div class="stat"><span class="v">45 d</span><span class="l">window per sample</span></div>
+  <div class="stat"><span class="v">3.21</span><span class="l">call units each</span></div>
+  <div class="stat"><span class="v">8</span><span class="l">coords per request</span></div>
+  <div class="stat"><span class="v">~38k</span><span class="l">total call units</span></div>
+  <div class="stat hl"><span class="v">8,920</span><span class="l">windows cached</span></div>
+</div>
+
+<!-- ══════════════════════════════ 09 ══════════════════════════════ -->
+<h2 id="s09"><span class="h-num">09</span>Features</h2>
+
+<p><strong>41 model inputs</strong> in three families, computed by one module that both training and scoring call. That shared path is deliberate: training/serving skew is the most common way a system like this rots, and it fails silently.</p>
+
+<figure class="bleed">
+<div class="fig-box">
+<svg class="dgm" viewBox="0 0 770 316" role="img" aria-label="Feature families: dynamic weather features from rolling windows, static terrain features constant per cell, and contextual calendar and history features.">
+<defs><marker id="ar11" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ar"/></marker></defs>
+
+<rect x="286" y="10" width="190" height="40" class="n-acc"/>
+<text x="381" y="28" class="t-b t-acc" text-anchor="middle">41 model features</text>
+<text x="381" y="43" class="t-s" text-anchor="middle">identical at train and score time</text>
+
+<path d="M330 54 C 260 66 160 62 130 78" class="e" marker-end="url(#ar11)"/>
+<path d="M381 54 L 381 78" class="e" marker-end="url(#ar11)"/>
+<path d="M432 54 C 500 66 600 62 632 78" class="e" marker-end="url(#ar11)"/>
+
+<rect x="10" y="82" width="240" height="196" class="n"/>
+<text x="130" y="102" class="t-b" text-anchor="middle">DYNAMIC · 24</text>
+<text x="130" y="118" class="t-s" text-anchor="middle">what the sky and soil have done</text>
+<line x1="24" y1="126" x2="236" y2="126" class="e-dash"/>
+<text x="24" y="144" class="t-m">rain_{1,3,7,15,30}d</text>
+<text x="24" y="160" class="t-m">rain_max_1d_in_{7,30}</text>
+<text x="24" y="176" class="t-m">wet_days_{7,30}</text>
+<text x="24" y="192" class="t-m t-acc">api</text><text x="70" y="192" class="t-s">exp. decay, k = 0.92</text>
+<text x="24" y="208" class="t-m">sm_{0_7,7_28,28_100}</text>
+<text x="34" y="222" class="t-s">+ delta_1d, delta_7d, mean_7d</text>
+<text x="24" y="240" class="t-m">et0_7d · wetness_ratio_7d</text>
+<text x="24" y="256" class="t-m">temp_mean_7d</text>
+<text x="24" y="272" class="t-m">rain_{7,30}d_anomaly</text>
+
+<rect x="262" y="82" width="234" height="140" class="n"/>
+<text x="379" y="102" class="t-b" text-anchor="middle">STATIC · 8</text>
+<text x="379" y="118" class="t-s" text-anchor="middle">which cells can fail at all</text>
+<line x1="276" y1="126" x2="482" y2="126" class="e-dash"/>
+<text x="276" y="144" class="t-m">elev_mean · elev_range</text>
+<text x="276" y="160" class="t-m">slope_mean · slope_max · slope_std</text>
+<text x="276" y="176" class="t-m">aspect_sin · aspect_cos</text>
+<text x="276" y="192" class="t-m">tri</text>
+<text x="276" y="212" class="t-s">Constant per cell — carries no temporal</text>
+<text x="276" y="226" class="t-s">information, so it cannot leak.</text>
+
+<rect x="508" y="82" width="252" height="140" class="n"/>
+<text x="634" y="102" class="t-b" text-anchor="middle">CONTEXTUAL · 9</text>
+<text x="634" y="118" class="t-s" text-anchor="middle">calendar and the cell's own past</text>
+<line x1="522" y1="126" x2="746" y2="126" class="e-dash"/>
+<text x="522" y="144" class="t-m">month · doy_sin · doy_cos</text>
+<text x="522" y="160" class="t-m">is_monsoon</text>
+<text x="522" y="176" class="t-m">hist_events_before</text>
+<text x="522" y="192" class="t-m">has_prior_event</text>
+<text x="522" y="212" class="t-s" style="fill:var(--crit)">Counted strictly BEFORE each sample date —</text>
+<text x="522" y="226" class="t-s" style="fill:var(--crit)">a catalogue total would hand over the answer.</text>
+
+<rect x="262" y="234" width="498" height="72" class="n-ghost"/>
+<text x="276" y="252" class="t-s"><tspan class="t-b">Deliberately excluded:</tspan> <tspan class="t-m">discharge</tspan> and <tspan class="t-m">discharge_ratio</tspan>.</text>
+<text x="276" y="270" class="t-s">GloFAS models river reaches; most landslide cells are headwater</text>
+<text x="276" y="286" class="t-s">slopes reading near zero. It also doubles API cost — and a feature</text>
+<text x="276" y="302" class="t-s">whose presence correlates with fetch order is a leak, not a feature.</text>
+</svg>
+</div>
+<figcaption><b>Three families, one module.</b> The antecedent precipitation index — <code>API_t = precip_t + 0.92 × API_(t−1)</code> — is a single number standing in for "how wet is this slope right now", weighting recent rain more heavily without the hard cutoff a fixed window imposes. It is the top feature by SHAP.</figcaption>
+</figure>
+
+<h3>Two features that had to be redesigned</h3>
+
+<p><strong><code>wetness_ratio_7d</code></strong> began as a subtraction: rainfall minus evapotranspiration. ET₀ varies far less than rainfall, so the difference correlated with <code>rain_7d</code> at <strong>1.00</strong> and carried no information the model did not already have. A ratio is scale-free and does separate.</p>
+
+<p><strong><code>rain_7d_anomaly</code></strong> exists because 200 mm in Cherrapunji and 200 mm in Leh are not the same event. Rainfall is normalised against a climatology pooled by elevation band and day-of-year bin — pooled rather than per-cell because the sampled windows are too short to build a reliable per-cell normal.</p>
+
+<h3>The leakage audit</h3>
+
+<p>Stage 06 refuses to hand over a matrix it has not checked. It reports the top correlations with the label and the share of cases with a prior event in the same cell, and a correlation above the ceiling fails the run rather than warning.</p>
+
+<pre><code>top correlations with the label:
+   rain_3d                    0.241
+   rain_7d                    0.197
+   rain_1d                    0.191
+   rain_max_1d_in_7           0.188
+   wetness_ratio_7d           0.186
+cases with a prior event in the same cell: 44.1%
+leakage audit passed</code></pre>
+
+<p>All rainfall and soil moisture, none above 0.25. A feature correlating at 0.9 with the label would mean the label had leaked into the inputs.</p>
+
+<!-- ══════════════════════════════ 10 ══════════════════════════════ -->
+<h2 id="s10"><span class="h-num">10</span>The model</h2>
+
+<p>Three estimators are trained and compared: <strong>logistic regression</strong> as an interpretable floor, <strong>random forest</strong> as a check, and <strong>XGBoost</strong> as the intended production model. On the current sample the floor won.</p>
+
+<figure class="bleed">
+<div class="fig-box">
+<svg class="dgm" viewBox="0 0 760 336" role="img" aria-label="Training flow: three estimators are fitted on the training split, calibrated on validation, scored on all three splits, compared by PR-AUC, then explained with SHAP and cross-validated across regions.">
+<defs><marker id="ar12" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ar"/></marker></defs>
+
+<rect x="16" y="120" width="130" height="56" class="n"/>
+<text x="81" y="142" class="t" text-anchor="middle">TRAIN split</text>
+<text x="81" y="160" class="t-m" text-anchor="middle">2,108 rows · 465 pos</text>
+<line x1="150" y1="148" x2="180" y2="148" class="e" marker-end="url(#ar12)"/>
+
+<rect x="184" y="80" width="146" height="36" class="n"/><text x="257" y="103" class="t" text-anchor="middle">logistic · L2, C=0.5</text>
+<rect x="184" y="126" width="146" height="36" class="n"/><text x="257" y="149" class="t" text-anchor="middle">random forest · 500</text>
+<rect x="184" y="172" width="146" height="36" class="n"/><text x="257" y="195" class="t" text-anchor="middle">XGBoost · 250–600</text>
+<text x="257" y="228" class="t-s" text-anchor="middle">tree depth and leaf size scale with</text>
+<text x="257" y="242" class="t-s" text-anchor="middle">the positive count — under 500</text>
+<text x="257" y="256" class="t-s" text-anchor="middle">positives, capacity is tightened</text>
+
+<line x1="334" y1="120" x2="366" y2="140" class="e" marker-end="url(#ar12)"/>
+<line x1="334" y1="144" x2="366" y2="148" class="e" marker-end="url(#ar12)"/>
+<line x1="334" y1="188" x2="366" y2="158" class="e" marker-end="url(#ar12)"/>
+
+<rect x="370" y="124" width="132" height="48" class="n-wat"/>
+<text x="436" y="144" class="t t-wat" text-anchor="middle">calibrate</text>
+<text x="436" y="160" class="t-s" text-anchor="middle">on VAL split only</text>
+<text x="436" y="192" class="t-s" text-anchor="middle">Platt below 50 positives,</text>
+<text x="436" y="206" class="t-s" text-anchor="middle">isotonic above</text>
+
+<line x1="506" y1="148" x2="536" y2="148" class="e" marker-end="url(#ar12)"/>
+
+<rect x="540" y="112" width="150" height="72" class="n-acc"/>
+<text x="615" y="134" class="t-b t-acc" text-anchor="middle">select by PR-AUC</text>
+<text x="615" y="154" class="t-s" text-anchor="middle">on the TEST split</text>
+<text x="615" y="172" class="t-m t-acc" text-anchor="middle">→ logistic</text>
+
+<line x1="615" y1="108" x2="615" y2="80" class="e" marker-end="url(#ar12)"/>
+<rect x="528" y="34" width="174" height="44" class="n"/>
+<text x="615" y="52" class="t" text-anchor="middle">SHAP attribution</text>
+<text x="615" y="68" class="t-s" text-anchor="middle">Linear or Tree explainer</text>
+
+<line x1="615" y1="188" x2="615" y2="216" class="e" marker-end="url(#ar12)"/>
+<rect x="528" y="220" width="174" height="44" class="n"/>
+<text x="615" y="238" class="t" text-anchor="middle">leave-one-region-out</text>
+<text x="615" y="254" class="t-s" text-anchor="middle">4 blocks, refit each time</text>
+
+<rect x="16" y="278" width="686" height="50" class="n-ghost"/>
+<text x="30" y="298" class="t-s">The SHAP path must peel <tspan class="t-m">CalibratedClassifierCV</tspan> → <tspan class="t-m">FrozenEstimator</tspan> → <tspan class="t-m">Pipeline</tspan> to reach the raw model.</text>
+<text x="30" y="316" class="t-s">A linear model also needs its inputs imputed and scaled first — raw NaNs produce silent nonsense.</text>
+</svg>
+</div>
+<figcaption><b>Calibration is fitted on validation and nowhere else.</b> An uncalibrated gradient booster ranks well but its raw scores are not probabilities — and a district officer acting on "80%" needs that to mean eight times in ten.</figcaption>
+</figure>
+
+<h3>Results — recorded run, 2,941-row matrix</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th>Model</th><th class="n">PR-AUC (test)</th><th class="n">95% CI</th><th class="n">ROC-AUC</th><th class="n">Brier</th><th class="n">Recall @5%</th></tr></thead>
+<tbody>
+<tr><td><strong>logistic</strong> ← selected</td><td class="n"><strong>0.4105</strong></td><td class="n">0.345 – 0.482</td><td class="n">0.688</td><td class="n">0.184</td><td class="n">0.111</td></tr>
+<tr><td>random forest</td><td class="n">0.3658</td><td class="n">0.305 – 0.431</td><td class="n">0.656</td><td class="n">0.190</td><td class="n">0.052</td></tr>
+<tr><td>XGBoost</td><td class="n">0.3342</td><td class="n">0.280 – 0.388</td><td class="n">0.625</td><td class="n">0.194</td><td class="n">0.078</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Test base rate is 0.267, so the selected model delivers a <strong>1.5× lift</strong>. Both tree models showed a large train-test gap; the linear one did not. At 465 training positives against 41 features, that is the expected outcome — and it is why capacity is scaled to the positive count rather than fixed.</p>
+
+<h4>Leave-one-region-out</h4>
+
+<div class="tw">
+<table>
+<thead><tr><th>Held-out block</th><th class="n">PR-AUC</th><th class="n">Recall @5%</th><th class="n">Rows</th><th class="n">Positives</th></tr></thead>
+<tbody>
+<tr><td>central_himalaya</td><td class="n">0.436</td><td class="n">0.184</td><td class="n">484</td><td class="n">98</td></tr>
+<tr><td>west_himalaya</td><td class="n">0.388</td><td class="n">0.114</td><td class="n">675</td><td class="n">167</td></tr>
+<tr><td>north_east</td><td class="n">0.359</td><td class="n">0.131</td><td class="n">652</td><td class="n">130</td></tr>
+<tr><td>eastern_himalaya</td><td class="n">0.339</td><td class="n">0.072</td><td class="n">1,130</td><td class="n">276</td></tr>
+<tr><td><strong>mean</strong></td><td class="n"><strong>0.380</strong></td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Mean held-out-region 0.380 against a temporal-test 0.410. The gap is small, which is the point: performance does not collapse on terrain the model has never seen.</p>
+
+<!-- ══════════════════════════════ 11 ══════════════════════════════ -->
+<h2 id="s11"><span class="h-num">11</span>Honesty instrumentation</h2>
+
+<p class="lede">A rare-event model is easy to lie with, mostly by accident. Four devices exist specifically to make that harder.</p>
+
+<h3>Accuracy is absent by design</h3>
+<p><code>src/model/metrics.py</code> never computes it. At the sampled ratio a "safe everywhere" model scores 86%; on the real grid, 99.998%. The number is not merely uninformative — it actively hides failure.</p>
+
+<h3>Recall at budget is the number to lead with</h3>
+<p>PR-AUC is the honest headline, but it is not an operational quantity. <em>Recall at budget</em> is: if a district can inspect its top 5% of cells today, what share of real landslides did it catch?</p>
+
+<div class="tw">
+<table>
+<thead><tr><th>Inspection budget</th><th class="n">1%</th><th class="n">5%</th><th class="n">10%</th><th class="n">20%</th></tr></thead>
+<tbody><tr><td>Share of real events caught</td><td class="n">3.3%</td><td class="n">11.1%</td><td class="n">20.3%</td><td class="n">43.1%</td></tr></tbody>
+</table>
+</div>
+
+<p>Inspecting the top 10% of cells catches about one event in five. Whether that is useful depends entirely on what inspecting a cell costs — which is a question for the district, not the model.</p>
+
+<h3>Every PR-AUC carries a bootstrap interval</h3>
+<p>Because the test split grows as the weather backfill lands, two successive runs are <em>not</em> measured on the same data. Two scores of 0.29 and 0.33 look like an improvement and are usually the same model on a slightly different test set. The interval makes that visible instead of leaving it to be discovered.</p>
+
+<h3>The operating threshold is stated, not defaulted</h3>
+<p>False negatives here cost lives; false positives cost an inspection vehicle. The threshold minimises expected cost at a <strong>20:1</strong> ratio rather than sitting at 0.5 because that is the library default.</p>
+
+<h3>Calibration is measured and published</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th>Predicted bin</th><th class="n">Mean predicted</th><th class="n">Observed</th><th class="n">Rows</th><th>Reading</th></tr></thead>
+<tbody>
+<tr><td>0.0 – 0.1</td><td class="n">0.083</td><td class="n">0.118</td><td class="n">211</td><td>slightly under-confident</td></tr>
+<tr><td>0.2 – 0.3</td><td class="n">0.255</td><td class="n">0.317</td><td class="n">300</td><td>good</td></tr>
+<tr><td>0.3 – 0.4</td><td class="n">0.371</td><td class="n">0.542</td><td class="n">59</td><td class="warn">over-confident</td></tr>
+<tr><td>above 0.6</td><td class="n">—</td><td class="n">—</td><td class="n">1 each</td><td>meaningless, too few rows</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Mean absolute gap 0.065. Reliable in the two bins that carry the data; the sparse bins are reported rather than quietly dropped.</p>
+
+<!-- ══════════════════════════════ 12 ══════════════════════════════ -->
+<h2 id="s12"><span class="h-num">12</span>Scoring and bands</h2>
+
+<p>The model's output is <strong>not a probability of failure and must not be presented as one</strong>. It was trained where roughly one row in six is a landslide; the real world is closer to one cell-day in fifty thousand.</p>
+
+<figure class="bleed">
+<div class="fig-box">
+<svg class="dgm" viewBox="0 0 780 330" role="img" aria-label="Scoring flow: a forecast pull with sixty past days and sixteen forecast days feeds the same feature module, then the model score splits into a prior-corrected absolute probability, a relative-risk band, and an exposure-weighted priority.">
+<defs><marker id="ar13" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ar"/></marker></defs>
+
+<rect x="16" y="30" width="164" height="64" class="n"/>
+<text x="98" y="52" class="t" text-anchor="middle">forecast pull</text>
+<text x="98" y="70" class="t-m" text-anchor="middle">past_days = 60</text>
+<text x="98" y="86" class="t-m" text-anchor="middle">forecast_days = 16</text>
+<text x="98" y="114" class="t-s" text-anchor="middle">the model's features are</text>
+<text x="98" y="128" class="t-s" text-anchor="middle">antecedent, so a forecast</text>
+<text x="98" y="142" class="t-s" text-anchor="middle">alone is useless</text>
+
+<line x1="184" y1="62" x2="216" y2="62" class="e" marker-end="url(#ar13)"/>
+<rect x="220" y="38" width="150" height="48" class="n-wat"/>
+<text x="295" y="58" class="t t-wat" text-anchor="middle">same feature module</text>
+<text x="295" y="74" class="t-s" text-anchor="middle">no training/serving skew</text>
+
+<line x1="374" y1="62" x2="406" y2="62" class="e" marker-end="url(#ar13)"/>
+<rect x="410" y="38" width="120" height="48" class="n-acc"/>
+<text x="470" y="58" class="t-b t-acc" text-anchor="middle">model score</text>
+<text x="470" y="74" class="t-s" text-anchor="middle">e.g. 0.23</text>
+
+<path d="M470 90 C 470 110 300 108 268 128" class="e" marker-end="url(#ar13)"/>
+<path d="M470 90 L 470 128" class="e" marker-end="url(#ar13)"/>
+<path d="M470 90 C 470 110 640 108 672 128" class="e" marker-end="url(#ar13)"/>
+
+<rect x="150" y="132" width="234" height="106" class="n"/>
+<text x="267" y="152" class="t-b" text-anchor="middle">absolute_probability</text>
+<text x="267" y="170" class="t-s" text-anchor="middle">the real-world frequency</text>
+<line x1="164" y1="178" x2="370" y2="178" class="e-dash"/>
+<text x="267" y="198" class="t-m" text-anchor="middle">offset = log(odds_sample / odds_pop)</text>
+<text x="267" y="216" class="t-m" text-anchor="middle">logit(p) − offset</text>
+<text x="267" y="232" class="t-s" text-anchor="middle" style="fill:var(--crit)">without it every number is inflated ~10,000×</text>
+
+<rect x="398" y="132" width="146" height="106" class="n-acc"/>
+<text x="471" y="152" class="t-b t-acc" text-anchor="middle">risk_band</text>
+<text x="471" y="170" class="t-s" text-anchor="middle">cut on relative risk</text>
+<line x1="412" y1="178" x2="530" y2="178" class="e-dash"/>
+<text x="412" y="196" class="t-m" style="fill:var(--crit)">≥5×  critical</text>
+<text x="412" y="211" class="t-m" style="fill:var(--high)">≥3×  high</text>
+<text x="412" y="226" class="t-m" style="fill:var(--elev)">≥2×  elevated</text>
+<text x="524" y="196" class="t-m" style="fill:var(--mod)">≥1.2×</text>
+<text x="524" y="211" class="t-m" style="fill:var(--low)">else</text>
+
+<rect x="558" y="132" width="206" height="106" class="n"/>
+<text x="661" y="152" class="t-b" text-anchor="middle">priority_score</text>
+<text x="661" y="170" class="t-s" text-anchor="middle">risk × exposure</text>
+<line x1="572" y1="178" x2="750" y2="178" class="e-dash"/>
+<text x="572" y="198" class="t-m">population .40</text>
+<text x="572" y="213" class="t-m">settlements .20 · roads .20</text>
+<text x="572" y="228" class="t-m">health .10 · schools .10</text>
+
+<rect x="150" y="256" width="614" height="60" class="n-ghost"/>
+<text x="166" y="276" class="t-b" style="fill:var(--crit)">Why bands are cut on relative risk, not the raw score</text>
+<text x="166" y="296" class="t-s">A model calibrated against a 16% base rate produces scores centred near 0.16, so a "critical at 0.80" rule would never fire and the</text>
+<text x="166" y="310" class="t-s">whole map would read "low" straight through a monsoon. 5× also carries the meaning an officer needs: five times the background rate.</text>
+</svg>
+</div>
+<figcaption><b>One score, three different questions.</b> The absolute probability answers "how often does this actually happen"; the band answers "how urgently should this be inspected"; the priority answers "where do I send the one team I have". Conflating them is how a warning system becomes either ignored or panic-inducing.</figcaption>
+</figure>
+
+<div class="callout">
+<span class="k">A cell above a road outranks a riskier one in empty forest</span>
+<p>Exposure raises priority but never zeroes it — an unpopulated cell about to fail is still worth knowing about. Exposure is <em>not</em> a model input; it is joined downstream for dispatch. Ranking by hazard alone under-serves sparse areas that are still dangerous to the people in them; ranking by exposure alone over-serves cities. Any deployment must state which it is ranking by.</p>
+</div>
+
+<!-- ══════════════════════════════ 13 ══════════════════════════════ -->
+<h2 id="s13"><span class="h-num">13</span>The warehouse</h2>
+
+<p>A MySQL star schema: <strong>4 dimensions, 5 facts, 1 operational log</strong>, plus <strong>5 views and 3 marts</strong>. Every rolling window, ranking and cohort in the analysis is a SQL window function over these tables rather than pandas code — so the model and the Power BI report consume exactly the same definitions.</p>
+
+<figure class="bleed">
+<div class="fig-box">
+<svg class="dgm" viewBox="0 0 760 340" role="img" aria-label="Star schema: dim_cell and dim_date are the conformed dimensions joined by every fact table on cell_id and date_id.">
+<defs><marker id="ar14" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ar"/></marker></defs>
+
+<rect x="286" y="30" width="180" height="52" class="n-acc"/>
+<text x="376" y="50" class="t-b t-acc" text-anchor="middle">dim_cell</text>
+<text x="376" y="66" class="t-m" text-anchor="middle">40,800 · 25 cols</text>
+<text x="376" y="78" class="t-s" text-anchor="middle">cell_id = lat_idx × 1000 + lon_idx</text>
+
+<rect x="286" y="258" width="180" height="52" class="n-acc"/>
+<text x="376" y="278" class="t-b t-acc" text-anchor="middle">dim_date</text>
+<text x="376" y="294" class="t-m" text-anchor="middle">3,658 · 11 cols</text>
+<text x="376" y="306" class="t-s" text-anchor="middle">date_id = YYYYMMDD</text>
+
+<rect x="30" y="100" width="160" height="46" class="n"/>
+<text x="110" y="119" class="t" text-anchor="middle">fact_landslide</text>
+<text x="110" y="135" class="t-m" text-anchor="middle">1,719 · FK both</text>
+
+<rect x="30" y="164" width="160" height="46" class="n"/>
+<text x="110" y="183" class="t" text-anchor="middle">fact_weather_daily</text>
+<text x="110" y="199" class="t-m" text-anchor="middle">no FK · bulk loaded</text>
+
+<rect x="30" y="228" width="160" height="46" class="n"/>
+<text x="110" y="247" class="t" text-anchor="middle">fact_sample</text>
+<text x="110" y="263" class="t-m" text-anchor="middle">11,955 · label + stratum</text>
+
+<rect x="562" y="100" width="168" height="46" class="n"/>
+<text x="646" y="119" class="t" text-anchor="middle">fact_exposure</text>
+<text x="646" y="135" class="t-m" text-anchor="middle">7,627 · FK cell</text>
+
+<rect x="562" y="164" width="168" height="46" class="n"/>
+<text x="646" y="183" class="t" text-anchor="middle">fact_risk_pred</text>
+<text x="646" y="199" class="t-m" text-anchor="middle">PK incl. model_version</text>
+
+<rect x="562" y="228" width="168" height="46" class="n-sunk"/>
+<text x="646" y="247" class="t" text-anchor="middle">dim_road · dim_settlement</text>
+<text x="646" y="263" class="t-s" text-anchor="middle">traceability for exposure</text>
+
+<line x1="194" y1="118" x2="282" y2="66" class="e" marker-end="url(#ar14)"/>
+<line x1="194" y1="130" x2="282" y2="272" class="e" marker-end="url(#ar14)"/>
+<line x1="194" y1="180" x2="282" y2="72" class="e-dash" marker-end="url(#ar14)"/>
+<line x1="194" y1="192" x2="282" y2="270" class="e-dash" marker-end="url(#ar14)"/>
+<line x1="194" y1="240" x2="282" y2="76" class="e-dash" marker-end="url(#ar14)"/>
+<line x1="194" y1="252" x2="282" y2="268" class="e-dash" marker-end="url(#ar14)"/>
+<line x1="558" y1="118" x2="470" y2="68" class="e" marker-end="url(#ar14)"/>
+<line x1="558" y1="180" x2="470" y2="74" class="e-dash" marker-end="url(#ar14)"/>
+<line x1="558" y1="192" x2="470" y2="270" class="e-dash" marker-end="url(#ar14)"/>
+<line x1="558" y1="248" x2="470" y2="80" class="e-dash" marker-end="url(#ar14)"/>
+
+<text x="376" y="150" class="t-s" text-anchor="middle">solid = enforced foreign key (3)</text>
+<text x="376" y="166" class="t-s" text-anchor="middle">dashed = join by convention</text>
+<text x="376" y="196" class="t-s" text-anchor="middle" style="font-style:italic">No geometry columns anywhere.</text>
+<text x="376" y="212" class="t-s" text-anchor="middle">Distance work is precomputed in GeoPandas</text>
+<text x="376" y="228" class="t-s" text-anchor="middle">and landed in fact_exposure — avoiding the</text>
+<text x="376" y="244" class="t-s" text-anchor="middle">SRID 4326 axis-order trap.</text>
+</svg>
+</div>
+<figcaption><b>Two conformed dimensions, deterministic natural keys.</b> <code>fact_weather_daily</code> deliberately carries no foreign keys: it is bulk-loaded in six-figure batches and the constraint check costs more than it protects, since both parents are populated first by the same pipeline.</figcaption>
+</figure>
+
+<h3>Views and marts</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th>Object</th><th>What it computes</th><th>Notable decision</th></tr></thead>
+<tbody>
+<tr><td><code>v_weather_rolling</code></td><td>rain over 3/7/15/30 days, soil-moisture lags, per-cell rainfall percentile</td><td>two passes — MySQL refuses to rank over a window function directly</td></tr>
+<tr><td><code>v_event_detail</code></td><td>events joined to terrain and elevation band</td><td>5 bands: &lt;500, &lt;1000, &lt;2000, &lt;3000, 3000+</td></tr>
+<tr><td><code>v_intensity_duration</code></td><td>mean mm/day against duration, the classic landslide-hydrology diagnostic</td><td>a validation gate on the input data, <em>not</em> a model feature</td></tr>
+<tr><td><code>v_cell_neighbours</code></td><td>the 3×3 block around each hill cell</td><td>derived from grid index arithmetic, not spatial joins</td></tr>
+<tr><td><code>v_alert_precision</code></td><td>yesterday's high/critical alerts against what actually happened</td><td>4-day verification window for reporting lag</td></tr>
+<tr><td><code>v_settlements_at_risk</code></td><td>named places in at-risk cells, largest first</td><td>"forty settlements" ranks a cell; it does not tell a team where to go</td></tr>
+<tr><td><code>mart_cell_daily_risk</code></td><td>what the map reads — risk joined to terrain and exposure</td><td><code>COALESCE(...,0)</code> so an unexposed cell still appears</td></tr>
+<tr><td><code>mart_district_daily_risk</code></td><td>districts ranked by summed priority of their worst cells</td><td>sum, not mean — an average hides one critical cell in a quiet district</td></tr>
+<tr><td><code>mart_event_history</code></td><td>events by state, band, month, with year-over-year lag</td><td>materialised as a physical table; the only one</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The <span class="band b-mod">moderate</span> band is deliberately kept in the district mart. The inline comment defends it: on a quiet day it is the top of the distribution, and a district table that empties itself outside the monsoon reads as a broken report rather than as low risk.</p>
+
+<!-- ══════════════════════════════ 14 ══════════════════════════════ -->
+<h2 id="s14"><span class="h-num">14</span>Interfaces</h2>
+
+<p><strong>Streamlit</strong> serves four pages: <em>Risk map</em> (the operational view), <em>Cell detail</em> (one cell, its drivers and its exposed settlements), <em>Field report</em> (an observation form for ground truth), and <em>History</em> (the recorded record).</p>
+
+<p><strong>Power BI</strong> consumes 36 DAX measures across six groups — command-centre header, risk shape, movement over the forecast window, historical page, model page, and narrative. Two of them carry reasoning worth repeating:</p>
+
+<div class="quote">Exposure is only counted where risk is actually elevated. Summing population across every scored cell would report the population of the Himalaya, which is true and useless.</div>
+
+<div class="quote">Sum, not average. A district with one critical cell and forty quiet ones needs a team; its average would hide that entirely.</div>
+
+<p>Both interfaces read <code>fact_risk_pred</code> through the marts and never touch the model file. Connection details are M parameters rather than literals, so moving to a managed MySQL is a parameter change and not a rebind of every query.</p>
+
+<!-- ══════════════════════════════ 15 ══════════════════════════════ -->
+<h2 id="s15"><span class="h-num">15</span>Verification</h2>
+
+<p><code>scripts/10_verify.py</code> runs <strong>24 checks in five groups</strong> and prints a single verdict. It is the last stage of the pipeline and the first thing to run when anything looks wrong.</p>
+
+<div class="tw">
+<table>
+<thead><tr><th>Group</th><th class="n">Checks</th><th>What it asserts</th></tr></thead>
+<tbody>
+<tr><td><strong>Completeness</strong></td><td class="n">7</td><td>row-count minimums per table, and that the hill mask covers 5–80% of the grid</td></tr>
+<tr><td><strong>Integrity</strong></td><td class="n">7</td><td>foreign keys resolve; sample uniqueness; rainfall 0–2000 mm; soil moisture 0–1; slope 0–90°; highest point between 8,000 and 9,000 m</td></tr>
+<tr><td><strong>Leakage</strong></td><td class="n">3</td><td>no feature correlates above the ceiling; prior-event share is plausible; the temporal split does not run backwards</td></tr>
+<tr><td><strong>Honesty</strong></td><td class="n">4</td><td>test PR-AUC, recall at 5% budget, mean held-out-region PR-AUC, calibration error</td></tr>
+<tr><td><strong>Predictions</strong></td><td class="n">3</td><td>predictions exist; probabilities in [0,1]; critical share is not absurd</td></tr>
+</tbody>
+</table>
+</div>
+
+<pre><code>24 checks: 23 passed, 1 warnings, 0 failed
+  ! WARN   recall at 5% budget    0.111
+passed with 1 warnings — read them before presenting</code></pre>
+
+<p>The single warning is honest rather than broken: catching 11% of events inside a 5% inspection budget is a real limitation, and the verifier says so every run rather than letting it pass unremarked.</p>
+
+<p>Alongside it, <code>pytest</code> runs <strong>18 unit and data tests</strong> in under three seconds. They pin the failures that actually happened here rather than chasing a coverage number.</p>
+
+<!-- ══════════════════════════════ 16 ══════════════════════════════ -->
+<h2 id="s16"><span class="h-num">16</span>Four real failures</h2>
+
+<p class="lede">Every one of these shipped silently for a while. They are recorded because the fixes are only trustworthy if the failures are stated.</p>
+
+<h3>1 · The elevation confounder</h3>
+<p>Covered in full in §07. Controls at 4,479 m against cases at 1,433 m; <code>elev_mean</code> became the top SHAP feature at twice the weight of anything else. Fixed by elevation-band matching; pinned by <code>tests/test_sampling.py</code>.</p>
+
+<h3>2 · Moving cache windows voided a backfill</h3>
+
+<p>An early version merged overlapping windows within a cell — 21% cheaper, and a false economy. The cache was keyed on <code>(cell, start, end)</code>, and merged boundaries move whenever the sampled dates for that cell change. Fixing a bias in the sampler therefore invalidated almost the entire backfill: <strong>2,190 fetched windows, of which 232 survived</strong>.</p>
+
+<figure class="bleed">
+<div class="fig-box">
+<svg class="dgm" viewBox="0 0 740 250" role="img" aria-label="Before: merged windows per cell shift their boundaries when a sample is added, invalidating the cache. After: one window anchored to each sample date never moves.">
+<text x="16" y="20" class="t-b" style="fill:var(--crit)">BEFORE — windows merged per cell</text>
+<text x="16" y="44" class="t-s">samples for cell 87066:</text>
+<circle cx="150" cy="40" r="4" style="fill:var(--accent)"/>
+<circle cx="230" cy="40" r="4" style="fill:var(--accent)"/>
+<rect x="110" y="54" width="164" height="20" class="n-sunk"/>
+<text x="192" y="68" class="t-m" text-anchor="middle">merged window A</text>
+
+<text x="16" y="100" class="t-s">add one sample →</text>
+<circle cx="150" cy="96" r="4" style="fill:var(--accent)"/>
+<circle cx="230" cy="96" r="4" style="fill:var(--accent)"/>
+<circle cx="310" cy="96" r="4" style="fill:var(--crit)"/>
+<rect x="110" y="110" width="244" height="20" style="fill:none;stroke:var(--crit);stroke-width:1.5;stroke-dasharray:4 3"/>
+<text x="232" y="124" class="t-m" text-anchor="middle" style="fill:var(--crit)">boundaries move — cache key changes</text>
+<text x="16" y="156" class="t-m" style="fill:var(--crit)">2,190 windows fetched → 232 survived</text>
+
+<line x1="380" y1="16" x2="380" y2="230" class="e-dash"/>
+
+<text x="404" y="20" class="t-b t-acc">AFTER — one window per sample</text>
+<text x="404" y="44" class="t-s">samples for cell 87066:</text>
+<circle cx="530" cy="40" r="4" style="fill:var(--accent)"/>
+<circle cx="620" cy="40" r="4" style="fill:var(--accent)"/>
+<rect x="486" y="54" width="88" height="20" class="n-acc"/>
+<rect x="576" y="54" width="88" height="20" class="n-acc"/>
+<text x="530" y="68" class="t-m" text-anchor="middle">45 d</text>
+<text x="620" y="68" class="t-m" text-anchor="middle">45 d</text>
+
+<text x="404" y="100" class="t-s">add one sample →</text>
+<circle cx="530" cy="96" r="4" style="fill:var(--accent)"/>
+<circle cx="620" cy="96" r="4" style="fill:var(--accent)"/>
+<circle cx="700" cy="96" r="4" style="fill:var(--water)"/>
+<rect x="486" y="110" width="88" height="20" class="n-acc"/>
+<rect x="576" y="110" width="88" height="20" class="n-acc"/>
+<rect x="656" y="110" width="80" height="20" class="n-wat"/>
+<text x="530" y="124" class="t-m" text-anchor="middle">unchanged</text>
+<text x="620" y="124" class="t-m" text-anchor="middle">unchanged</text>
+<text x="404" y="156" class="t-m t-acc">only the new sample is fetched</text>
+
+<rect x="404" y="176" width="332" height="56" class="n-ghost"/>
+<text x="416" y="196" class="t-s">Belt and braces: <tspan class="t-m">pending()</tspan> now checks <tspan class="t-b">day coverage</tspan></text>
+<text x="416" y="212" class="t-s">across every cache file rather than filename existence,</text>
+<text x="416" y="228" class="t-s">so days already on disk are never refetched.</text>
+</svg>
+</div>
+<figcaption><b>A window anchored to its own sample date never moves.</b> Rebuilding the sample now re-fetches only the samples that actually changed. The 21% saving was a small price for that.</figcaption>
+</figure>
+
+<h3>3 · Forecast dates leaked into the training sample</h3>
+
+<p>The backfill daemon died on <code>HTTP 400</code> asking the ERA5 archive for <code>start_date=2026-07-15&amp;end_date=2026-08-28</code> — dates in the present, for a training sample that runs 2007–2016.</p>
+
+<figure class="bleed">
+<div class="fig-box">
+<svg class="dgm" viewBox="0 0 760 260" role="img" aria-label="Causal chain: stage 08 appends forecast days to dim_date, an unbounded read by the sampler admits them into the control pool, planned windows end in the present, and ERA5 answers with HTTP 400 which then kills the whole run.">
+<defs><marker id="ar15" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ar"/></marker></defs>
+
+<rect x="12" y="60" width="128" height="58" class="n"/>
+<text x="76" y="82" class="t-s" text-anchor="middle">08_score.py appends</text>
+<text x="76" y="98" class="t-s" text-anchor="middle">5 forecast days to</text>
+<text x="76" y="112" class="t-m" text-anchor="middle">dim_date</text>
+<text x="76" y="136" class="t-s" text-anchor="middle" style="opacity:.75">correct and necessary —</text>
+<text x="76" y="150" class="t-s" text-anchor="middle" style="opacity:.75">the marts join through it</text>
+
+<line x1="144" y1="89" x2="176" y2="89" class="e" marker-end="url(#ar15)"/>
+
+<rect x="180" y="60" width="128" height="58" class="n-acc"/>
+<text x="244" y="82" class="t-s t-acc" text-anchor="middle">04_build_sample.py</text>
+<text x="244" y="98" class="t-s" text-anchor="middle">reads dim_date</text>
+<text x="244" y="112" class="t-s t-acc" text-anchor="middle">with no bound</text>
+<text x="244" y="140" class="t-s" text-anchor="middle" style="fill:var(--crit)">THE DEFECT</text>
+
+<line x1="312" y1="89" x2="344" y2="89" class="e" marker-end="url(#ar15)"/>
+
+<rect x="348" y="60" width="128" height="58" class="n"/>
+<text x="412" y="82" class="t-s" text-anchor="middle">18 controls drawn</text>
+<text x="412" y="98" class="t-s" text-anchor="middle">on 2026-08-27</text>
+<text x="412" y="112" class="t-s" text-anchor="middle">to 2026-08-31</text>
+
+<line x1="480" y1="89" x2="512" y2="89" class="e" marker-end="url(#ar15)"/>
+
+<rect x="516" y="60" width="128" height="58" class="n"/>
+<text x="580" y="82" class="t-s" text-anchor="middle">45-day windows</text>
+<text x="580" y="98" class="t-s" text-anchor="middle">end in the present;</text>
+<text x="580" y="112" class="t-s" text-anchor="middle">ERA5 lags ~5 days</text>
+
+<line x1="648" y1="89" x2="680" y2="89" class="e" marker-end="url(#ar15)"/>
+<rect x="684" y="60" width="66" height="58" class="n-acc" style="stroke:var(--crit)"/>
+<text x="717" y="86" class="t-b" text-anchor="middle" style="fill:var(--crit)">HTTP</text>
+<text x="717" y="104" class="t-b" text-anchor="middle" style="fill:var(--crit)">400</text>
+
+<path d="M717 122 C 717 160 400 160 320 178" class="e" style="stroke:var(--crit)" marker-end="url(#ar15)"/>
+
+<rect x="112" y="176" width="208" height="46" class="n" style="stroke:var(--crit)"/>
+<text x="216" y="196" class="t-s" text-anchor="middle" style="fill:var(--crit)">retried 4× with backoff,</text>
+<text x="216" y="212" class="t-s" text-anchor="middle" style="fill:var(--crit)">then raised — killing a run with</text>
+<text x="216" y="226" class="t-s" text-anchor="middle" style="fill:var(--crit)">10,000 good windows left</text>
+
+<rect x="352" y="168" width="398" height="62" class="n-acc"/>
+<text x="366" y="188" class="t-b t-acc">Two fixes, because there were two bugs</text>
+<text x="366" y="206" class="t-s">1 · Sampler and loader now bound their <tspan class="t-m">dim_date</tspan> reads to the study window.</text>
+<text x="366" y="222" class="t-s">2 · Any non-429 4xx raises immediately, skips its batch, and the run continues.</text>
+</svg>
+</div>
+<figcaption><b>One symptom, two independent defects.</b> Fixing only the dates would have left a fetcher that still dies on the next permanent refusal; fixing only the error handling would have left 18 junk rows in the training sample. Both are now pinned by tests in <code>tests/test_warehouse.py</code> and <code>tests/test_openmeteo.py</code>.</figcaption>
+</figure>
+
+<h3>4 · Excel rewrote the catalogue dates</h3>
+<p>Covered in §05. 4,395 rows silently converted to <code>DD-MM-YYYY</code>, 4,083 of which would be misdated under either parsing convention. The mangled copy remains in <code>dataset/</code> and the pipeline never reads it.</p>
+
+<!-- ══════════════════════════════ 17 ══════════════════════════════ -->
+<h2 id="s17"><span class="h-num">17</span>How much data is enough</h2>
+
+<p>"The dataset is small" is an excuse until it is measured, at which point it becomes a finding. <code>scripts/13_learning_curve.py</code> subsamples the training split and holds the test split fixed.</p>
+
+<figure class="bleed">
+<div class="fig-box">
+<svg class="dgm" viewBox="0 0 700 300" role="img" aria-label="Learning curve: test PR-AUC rises from 0.380 at 527 training rows to 0.446 at 2,108, with increments decaying sharply after the midpoint.">
+<line x1="70" y1="240" x2="660" y2="240" class="e"/>
+<line x1="70" y1="240" x2="70" y2="40" class="e"/>
+<text x="365" y="272" class="t-s" text-anchor="middle">training rows</text>
+<text x="32" y="140" class="t-s" text-anchor="middle" transform="rotate(-90 32 140)">test PR-AUC</text>
+
+<line x1="70" y1="220" x2="660" y2="220" class="e-dash" style="opacity:.3"/>
+<text x="62" y="224" class="t-m" text-anchor="end">0.36</text>
+<line x1="70" y1="150" x2="660" y2="150" class="e-dash" style="opacity:.3"/>
+<text x="62" y="154" class="t-m" text-anchor="end">0.41</text>
+<line x1="70" y1="80" x2="660" y2="80" class="e-dash" style="opacity:.3"/>
+<text x="62" y="84" class="t-m" text-anchor="end">0.46</text>
+
+<line x1="70" y1="240" x2="660" y2="240" style="stroke:var(--low);stroke-width:1.5;stroke-dasharray:6 4"/>
+<text x="656" y="256" class="t-m" text-anchor="end" style="fill:var(--low)">base rate 0.267</text>
+
+<polyline points="118,192 202,143 285,130 368,123 452,103 536,99" class="e-acc" style="stroke-width:2.4"/>
+<circle cx="118" cy="192" r="4.5" style="fill:var(--accent)"/>
+<circle cx="202" cy="143" r="4.5" style="fill:var(--accent)"/>
+<circle cx="285" cy="130" r="4.5" style="fill:var(--accent)"/>
+<circle cx="368" cy="123" r="4.5" style="fill:var(--accent)"/>
+<circle cx="452" cy="103" r="4.5" style="fill:var(--accent)"/>
+<circle cx="536" cy="99" r="4.5" style="fill:var(--accent)"/>
+
+<text x="118" y="182" class="t-m" text-anchor="middle">0.380</text>
+<text x="202" y="133" class="t-m" text-anchor="middle">0.415</text>
+<text x="285" y="120" class="t-m" text-anchor="middle">0.424</text>
+<text x="368" y="113" class="t-m" text-anchor="middle">0.429</text>
+<text x="452" y="93" class="t-m" text-anchor="middle">0.443</text>
+<text x="536" y="89" class="t-m" text-anchor="middle">0.446</text>
+
+<text x="118" y="256" class="t-m" text-anchor="middle">527</text>
+<text x="202" y="256" class="t-m" text-anchor="middle">843</text>
+<text x="285" y="256" class="t-m" text-anchor="middle">1160</text>
+<text x="368" y="256" class="t-m" text-anchor="middle">1476</text>
+<text x="452" y="256" class="t-m" text-anchor="middle">1792</text>
+<text x="536" y="256" class="t-m" text-anchor="middle">2108</text>
+
+<line x1="118" y1="210" x2="202" y2="210" class="e" style="stroke:var(--mod)"/>
+<text x="160" y="206" class="t-m" text-anchor="middle" style="fill:var(--mod)">+0.035</text>
+<line x1="452" y1="120" x2="536" y2="120" class="e" style="stroke:var(--crit)"/>
+<text x="494" y="134" class="t-m" text-anchor="middle" style="fill:var(--crit)">+0.003</text>
+
+<rect x="560" y="40" width="132" height="90" class="n-ghost"/>
+<text x="572" y="60" class="t-s">EPV at 100%:</text>
+<text x="572" y="78" class="t-m">465 / 41 = 11.3</text>
+<text x="572" y="100" class="t-s">Full backfill takes</text>
+<text x="572" y="116" class="t-s">this to about 28.</text>
+</svg>
+</div>
+<figcaption><b>The curve is flattening.</b> Quadrupling the training rows bought +0.066; the last 1.4× bought +0.016, and the final step +0.003. Finishing the weather backfill is worth doing for <em>statistical power</em> — events-per-variable rises from 11 to about 28, which is the difference between "model selection is noise" and a defensible choice — but it will not produce a large jump in score.</figcaption>
+</figure>
+
+<p>These numbers are deliberately uncalibrated, so they sit slightly above what stage 07 reports. Including the Platt step would mix two effects in one line. Only the trend is being read.</p>
+
+<!-- ══════════════════════════════ 18 ══════════════════════════════ -->
+<h2 id="s18"><span class="h-num">18</span>Where it stands</h2>
+
+<div class="stat-row">
+  <div class="stat"><span class="v">13</span><span class="l">scripts</span></div>
+  <div class="stat"><span class="v">12</span><span class="l">modules</span></div>
+  <div class="stat"><span class="v">11</span><span class="l">tables</span></div>
+  <div class="stat"><span class="v">8</span><span class="l">views + marts</span></div>
+  <div class="stat"><span class="v">41</span><span class="l">features</span></div>
+  <div class="stat"><span class="v">18</span><span class="l">tests</span></div>
+  <div class="stat"><span class="v">24</span><span class="l">verify checks</span></div>
+</div>
+
+<div class="tw">
+<table>
+<thead><tr><th>Component</th><th>State</th><th>Detail</th></tr></thead>
+<tbody>
+<tr><td>Warehouse</td><td class="pass">loaded</td><td>40,800 cells · 22,594 hill · 1,719 events · 11,955 samples · 7,627 exposure rows</td></tr>
+<tr><td>Weather backfill</td><td class="warn">62% · running</td><td>8,920 cached windows, 4,538 pending, ~900/hour under the rolling quota</td></tr>
+<tr><td>Model</td><td class="pass">clean</td><td>logistic, elevation leak removed, trained on the 20%-coverage matrix</td></tr>
+<tr><td>Verification</td><td class="pass">23 / 1 / 0</td><td>the single warning is recall at 5% budget</td></tr>
+<tr><td>Tests</td><td class="pass">18 passing</td><td>sampling, fetcher, warehouse invariants</td></tr>
+<tr><td>Version control</td><td class="pass">2 commits</td><td>63 files tracked, local only, not pushed</td></tr>
+<tr><td><code>fact_risk_pred</code></td><td class="fail">stale</td><td>200 rows scored on 2026-08-27 — by the <em>leaked</em> model</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout trap">
+<span class="k">Do not demo the risk map yet</span>
+<p><code>fact_risk_pred</code> still holds output from the model that had the elevation leak. Streamlit and Power BI both read it. Stage 08 must run against the current model before either interface is shown to anyone — it is the one artefact in the repository that would actively misrepresent the work.</p>
+</div>
+
+<h4>The sequence when the backfill lands</h4>
+<pre><code>05_fetch_weather.py --load-only
+06_build_features.py
+07_train_model.py
+08_score.py          ← clears the stale predictions
+10_verify.py
+13_learning_curve.py ← re-measure and update the curve</code></pre>
+
+<!-- ══════════════════════════════ 19 ══════════════════════════════ -->
+<h2 id="s19"><span class="h-num">19</span>Limitations</h2>
+
+<p class="lede">Read these before quoting any number above.</p>
+
+<h3>Daily sums cannot see the trigger</h3>
+<p>This is the largest cap on performance and it is a data limit, not a model limit. Landslides respond to sub-daily rainfall <em>intensity</em> — millimetres per hour. The model sees <code>precipitation_sum</code>, a 24-hour total. A three-hour cloudburst and a day of steady drizzle can be the same number here and are completely different on a hillside. No model class fixes this; only hourly data would.</p>
+
+<h3>11 km cells against 1–2 km orographic rainfall</h3>
+<p>The grid matches ERA5-Land's native resolution, so there is no false precision — but in Himalayan terrain rainfall varies sharply over one or two kilometres, and the predictor frequently does not see the rain that caused the slide.</p>
+
+<h3>Reporting bias in the labels</h3>
+<p>The catalogue records <em>reported</em> landslides. Absence of a record is not absence of a landslide. The exclusion buffer mitigates this; nothing removes it.</p>
+
+<h3>An incomplete backfill</h3>
+<p>The recorded metrics come from a 2,941-row matrix built at about 20% weather coverage. Events-per-variable is 11 across 41 features, which is thin. The learning curve in §17 quantifies exactly what completing it is worth.</p>
+
+<h3>Not an operational warning system</h3>
+<p>No hourly nowcast. No validation against IMD or GSI bulletins. No human in the loop. It is a screening aid that ranks cells for inspection, and the model card states the out-of-scope uses explicitly.</p>
+
+<hr>
+
+<!-- ══════════════════════════════ A ══════════════════════════════ -->
+<h2 id="sA"><span class="h-num">A</span>Constants</h2>
+
+<p>Every value below lives in <code>config/settings.py</code> with its reasoning written beside it. Nothing downstream hardcodes a number.</p>
+
+<div class="tw">
+<table>
+<thead><tr><th>Constant</th><th class="n">Value</th><th>Why this and not another</th></tr></thead>
+<tbody>
+<tr><td><code>LAT_MIN, LAT_MAX</code></td><td class="n">21.5, 37.5</td><td rowspan="2">a box, not a state list — the catalogue spells <code>Nagaland</code> and <code>Nāgāland</code> separately and name matching silently drops events</td></tr>
+<tr><td><code>LON_MIN, LON_MAX</code></td><td class="n">72.0, 97.5</td></tr>
+<tr><td><code>GRID_DEG</code></td><td class="n">0.1</td><td>matches ERA5-Land native resolution and the catalogue's 5–25 km positional error</td></tr>
+<tr><td><code>LON_INDEX_SPAN</code></td><td class="n">1000</td><td>radix keeping <code>cell_id</code> collision-free; guarded at import</td></tr>
+<tr><td><code>MIN_SLOPE_DEG</code></td><td class="n">5.0</td><td>a landslide needs a slope; floodplain cells only dilute the negative pool</td></tr>
+<tr><td><code>DATE_START, DATE_END</code></td><td class="n">2007-01-01, 2016-12-31</td><td>the catalogue runs to 2017-09-28 but 2017 is incomplete — August is missing entirely</td></tr>
+<tr><td><code>NEGATIVES_PER_POSITIVE</code></td><td class="n">6</td><td>the binding constraint is the weather API, not statistics; a covered 1:6 beats a hollow 1:15</td></tr>
+<tr><td><code>STRATUM_WEIGHTS</code></td><td class="n">.50 / .30 / .20</td><td>temporal / spatial / background — must sum to 1.0</td></tr>
+<tr><td><code>EXCLUSION_RADIUS_KM</code></td><td class="n">15.0</td><td rowspan="2">near-miss candidates are discarded, not labelled zero — unreported slides are common in remote terrain</td></tr>
+<tr><td><code>EXCLUSION_DAYS</code></td><td class="n">2</td></tr>
+<tr><td><code>FEATURE_WINDOW_DAYS</code></td><td class="n">45</td><td>keeps the 30-day antecedent accumulation at a quarter less API cost than 60</td></tr>
+<tr><td><code>SPLIT_TRAIN_END</code></td><td class="n">2013-12-31</td><td rowspan="2">blocked in time, never random — a random split leaks the future</td></tr>
+<tr><td><code>SPLIT_VAL_END</code></td><td class="n">2014-12-31</td></tr>
+<tr><td><code>_ELEVATION_BAND_M</code></td><td class="n">500</td><td rowspan="2">the fix for the confounder — a 1,500 m eligibility window centred on the case</td></tr>
+<tr><td><code>_ELEVATION_BAND_TOLERANCE</code></td><td class="n">±1 band</td></tr>
+<tr><td><code>_SPATIAL_MIN_KM / MAX</code></td><td class="n">25 / 300</td><td>inner edge clears the exclusion buffer; outer keeps the control in the same weather system</td></tr>
+<tr><td><code>_SEASON_WINDOW_DAYS</code></td><td class="n">30</td><td>circular, so late December and early January count as adjacent</td></tr>
+<tr><td><code>API_DECAY</code></td><td class="n">0.92</td><td>daily retention of the antecedent precipitation index</td></tr>
+<tr><td><code>OPENMETEO_DAILY_BUDGET</code></td><td class="n">9000</td><td>1,000 below the free ceiling, so the warning fires before the API does</td></tr>
+<tr><td><code>FALSE_NEGATIVE_COST</code></td><td class="n">20 : 1</td><td>a missed landslide can cost lives; a false alarm costs an inspection vehicle</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ══════════════════════════════ B ══════════════════════════════ -->
+<h2 id="sB"><span class="h-num">B</span>Files and commands</h2>
+
+<pre><code>config/      settings — every constant, reasoning beside it
+src/
+  data/      grid · dem · landslides · sampling · openmeteo · osm · admin
+  features/  rolling windows and the leakage audit
+  model/     estimators · metrics with bootstrap intervals · SHAP · scoring
+scripts/     00–13, one stage each, all runnable standalone
+sql/         01_schema.sql · 02_analytics.sql
+app/         Streamlit — risk map, cell detail, field report, history
+powerbi/     36 DAX measures
+tests/       regression cover for the real failures
+docs/        plan · handover · decisions · model card · this walkthrough
+reports/     EDA figures and the learning curve</code></pre>
+
+<p>Everything runs through the project virtualenv — the geospatial stack will not load under system Python.</p>
+
+<pre><code>.venv/Scripts/python.exe scripts/run_pipeline.py
+.venv/Scripts/python.exe scripts/run_pipeline.py --from 06
+.venv/Scripts/python.exe scripts/05_fetch_weather.py --plan
+.venv/Scripts/python.exe scripts/05_fetch_weather.py --no-discharge --daemon-hours 20
+.venv/Scripts/python.exe -m pytest
+.venv/Scripts/python.exe -m streamlit run app/streamlit_app.py</code></pre>
+
+<h4>Data sources</h4>
+<ul>
+<li><strong>NASA Global Landslide Catalog</strong> — event locations and dates, 2007–2016.</li>
+<li><strong>Open-Meteo Archive</strong> (ERA5-Land) — daily rainfall, soil moisture at three depths, temperature, ET₀, wind. Unauthenticated, ~10,000 calls/day.</li>
+<li><strong>Open-Meteo Flood</strong> (GloFAS) — river discharge; stored and reported, deliberately excluded from the model.</li>
+<li><strong>Copernicus DEM GLO-30</strong> — 30 m elevation, 442 tiles, aggregated to slope, aspect and ruggedness per cell.</li>
+<li><strong>OpenStreetMap</strong> via Geofabrik — roads, settlements, schools, health facilities.</li>
+<li><strong>geoBoundaries</strong> — state and district boundaries for administrative labelling.</li>
+</ul>
+
+<div class="foot">
+Slopewatch · SIH 2026 · PS 26192 — flash flood and landslide early warning.<br>
+Every figure in this document traces to a committed artefact: <code>models/metrics_v1.json</code>, <code>models/feature_importance_v1.csv</code>, <code>models/calibration_v1.csv</code>, <code>models/learning_curve_logistic.csv</code>, or a run log under <code>logs/</code>.
+</div>
+
+</div>
+</main>
+</div>
