@@ -264,6 +264,19 @@ footer{margin-top:64px;padding-top:22px;border-top:1px solid var(--rule);display
     <p class="lede">A landslide and flash-flood early warning engine for India's hill states — built from public data that has already been verified as reachable, wired through SQL, Python and Power BI, and deployed on free-tier infrastructure.</p>
   </div>
 
+  <div class="note" style="border-left:4px solid #b45309;background:rgba(180,83,9,.08);padding:1rem 1.15rem;margin:1.5rem 0;">
+    <strong>Superseded — this is the plan as written before the build.</strong>
+    It is kept as a record of what was intended, not as a description of what exists.
+    The delivered system diverges in four ways, each for a reason found during the build:
+    <ul style="margin:.6rem 0 0;padding-left:1.1rem;">
+      <li><strong>MySQL 8, not Postgres with PostGIS.</strong> No geometry columns anywhere — distance work is a one-time GeoPandas precompute landed in <code>fact_exposure</code>, which sidesteps the SRID 4326 axis-order trap and keeps the schema portable.</li>
+      <li><strong>No Power BI.</strong> One Streamlit application carries all six views, authority-facing and field-facing alike.</li>
+      <li><strong>Negatives are 1:6, not a larger ratio</strong>, because the binding constraint turned out to be the weather API rather than statistics.</li>
+      <li><strong>Controls are matched on elevation.</strong> The plan did not anticipate that a 5° slope mask admits the Tibetan plateau — the confounder that cost the most to find.</li>
+    </ul>
+    <p style="margin:.6rem 0 0;">For the system as built, read the walkthrough and the README.</p>
+  </div>
+
   <div class="meta-row">
     <div class="meta-cell"><span class="k">Target</span><span class="v">Himalayan arc + NER</span></div>
     <div class="meta-cell"><span class="k">Labelled events</span><span class="v">1,719 landslides</span></div>

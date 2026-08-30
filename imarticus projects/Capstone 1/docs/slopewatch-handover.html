@@ -461,7 +461,7 @@ wetness_ratio_7d     ██████</pre>
   </div>
 
   <div class="prose">
-    <p>MySQL 8.0, star schema, loaded and indexed. Every rolling window the model trains on is defined here as a SQL view, so the analysis and Power BI read the same definition rather than two that drift apart.</p>
+    <p>MySQL 8.0, star schema, loaded and indexed. Every rolling window the model trains on is defined here as a SQL view, so the analysis and the application read the same definition rather than two that drift apart.</p>
   </div>
 
   <div class="tw">
@@ -524,22 +524,22 @@ Uttarakhand       Nainital   moderate   0.225        0             0    2
   <div class="cards">
     <div class="card">
       <span class="pg">Interface 01</span>
-      <h4>Power BI</h4>
+      <h4>Streamlit — the authority side</h4>
       <ul class="tick">
-        <li>Connects to the MySQL marts directly</li>
-        <li>28 DAX measures supplied in <code>powerbi/measures.dax</code></li>
-        <li>Host and database as M parameters, not literals — moving to a managed MySQL later is a parameter change</li>
-        <li>Accuracy is deliberately absent from the measure set</li>
+        <li>Risk map over <code>mart_cell_daily_risk</code>, filtered by band</li>
+        <li>Districts ranked by summed priority, not a mean — one critical cell in a quiet district still calls a team</li>
+        <li>Named settlements inside each flagged cell, largest first</li>
+        <li>Model page: metrics with the base rate beside them, and what the model is not</li>
       </ul>
     </div>
     <div class="card">
       <span class="pg">Interface 02</span>
-      <h4>Streamlit</h4>
+      <h4>Streamlit — the field side</h4>
       <ul class="tick">
-        <li>Risk map, cell detail with named drivers, history</li>
-        <li>Geo-tagged field reporting for cracks and blocked roads</li>
-        <li>Reports queue on-device first, so one can be filed from a severed road</li>
-        <li>Covers the citizen and field-officer side Power BI cannot</li>
+        <li>Cell detail with the drivers named in plain language</li>
+        <li>Geo-tagged reporting for cracks, slope movement and blocked roads</li>
+        <li>Written to an on-device file, so one can be filed from a severed road</li>
+        <li>No automatic upload — the interface says so rather than implying one</li>
       </ul>
     </div>
   </div>
