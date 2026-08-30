@@ -1,0 +1,290 @@
+<title>Slopewatch Session Handoff</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+:root{
+  --sans:"IBM Plex Sans Condensed",-apple-system,"Segoe UI",sans-serif;
+  --serif:"IBM Plex Serif",Georgia,serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  --ground:#ECEEEC; --surface:#F8F9F8; --sunk:#E1E5E2;
+  --ink:#151F1C; --ink-2:#4C5955; --ink-3:#74827D;
+  --rule:#C6CEC9; --rule-2:#D8DEDA;
+  --accent:#9A5615; --accent-wash:#F0E2D2;
+  --water:#20666E; --water-wash:#DCE9EA;
+  --crit:#8F2222; --warn:#8A6208; --ok:#456F13;
+  --measure:70ch;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0E1412; --surface:#151D1A; --sunk:#1C2622;
+    --ink:#E3E9E5; --ink-2:#9DABA5; --ink-3:#78877F;
+    --rule:#2B3833; --rule-2:#222E2A;
+    --accent:#DA9451; --accent-wash:#2E2117;
+    --water:#66B4BC; --water-wash:#14282B;
+    --crit:#E07A7A; --warn:#CFB055; --ok:#9BC46A;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0E1412; --surface:#151D1A; --sunk:#1C2622;
+  --ink:#E3E9E5; --ink-2:#9DABA5; --ink-3:#78877F;
+  --rule:#2B3833; --rule-2:#222E2A;
+  --accent:#DA9451; --accent-wash:#2E2117;
+  --water:#66B4BC; --water-wash:#14282B;
+  --crit:#E07A7A; --warn:#CFB055; --ok:#9BC46A;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:var(--serif);font-size:16.5px;line-height:1.62;-webkit-font-smoothing:antialiased;}
+.wrap{max-width:62rem;margin:0 auto;padding:2.4rem 1.6rem 6rem;}
+.measure{max-width:var(--measure);}
+.eyebrow{font-family:var(--sans);text-transform:uppercase;letter-spacing:.15em;
+  font-size:.7rem;font-weight:600;color:var(--accent);}
+h1{font-family:var(--sans);font-weight:700;font-size:clamp(2.2rem,5.5vw,3.4rem);
+  line-height:1;letter-spacing:-.015em;margin:.5rem 0 .6rem;text-wrap:balance;}
+.standfirst{font-size:1.14rem;color:var(--ink-2);max-width:54ch;margin:0 0 1.2rem;}
+.stamp{font-family:var(--mono);font-size:.74rem;color:var(--ink-3);
+  display:flex;flex-wrap:wrap;gap:.35rem 1.4rem;padding-bottom:1.5rem;
+  border-bottom:2px solid var(--ink);margin-bottom:2.4rem;}
+h2{font-family:var(--sans);font-weight:700;font-size:1.72rem;line-height:1.1;
+  margin:3.4rem 0 .8rem;letter-spacing:-.01em;text-wrap:balance;}
+h2 .n{font-family:var(--mono);font-size:.8rem;color:var(--accent);display:block;
+  font-weight:500;letter-spacing:.05em;margin-bottom:.3rem;}
+h3{font-family:var(--sans);font-weight:600;font-size:1.14rem;margin:2rem 0 .4rem;}
+p{margin:0 0 1rem;}
+code{font-family:var(--mono);font-size:.86em;background:var(--sunk);
+  padding:.1em .34em;border-radius:2px;word-break:break-word;}
+pre{background:var(--surface);border:1px solid var(--rule);border-left:3px solid var(--water);
+  padding:.85rem 1rem;overflow-x:auto;font-family:var(--mono);font-size:.8rem;
+  line-height:1.55;margin:1.2rem 0;}
+pre code{background:none;padding:0;}
+ul,ol{margin:0 0 1rem;padding-left:1.15rem;}
+li{margin-bottom:.42rem;}
+a{color:var(--accent);}
+.tw{overflow-x:auto;margin:1.4rem 0;border:1px solid var(--rule);}
+table{border-collapse:collapse;width:100%;font-size:.88rem;background:var(--surface);}
+th,td{text-align:left;padding:.5rem .7rem;border-bottom:1px solid var(--rule-2);vertical-align:top;}
+th{font-family:var(--sans);font-weight:600;text-transform:uppercase;letter-spacing:.06em;
+  font-size:.7rem;color:var(--ink-2);background:var(--sunk);white-space:nowrap;}
+tbody tr:last-child td{border-bottom:0;}
+td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap;}
+.callout{border-left:3px solid var(--accent);background:var(--accent-wash);
+  padding:.9rem 1.1rem;margin:1.4rem 0;font-size:.95rem;}
+.callout.stop{border-left-color:var(--crit);background:var(--surface);}
+.callout.go{border-left-color:var(--water);background:var(--water-wash);}
+.callout .k{font-family:var(--sans);font-weight:700;text-transform:uppercase;
+  letter-spacing:.08em;font-size:.7rem;color:var(--accent);display:block;margin-bottom:.25rem;}
+.callout.stop .k{color:var(--crit);}
+.callout.go .k{color:var(--water);}
+.callout p:last-child{margin-bottom:0;}
+.ok{color:var(--ok);font-weight:600;}
+.wn{color:var(--warn);font-weight:600;}
+.bad{color:var(--crit);font-weight:600;}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));gap:1px;
+  background:var(--rule);border:1px solid var(--rule);margin:1.5rem 0;}
+.cell{background:var(--surface);padding:.75rem .9rem;}
+.cell .v{font-family:var(--mono);font-size:1.25rem;display:block;line-height:1.15;
+  font-variant-numeric:tabular-nums;}
+.cell .l{font-family:var(--sans);font-size:.7rem;text-transform:uppercase;
+  letter-spacing:.07em;color:var(--ink-3);display:block;margin-top:.2rem;}
+.cell.hl .v{color:var(--accent);}
+ol.steps{counter-reset:s;list-style:none;padding-left:0;}
+ol.steps>li{counter-increment:s;position:relative;padding-left:2.4rem;margin-bottom:1rem;}
+ol.steps>li::before{content:counter(s);position:absolute;left:0;top:.05rem;
+  font-family:var(--mono);font-size:.78rem;color:var(--accent);border:1px solid var(--accent);
+  width:1.6rem;height:1.6rem;display:grid;place-items:center;border-radius:2px;}
+.foot{margin-top:4rem;padding-top:1.2rem;border-top:2px solid var(--ink);
+  font-family:var(--sans);font-size:.82rem;color:var(--ink-3);}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+</style>
+
+<div class="wrap">
+
+<div class="eyebrow">Session handoff</div>
+<h1>Slopewatch</h1>
+<p class="standfirst">Everything that changed this session, what is running right now, what is blocked and on what, and the traps that cost real time — so the next session starts where this one ended rather than rediscovering it.</p>
+<div class="stamp">
+  <span>2026-08-29 → 2026-08-30</span>
+  <span>13 commits · 91 files · +16,325 lines</span>
+  <span>pushed to origin/main</span>
+</div>
+
+<div class="measure">
+
+<!-- ───────────────────────── 01 ───────────────────────── -->
+<h2><span class="n">01</span>Read this first</h2>
+
+<div class="callout go">
+<span class="k">The demo blocker is cleared</span>
+<p><code>fact_risk_pred</code> held 200 rows scored by the model that still had the <strong>elevation leak</strong>, and every app view read it. Scoring landed at 19:55 on 2026-08-30: <strong>1,792 predictions across 256 cells</strong>, stamped <code>v1-xgboost</code>, forecast window 2026-08-30 to 09-05. The map is safe to show.</p>
+<p>Verification after scoring: <span class="ok">23 pass · 1 warn · 0 fail</span>, the warning being recall at 5% budget, which is a real limitation the verifier states every run.</p>
+</div>
+
+<div class="callout">
+<span class="k">Running right now</span>
+<p>Background task <code>b0x0qev9s</code> — the weather backfill daemon, restarted after scoring finished, 20 hours, 3,471 windows outstanding. It sleeps 20 minutes between quota refills and resumes on its own.</p>
+</div>
+
+<!-- ───────────────────────── 02 ───────────────────────── -->
+<h2><span class="n">02</span>Where it stands</h2>
+
+<div class="grid">
+  <div class="cell"><span class="v">8,837</span><span class="l">training rows</span></div>
+  <div class="cell"><span class="v">23</span><span class="l">events per variable</span></div>
+  <div class="cell hl"><span class="v">1.45×</span><span class="l">lift over base rate</span></div>
+  <div class="cell"><span class="v">74%</span><span class="l">weather coverage</span></div>
+  <div class="cell"><span class="v">18</span><span class="l">tests passing</span></div>
+  <div class="cell"><span class="v">23/1/0</span><span class="l">verify pass/warn/fail</span></div>
+</div>
+
+<div class="tw">
+<table>
+<thead><tr><th>Component</th><th>State</th><th>Detail</th></tr></thead>
+<tbody>
+<tr><td>Warehouse</td><td class="ok">loaded</td><td>40,800 cells · 22,594 hill · 1,719 events · 11,955 samples · 424,528 weather rows</td></tr>
+<tr><td>Model</td><td class="ok">clean</td><td>XGBoost, elevation leak gone, test PR-AUC 0.244 [0.214–0.280] against a 0.168 base rate</td></tr>
+<tr><td>Application</td><td class="ok">6 views</td><td>risk map, districts, cell detail, model, field report, history — all audited, zero exceptions</td></tr>
+<tr><td>Documentation</td><td class="ok">complete</td><td>README carries the full walkthrough: 20 sections, 18 diagrams, 12 figures, 764 lines</td></tr>
+<tr><td>Weather backfill</td><td class="wn">74% · paused</td><td>9,970 cached windows, 3,471 pending, quota-blocked</td></tr>
+<tr><td><code>fact_risk_pred</code></td><td class="ok">current</td><td>1,792 rows · 256 cells · <code>v1-xgboost</code> — coverage is API-bound, not model-bound</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ───────────────────────── 03 ───────────────────────── -->
+<h2><span class="n">03</span>What changed this session</h2>
+
+<h3>Five defects found and fixed in the pipeline</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th>Defect</th><th>How it presented</th><th>Fix</th></tr></thead>
+<tbody>
+<tr><td><strong>Forecast dates in the training sample</strong></td><td>Backfill daemon died on <code>HTTP 400</code> asking ERA5 for a window ending in the present</td><td><code>04_build_sample.py</code> and the weather loader now bound their <code>dim_date</code> reads to the study window; 18 junk samples deleted</td></tr>
+<tr><td><strong>A permanent 400 killed the run</strong></td><td>Four retries then raise, ending a backfill with 10,000 good windows left</td><td><code>PermanentRequestError</code> — non-429 4xx raises immediately, the batch is skipped, the run continues</td></tr>
+<tr><td><strong>Capacity gate measured the wrong thing</strong></td><td>Crossing 941 positives tripped <code>n_positives &lt; 500</code>; both trees became lookup tables (RF 0.934 train / 0.241 val)</td><td>Gate now measures <strong>events per variable</strong>, threshold 50; both trees improved on held-out data</td></tr>
+<tr><td><strong>Selection picked the worst operational model</strong></td><td>PR-AUC sort chose the model catching 5.3% at a 5% budget over one catching 13.0%</td><td>Overlapping intervals treated as tied, tie broken on recall@budget, <em>validated across splits</em> before applying</td></tr>
+<tr><td><strong><code>model_version</code> was a bare constant</strong></td><td>Every re-score deleted the previous rows and wrote <code>v1</code> again — no way to tell which model the map served</td><td>Estimator stamped in (<code>v1-xgboost</code>); whole family cleared before writing</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>Three defects found in the application</h3>
+
+<p>Found by auditing against live data, not by anything throwing an error — which is the point.</p>
+
+<div class="tw">
+<table>
+<thead><tr><th>Defect</th><th>Effect</th></tr></thead>
+<tbody>
+<tr><td><code>latest = cell.iloc[0]</code> after an <strong>ascending</strong> sort</td><td>Every number on the cell-detail page came from the <em>earliest</em> day in the forecast window while the label claimed otherwise</td></tr>
+<tr><td>A sync that did not exist</td><td>The field report form promised <em>"will sync when the network is available"</em>. Nothing synced it. For a safety-reporting feature that is the worst possible failure — the officer believes it was filed</td></tr>
+<tr><td>No model page at all</td><td><code>mart_model_performance</code> sat unread; nothing in the interface said how well the model works</td></tr>
+<tr><td>Caches outlived a re-score</td><td>After <code>08_score.py</code> replaced the forecast window, the cached date list still pointed at days that no longer existed and the map rendered <em>"Nothing scored for that day"</em>. The app looked broken while holding a stale answer — the worse failure, because nobody thinks to press refresh. Every loader now takes a fingerprint of the prediction set, so new scores invalidate the cache immediately.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>Built</h3>
+
+<ul>
+<li><strong>18 tests</strong> pinning the failures that actually happened — including a synthetic world where plateau and slope cells are <em>interleaved in space</em>, so only elevation-band matching can pass.</li>
+<li><strong><code>13_learning_curve.py</code></strong> — measures what more data is worth. Ran twice; the first run's extrapolation held.</li>
+<li><strong><code>14_report_figures.py</code></strong> — six figures, each verified to reproduce its stored metric before drawing.</li>
+<li><strong><code>15_extract_diagrams.py</code></strong> — lifts all 18 walkthrough diagrams into standalone theme-aware SVGs.</li>
+<li><strong>Districts view</strong> and a rebuilt <strong>map</strong> — real cell footprints, tooltips, legend, risk-vs-priority toggle.</li>
+<li><strong>Model card</strong>, <strong>walkthrough</strong>, and a README that carries the whole thing.</li>
+</ul>
+
+<!-- ───────────────────────── 04 ───────────────────────── -->
+<h2><span class="n">04</span>The two findings worth defending</h2>
+
+<h3>The elevation confounder</h3>
+
+<p>An early model put <code>elev_mean</code> top of the SHAP ranking at 2.3× the runner-up. The cause was the hill mask one stage removed: <code>slope_mean ≥ 5°</code> admits the Ladakh and Tibetan plateau, so background controls sat at <strong>4,479 m against 1,433 m for cases</strong>. The model was separating a plateau from a slope.</p>
+
+<p>Fixed by elevation-band matching in the sampler — <strong>gap now −17 m</strong>, <code>elev_mean</code> absent from the top 15. The finding has since survived a change of model and a tripling of the data.</p>
+
+<div class="callout">
+<span class="k">Say this correctly</span>
+<p>The PR-AUC before and after is <strong>not</strong> comparable — different sample, different test split. Only the SHAP <em>ranking</em> is a fair before/after. Claiming a metric improvement there would be exactly the dishonesty the rest of the system is built to prevent.</p>
+</div>
+
+<h3>The base rate moved, and the model did not get worse</h3>
+
+<p>The headline PR-AUC fell 0.410 → 0.244 between runs. The base rate fell with it, 0.267 → 0.168. Lift went <strong>1.54× → 1.45×</strong>, and everything base-rate independent improved:</p>
+
+<div class="tw">
+<table>
+<thead><tr><th></th><th class="n">20% coverage</th><th class="n">74% coverage</th></tr></thead>
+<tbody>
+<tr><td>Brier</td><td class="n">0.184</td><td class="n ok">0.139</td></tr>
+<tr><td>calibration error</td><td class="n">0.065</td><td class="n ok">0.060</td></tr>
+<tr><td>recall @10%</td><td class="n">0.203</td><td class="n ok">0.287</td></tr>
+<tr><td>LORO minus temporal test</td><td class="n">−0.030</td><td class="n ok">+0.015</td></tr>
+<tr><td>events per variable</td><td class="n">11.3</td><td class="n ok">23.0</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Spatial generalisation is now marginally <em>better</em> than temporal — the strongest evidence yet that it learned conditions rather than places.</p>
+
+<!-- ───────────────────────── 05 ───────────────────────── -->
+<h2><span class="n">05</span>Next actions, in order</h2>
+
+<ol class="steps">
+<li><s>Score against the clean model.</s> <span class="ok">Done 19:55</span> — 1,792 rows, 256 cells, <code>v1-xgboost</code>, verified.</li>
+<li><s>Restart the backfill.</s> <span class="ok">Running</span> as <code>b0x0qev9s</code>. 3,471 windows left, roughly 4 hours of refilled quota.</li>
+<li><strong>Widen forecast coverage.</strong> 256 of 22,594 hill cells are scored — bounded by the day's API allowance, not by the model. <code>08_score.py --cells N</code> takes as many as the quota permits; run it again on a fresh day for a fuller map.</li>
+<li><strong>Re-run the chain at full coverage</strong> — <code>--load-only</code> → 06 → 07 → 08 → 10 → 13 — then refresh figures and diagrams with 14 and 15. Expect the score to barely move; the learning curve says so.</li>
+<li><strong>Decide on the three dead warehouse objects</strong> — <code>dim_road</code>, <code>fact_exposure.exposure_score</code>, <code>etl_run_log</code>. Populate or drop. A commented column nothing fills is the worst of the three options.</li>
+<li><strong>Consider hourly rainfall intensity as a v2.</strong> The only remaining lever on the score ceiling, scoped with the daily model as control.</li>
+</ol>
+
+<!-- ───────────────────────── 06 ───────────────────────── -->
+<h2><span class="n">06</span>Traps — do not rediscover these</h2>
+
+<div class="tw">
+<table>
+<thead><tr><th>Trap</th><th>What happens</th></tr></thead>
+<tbody>
+<tr><td><strong>Never compare two PR-AUCs directly</strong></td><td>The test split grows with the backfill. Read the lift over the base rate, and the bootstrap interval, or you will report a change that did not occur.</td></tr>
+<tr><td><strong>The forecast path has no cache</strong></td><td>A <code>--dry-run</code> of <code>08_score.py</code> costs the same quota as a real run. Doing the dry run first consumed the very attempt it was protecting — the real run got 0 cells 25 seconds later. Trust the <code>weather.empty</code> guard, which returns before the delete, and run it live.</td></tr>
+<tr><td><strong>Streamlit caches survive a re-score</strong></td><td>Every loader now takes <code>data_version()</code>. Add that argument to any new cached loader or it will serve stale predictions for up to an hour after the next score.</td></tr>
+<tr><td><strong><code>fetch_forecast</code> never charges the budget</strong></td><td><code>_budget.json</code> understates real spend, sometimes badly. It is a guideline, not the truth. HTTP 429 is the truth.</td></tr>
+<tr><td><strong><code>dim_date</code> is not a pure dimension</strong></td><td><code>08_score.py</code> appends forecast days to it. Anything reading it unbounded inherits future dates. Two readers were bitten; both are now clamped and tested.</td></tr>
+<tr><td><strong>Never open the catalogue CSV in Excel</strong></td><td>It rewrites 4,395 of 11,033 dates to <code>DD-MM-YYYY</code>. 4,083 events would be misdated under either convention. <code>dataset/</code> holds the corrupted copy; the code reads <code>data/raw/</code>.</td></tr>
+<tr><td><strong>Grep for "Power BI" with the space</strong></td><td>A sweep for <code>powerbi</code> missed 17 references. Power BI is now fully removed except inside the banner-marked historical plan.</td></tr>
+<tr><td><strong><code>git add -A</code> from this directory</strong></td><td>Sweeps in the unrelated sibling project <code>capstone -powerbi</code>. Stage explicit paths.</td></tr>
+<tr><td><strong>Figures must reproduce their metric</strong></td><td>The first version of <code>14_report_figures.py</code> skipped calibration and drew recall@5% as 0.117 against 0.130 in the JSON. It now asserts agreement before drawing.</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ───────────────────────── 07 ───────────────────────── -->
+<h2><span class="n">07</span>Where things live</h2>
+
+<pre><code>README.md                          the complete account — start here
+docs/slopewatch-walkthrough.html   same content, as a designed page
+docs/model-card.md                 intended and out-of-scope use
+docs/diagrams/*.svg                18 extracted, regenerate with script 15
+docs/slopewatch-plan.html          pre-build plan, banner-marked as superseded
+reports/figures/*.png              12 figures, regenerate with script 14
+models/metrics_v1.json             every number the docs quote</code></pre>
+
+<p>Run everything through <code>.venv/Scripts/python.exe</code> — the geospatial stack will not load under system Python. Credentials in <code>.env</code>, gitignored.</p>
+
+<div class="callout">
+<span class="k">Honest scope note</span>
+<p>The learning curve has flattened, so more training data will not move the score much. The remaining ceiling is <strong>predictor resolution</strong>: daily rainfall sums on an 11 km grid cannot see the three-hour burst that tips a saturated slope. The intensity-duration gate <em>passes</em>, so the data does resolve duration and antecedent build-up — it is specifically the sub-daily axis that is missing. That is the narrower, defensible claim.</p>
+</div>
+
+</div>
+
+<div class="foot">
+Slopewatch · SIH 2026 · PS 26192 — flash flood and landslide early warning.<br>
+13 commits pushed to <code>origin/main</code>. Every figure and diagram in the documentation regenerates from committed artefacts.
+</div>
+
+</div>

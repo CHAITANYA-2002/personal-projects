@@ -1601,21 +1601,23 @@ passed with 1 warnings — read them before presenting</code></pre>
 <thead><tr><th>Component</th><th>State</th><th>Detail</th></tr></thead>
 <tbody>
 <tr><td>Warehouse</td><td class="pass">loaded</td><td>40,800 cells · 22,594 hill · 1,719 events · 11,955 samples · 7,627 exposure rows</td></tr>
-<tr><td>Weather backfill</td><td class="warn">74% · running</td><td>9,970 cached windows, ~2,000 pending under the rolling quota</td></tr>
+<tr><td>Weather backfill</td><td class="warn">74% · running</td><td>9,970 cached windows, 3,471 pending under the rolling quota</td></tr>
 <tr><td>Model</td><td class="pass">clean</td><td>XGBoost, elevation leak removed, 8,837-row matrix, EPV 23</td></tr>
 <tr><td>Verification</td><td class="pass">23 / 1 / 0</td><td>the single warning is recall at 5% budget</td></tr>
 <tr><td>Tests</td><td class="pass">18 passing</td><td>sampling, fetcher, warehouse invariants</td></tr>
 <tr><td>Version control</td><td class="pass">2 commits</td><td>63 files tracked, local only, not pushed</td></tr>
-<tr><td><code>fact_risk_pred</code></td><td class="fail">stale</td><td>200 rows scored on 2026-08-27 — by the <em>leaked</em> model</td></tr>
+<tr><td><code>fact_risk_pred</code></td><td class="pass">current</td><td>1,792 rows · 256 cells · <code>v1-xgboost</code> · forecast 2026-08-30 to 09-05</td></tr>
 </tbody>
 </table>
 </div>
 
-<div class="callout trap">
-<span class="k">Do not demo the risk map yet</span>
-<p><code>fact_risk_pred</code> still holds output from the model that had the elevation leak, and every view reads it. Stage 08 must run against the current model before the application is shown to anyone — it is the one artefact in the repository that would actively misrepresent the work.</p>
+<div class="callout">
+<span class="k">Resolved — the map now serves the clean model</span>
+<p><code>fact_risk_pred</code> held 200 rows scored by the model that still had the elevation leak, and every view read it. It now holds <strong>1,792 rows across 256 cells</strong>, stamped <code>v1-xgboost</code>.</p>
 
-<p>Worse, until now those rows were labelled <code>v1</code> and so is the current model, so the warehouse could not say which of the two it was serving. <code>08_score.py</code> now stamps the estimator into the version string — <code>v1-xgboost</code> — and clears the whole family before writing, because the marts do not filter on version and two coexisting versions would make every district count twice.</p>
+<p>The version stamp is the second half of that fix. Those rows were previously labelled <code>v1</code> — and so is the current model — so the warehouse could not say which of the two it was serving. <code>08_score.py</code> now stamps the estimator into the version string and clears the whole family before writing, because the marts do not filter on version and two coexisting versions would make every district count twice.</p>
+
+<p>Coverage is the remaining limit, not correctness: 256 of 22,594 hill cells, bounded by the day's API allowance rather than by the model.</p>
 </div>
 
 <p>Every outstanding item, with its blocker and what would close it, is tabulated in <a href="#s20">§20</a>.</p>

@@ -124,8 +124,31 @@ def note(kind: str, label: str, body: str) -> None:
 # data access
 # --------------------------------------------------------------------------
 
+def data_version() -> str:
+    """A cheap fingerprint of the prediction set, used to bust every cache.
+
+    Without this the app serves whatever it cached until the TTL lapses, and a
+    re-score silently breaks it: 08_score.py replaces the forecast window, the
+    cached date list still points at days that no longer exist, and the map
+    renders "Nothing scored for that day". The app looks broken when in fact it
+    is holding a stale answer, which is the worse of the two failures because
+    nobody thinks to press refresh.
+
+    Every cached loader takes this as an argument, so new predictions
+    invalidate the cache immediately rather than up to an hour later.
+    """
+    try:
+        row = db.read_sql(
+            "SELECT COUNT(*) AS n, COALESCE(MAX(scored_at), 0) AS latest, "
+            "COALESCE(MAX(model_version), '') AS version FROM fact_risk_pred"
+        ).iloc[0]
+        return f"{row['n']}-{row['latest']}-{row['version']}"
+    except Exception:
+        return "unknown"
+
+
 @st.cache_data(ttl=900)
-def load_risk(target_date: int | None = None) -> pd.DataFrame:
+def load_risk(target_date: int | None = None, version: str = "") -> pd.DataFrame:
     where = "WHERE r.date_id = :target" if target_date else ""
     frame = db.read_sql(
         f"""
@@ -145,7 +168,7 @@ def load_risk(target_date: int | None = None) -> pd.DataFrame:
 
 
 @st.cache_data(ttl=3600)
-def load_available_dates() -> list[int]:
+def load_available_dates(version: str = "") -> list[int]:
     frame = db.read_sql(
         "SELECT DISTINCT date_id FROM fact_risk_pred ORDER BY date_id"
     )
@@ -182,7 +205,7 @@ def queued_reports() -> list[dict]:
 
 
 @st.cache_data(ttl=900)
-def load_districts(target_date: int | None = None) -> pd.DataFrame:
+def load_districts(target_date: int | None = None, version: str = "") -> pd.DataFrame:
     where = "WHERE date_id = :target" if target_date else ""
     return db.read_sql(
         f"""
@@ -199,7 +222,7 @@ def load_districts(target_date: int | None = None) -> pd.DataFrame:
 
 
 @st.cache_data(ttl=900)
-def load_settlements(target_date: int) -> pd.DataFrame:
+def load_settlements(target_date: int, version: str = "") -> pd.DataFrame:
     return db.read_sql(
         """
         SELECT  place_name, place_type, est_population, district_name,
@@ -331,7 +354,7 @@ def district_page() -> None:
         "downhill, summed across the district's qualifying cells."
     )
 
-    dates = load_available_dates()
+    dates = load_available_dates(data_version())
     if not dates:
         st.warning(
             "No predictions stored yet. Run `scripts/08_score.py` to populate "
@@ -345,7 +368,7 @@ def district_page() -> None:
         key="district_day",
     )
 
-    frame = load_districts(selected)
+    frame = load_districts(selected, data_version())
     if frame.empty:
         st.info(
             "No district reached the reporting threshold on this day. That is "
@@ -384,7 +407,7 @@ def district_page() -> None:
         "\"Forty settlements\" ranks a cell; it does not tell a team where to "
         "go. Largest first."
     )
-    places = load_settlements(selected)
+    places = load_settlements(selected, data_version())
     if places.empty:
         st.caption("No settlement records join to today's flagged cells.")
         return
@@ -429,7 +452,7 @@ def risk_map_page() -> None:
         "does not mean it is two-thirds likely to fail."
     )
 
-    dates = load_available_dates()
+    dates = load_available_dates(data_version())
     if not dates:
         st.warning(
             "No predictions stored yet. Run `scripts/08_score.py` to populate "
@@ -441,7 +464,7 @@ def risk_map_page() -> None:
         "Forecast day", options=dates, value=dates[0],
         format_func=lambda value: str(pd.to_datetime(str(value)).date()),
     )
-    frame = load_risk(selected)
+    frame = load_risk(selected, data_version())
     if frame.empty:
         st.info("Nothing scored for that day.")
         return
@@ -658,12 +681,12 @@ def _render_legend(frame: pd.DataFrame, colour_by: str) -> None:
 def cell_detail_page() -> None:
     st.title("Cell detail")
 
-    dates = load_available_dates()
+    dates = load_available_dates(data_version())
     if not dates:
         st.warning("No predictions stored yet.")
         return
 
-    frame = load_risk(dates[0])
+    frame = load_risk(dates[0], data_version())
     if frame.empty:
         st.info("Nothing scored.")
         return
@@ -680,7 +703,7 @@ def cell_detail_page() -> None:
         "Cell", list(labels), format_func=lambda value: labels[value]
     )
 
-    series = load_risk()
+    series = load_risk(None, data_version())
     cell = series[series["cell_id"] == cell_id].sort_values("date_id")
     if cell.empty:
         st.info("No data for that cell.")

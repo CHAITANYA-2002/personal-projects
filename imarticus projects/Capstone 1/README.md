@@ -482,6 +482,7 @@ Two rules carried by the district view are worth stating, because both are easy 
 ```
 24 checks: 23 passed, 1 warnings, 0 failed
   ! WARN   recall at 5% budget    0.130
+  PASS     risk predictions       1,792 rows
 passed with 1 warnings — read them before presenting
 ```
 
@@ -579,9 +580,9 @@ These numbers are deliberately uncalibrated, so they sit slightly above what sta
 | Verification | 23 pass / 1 warn / 0 fail | the warning is recall at 5% budget |
 | Tests | 18 passing | sampling, fetcher, warehouse invariants |
 | Application | 6 views, 0 exceptions | every page audited against live data |
-| `fact_risk_pred` | **stale** | two models behind — see below |
+| `fact_risk_pred` | **current** | 1,792 rows across 256 cells, stamped `v1-xgboost`, forecast 2026-08-30 → 09-05 |
 
-> **Do not demo the risk map yet.** `fact_risk_pred` still holds output from the model that had the elevation leak, and every view reads it. Stage 08 must run against the current model first — it is the one artefact in the repository that would actively misrepresent the work.
+The risk map now serves output from the clean model. It previously held 200 rows scored by the model that still had the elevation leak — and because `model_version` was a bare constant, the warehouse could not say which of the two it was showing. Both are fixed: the estimator is stamped into the version, and `08_score.py` clears the family before writing.
 
 ### The sequence when the backfill lands
 
@@ -637,7 +638,7 @@ Open-Meteo's allowance refills on a rolling window. Both rows below are waiting 
 | Item | State | What closes it |
 |---|---|---|
 | Weather backfill | 74% — 3,471 windows pending | ~4 more hours of refilled quota; the daemon resumes on its own |
-| `fact_risk_pred` | two models stale | `08_score.py`, which needs forecast quota from the same allowance |
+| Forecast coverage | 256 of 22,594 hill cells scored | The same quota. `08_score.py --cells N` scores as many as the day's allowance permits; 256 landed on the first successful attempt. |
 
 ### Declared in the schema, never populated
 
